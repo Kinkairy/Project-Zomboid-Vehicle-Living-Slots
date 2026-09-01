@@ -1,0 +1,7 @@
+name=房车生活：KI5 露营拖车适配 / Mobile Living: KI5 Campers
+id=VehicleLivingSlotsKI5Campers
+description=Build 42.20: optional Vehicle Living Slots adapter for KI5 Campers.
+modversion=RC3.5.0
+versionMin=42.20.2
+require=\VehicleLivingSlots,\KI5campers,\damnlib
+author=Kinkairy

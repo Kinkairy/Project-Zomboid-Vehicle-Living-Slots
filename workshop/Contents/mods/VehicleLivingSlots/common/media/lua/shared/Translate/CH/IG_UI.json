@@ -1,0 +1,23 @@
+{
+    "IGUI_VehiclePartCatVLSLiving": "生活設備",
+    "IGUI_SeatBed": "後艙空間",
+    "IGUI_VehiclePartSeatBed": "後艙空間",
+    "IGUI_VehiclePartVLSLargeVanSlot2": "中央空間",
+    "IGUI_VehiclePartVLSLargeVanSlot3": "右側空間",
+    "IGUI_VehiclePartVLSLargeVanSlot4": "右中空間",
+    "IGUI_VehiclePartVLSLargeVanSlot5": "後部空間",
+    "IGUI_VLSSmallVanRearLivingArea": "後艙空間",
+    "IGUI_VLSLargeVanLeftLivingArea": "左側空間",
+    "IGUI_VLSLargeVanCenterLivingArea": "中央空間",
+    "IGUI_VLSLargeVanRightLivingArea": "右側空間",
+    "IGUI_VLSLargeVanFrontLeftSpace": "左前空間",
+    "IGUI_VLSLargeVanFrontRightSpace": "右前空間",
+    "IGUI_VLSLargeVanMiddleLeftSpace": "左中空間",
+    "IGUI_VLSLargeVanMiddleRightSpace": "右中空間",
+    "IGUI_VLSLargeVanRearSpace": "後部空間",
+    "IGUI_VLSLargeVanLivingSpace": "空間",
+    "IGUI_VehiclePartVLSWeaponCabinetSlot": "武器箱",
+    "IGUI_VehiclePartVLSAuxBatterySlot": "副電瓶",
+    "IGUI_VehiclePartVLSLargeVanWaterTank": "水箱",
+    "IGUI_Vehicle_ContainerCapacity_Water": "水: %1"
+}

@@ -1,0 +1,11 @@
+{
+    "Sandbox_VehicleLivingSlots": "Mobile Living",
+    "Sandbox_VehicleLivingSlots_FridgePowerConsumption": "Fridge power consumption",
+    "Sandbox_VehicleLivingSlots_FridgePowerConsumption_tooltip": "Displayed at 1000 times the fridge's actual auxiliary-battery drain per game minute. Default: 0.04, giving about 17.36 game days on a full battery. Set to 0 to stop drain; an installed auxiliary battery is still required.",
+    "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption": "Microwave power consumption",
+    "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption_tooltip": "Displayed at 1000 times the microwave's actual auxiliary-battery drain per active game minute. Default: 0.4, ten times the fridge rate. Set to 0 to stop drain; an installed auxiliary battery is still required.",
+    "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption": "Vehicle water-purification power consumption",
+    "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption_tooltip": "Displayed at 1000 times the auxiliary-battery drain per litre of water purified. Default: 0.4, matching the microwave rate. Set to 0 to stop drain; an installed auxiliary battery is still required.",
+    "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption": "Television power consumption",
+    "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption_tooltip": "Displayed at 1000 times the television's actual auxiliary-battery drain per active game minute. Default: 0.4, matching the microwave rate. Set to 0 to stop drain; an installed auxiliary battery is still required."
+}

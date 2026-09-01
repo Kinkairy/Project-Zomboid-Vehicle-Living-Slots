@@ -1,0 +1,1455 @@
+module Base
+
+{
+
+    template vehicle VLSMediumVanLivingSystem
+
+    {
+
+        seats = 5,
+
+        passenger FrontLeft
+        {
+            area = SeatFrontLeft,
+            door = DoorFrontLeft,
+            hasRoof = true,
+            position inside
+            {
+                offset = 0.1923 -0.0989 0.4231,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.6044 -0.4725 0.467,
+                rotate = 0.0 0.0 0.0,
+                area = SeatFrontLeft,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontRight
+        {
+            area = SeatFrontRight,
+            door = DoorFrontRight,
+            hasRoof = true,
+            position inside
+            {
+                offset = -0.1923 -0.0989 0.4231,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = -0.6044 -0.4725 0.467,
+                rotate = 0.0 0.0 0.0,
+                area = SeatFrontRight,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger Bed
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.38 -0.1044 -0.75,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SpaceCenter
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0 -0.1044 -0.75,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SpaceRight
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = -0.38 -0.1044 -0.75,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+part SeatBed
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = Bed,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanSlot2
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = SpaceCenter,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanSlot3
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = SpaceRight,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSUniversalFreezer
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSLargeVanFreezer2
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSLargeVanFreezer3
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSWeaponCabinetSlot
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_GreenWallLocker,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 40,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.WeaponLocker,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.WeaponLocker, update = VLS.Update.WeaponLocker, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 250,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.WeaponLocker,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 250,
+                skills = Mechanics:1,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.WeaponLocker,
+            }
+        }
+
+part VLSAuxBatterySlot
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.CarBattery1;Base.CarBattery2;Base.CarBattery3,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 2,
+            table install
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = Vehicles.InstallTest.Default,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = Vehicles.UninstallTest.Battery,
+            }
+        }
+
+    }
+
+    template vehicle VLSLargeVanLivingSystem
+
+    {
+
+        seats = 7,
+
+        passenger FrontLeft
+        {
+            area = SeatFrontLeft,
+            door = DoorFrontLeft,
+            hasRoof = true,
+            position inside
+            {
+                offset = 0.1978 -0.1429 0.3352,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.6319 -0.5769 0.4231,
+                rotate = 0.0 0.0 0.0,
+                area = SeatFrontLeft,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontRight
+        {
+            area = SeatFrontRight,
+            door = DoorFrontRight,
+            hasRoof = true,
+            position inside
+            {
+                offset = -0.1978 -0.1429 0.3352,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = -0.6319 -0.5769 0.4231,
+                rotate = 0.0 0.0 0.0,
+                area = SeatFrontRight,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger Bed
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.3 -0.1044 -0.3,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SpaceCenter
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = -0.3 -0.1044 -0.3,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SpaceRight
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.3 -0.1044 -0.72,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSLargeVanSpace4
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = -0.3 -0.1044 -0.72,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSLargeVanSpace5
+        {
+            area = TruckBed,
+            door = DoorRear,
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0 -0.1044 -1.12,
+                rotate = 0.0 0.0 0.0,
+            }
+            position outside
+            {
+                offset = 0.0 -0.4725 -1.5989,
+                rotate = 0.0 0.0 0.0,
+                area = TruckBed,
+            }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat Bed
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceCenter
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SpaceRight
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSLargeVanSpace4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+part SeatBed
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = Bed,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanSlot2
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = SpaceCenter,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanSlot3
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = SpaceRight,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSUniversalFreezer
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSLargeVanFreezer2
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSLargeVanFreezer3
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+
+part VLSLargeVanSlot4
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSLargeVanSpace4,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanSlot5
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSLargeVanSpace5,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+part VLSLargeVanFreezer4
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSLargeVanFreezer5
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+
+part VLSWeaponCabinetSlot
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_GreenWallLocker,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 40,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.WeaponLocker,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.WeaponLocker, update = VLS.Update.WeaponLocker, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 250,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.WeaponLocker,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 250,
+                skills = Mechanics:1,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.WeaponLocker,
+            }
+        }
+part VLSLargeVanWaterTank
+        {
+            mechanicArea = Back,
+            area = GasTank,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+
+part VLSAuxBatterySlot
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.CarBattery1;Base.CarBattery2;Base.CarBattery3,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 2,
+            table install
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = Vehicles.InstallTest.Default,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = Vehicles.UninstallTest.Battery,
+            }
+        }
+
+    }
+
+    vehicle Van { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanAmbulance { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanBeckmans { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanBrewsterHarbin { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanBuilder { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanCarpenter { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanCoastToCoast { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanDeerValley { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanFossoil { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanGardenGods { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanGardener { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanGreenes { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanJohnMcCoy { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanJonesFabrication { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanKerrHomes { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanKnobCreekGas { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanKnoxCom { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanKorshunovs { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanLouisvilleLandscaping { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMail { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMccoy { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMechanic { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMeltingPointMetal { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMetalheads { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMetalworker { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMicheles { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMobileMechanics { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanMooreMechanics { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanOldMill { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanOvoFarm { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanPennSHam { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanPlattAuto { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanPluggedInElectrics { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanRadio { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanRadio_3N { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanRiversideFabrication { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanRosewoodworking { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanSchwabSheetMetal { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanSpiffo { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanTreyBaines { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanUncloggers { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanUtility { template = VLSMediumVanLivingSystem, }
+
+    vehicle VanWPCarpentry { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Blacksmith { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_BugWipers { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Charlemange_Beer { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_CraftSupplies { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Glass { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_HeritageTailors { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_KnoxDisti { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Leather { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_LectroMax { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Locksmith { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Masonry { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_MassGenFac { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Perfick_Potato { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_Transit { template = VLSMediumVanLivingSystem, }
+
+    vehicle Van_VoltMojo { template = VLSMediumVanLivingSystem, }
+
+    vehicle StepVan { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Blacksmith { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Butchers { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Cereal { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Citr8 { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_CompleteRepairShop { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Florist { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Genuine_Beer { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Glass { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Heralds { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_HuangsLaundry { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Jorgensen { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_LouisvilleMotorShop { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_LouisvilleSWAT { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_MarineBites { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Masonry { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Mechanic { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_MobileLibrary { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Plonkies { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Propane { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_RandisPlants { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Scarlet { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_SmartKut { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_SouthEasternHosp { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_SouthEasternPaint { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_USL { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVan_Zippee { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVanAirportCatering { template = VLSLargeVanLivingSystem, }
+
+    vehicle StepVanMail { template = VLSLargeVanLivingSystem, }
+
+}

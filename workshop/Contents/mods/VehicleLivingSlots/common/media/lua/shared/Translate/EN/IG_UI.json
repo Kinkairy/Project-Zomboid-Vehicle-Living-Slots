@@ -1,0 +1,23 @@
+{
+    "IGUI_VehiclePartCatVLSLiving": "Living Equipment",
+    "IGUI_SeatBed": "Rear Space",
+    "IGUI_VehiclePartSeatBed": "Rear Space",
+    "IGUI_VehiclePartVLSLargeVanSlot2": "Center Space",
+    "IGUI_VehiclePartVLSLargeVanSlot3": "Right Space",
+    "IGUI_VehiclePartVLSLargeVanSlot4": "Middle Right Space",
+    "IGUI_VehiclePartVLSLargeVanSlot5": "Rear Space",
+    "IGUI_VLSSmallVanRearLivingArea": "Rear Space",
+    "IGUI_VLSLargeVanLeftLivingArea": "Left Space",
+    "IGUI_VLSLargeVanCenterLivingArea": "Center Space",
+    "IGUI_VLSLargeVanRightLivingArea": "Right Space",
+    "IGUI_VLSLargeVanFrontLeftSpace": "Front Left Space",
+    "IGUI_VLSLargeVanFrontRightSpace": "Front Right Space",
+    "IGUI_VLSLargeVanMiddleLeftSpace": "Middle Left Space",
+    "IGUI_VLSLargeVanMiddleRightSpace": "Middle Right Space",
+    "IGUI_VLSLargeVanRearSpace": "Rear Space",
+    "IGUI_VLSLargeVanLivingSpace": "Space",
+    "IGUI_VehiclePartVLSWeaponCabinetSlot": "Weapon Chest",
+    "IGUI_VehiclePartVLSAuxBatterySlot": "Auxiliary Battery",
+    "IGUI_VehiclePartVLSLargeVanWaterTank": "Water Tank",
+    "IGUI_Vehicle_ContainerCapacity_Water": "Water: %1"
+}

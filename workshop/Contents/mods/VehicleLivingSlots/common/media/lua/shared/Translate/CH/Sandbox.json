@@ -1,0 +1,11 @@
+{
+    "Sandbox_VehicleLivingSlots": "房車生活",
+    "Sandbox_VehicleLivingSlots_FridgePowerConsumption": "冰箱耗電量",
+    "Sandbox_VehicleLivingSlots_FridgePowerConsumption_tooltip": "冰箱每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.04，滿電約可持續 17.36 個遊戲日；設為 0 可停止耗電，但仍須安裝副電瓶。",
+    "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption": "微波爐耗電量",
+    "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption_tooltip": "微波爐工作時每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.4，是冰箱的 10 倍；設為 0 可停止耗電，但仍須安裝副電瓶。",
+    "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption": "房車淨水耗電量",
+    "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption_tooltip": "房車水箱每淨化 1 公升水實際耗電量的 1000 倍顯示值。預設 0.4，與微波爐相同；設為 0 可停止耗電，但仍須安裝副電瓶。",
+    "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption": "電視機耗電量",
+    "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption_tooltip": "電視機開啟時每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.4，與微波爐相同；設為 0 可停止耗電，但仍須安裝副電瓶。"
+}

@@ -1,0 +1,25 @@
+VERSION = 1,
+
+option VehicleLivingSlots.FridgePowerConsumption = {
+    type = double, min = 0.0, max = 100.0, default = 0.04,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_FridgePowerConsumption,
+}
+
+option VehicleLivingSlots.MicrowavePowerConsumption = {
+    type = double, min = 0.0, max = 100.0, default = 0.4,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_MicrowavePowerConsumption,
+}
+
+option VehicleLivingSlots.WaterPurificationPowerConsumption = {
+    type = double, min = 0.0, max = 100.0, default = 0.4,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_WaterPurificationPowerConsumption,
+}
+
+option VehicleLivingSlots.TelevisionPowerConsumption = {
+    type = double, min = 0.0, max = 100.0, default = 0.4,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_TelevisionPowerConsumption,
+}

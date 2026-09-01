@@ -1,0 +1,2315 @@
+module Base
+{
+    template vehicle VLSKI5CamperSlots3
+    {
+        part VLSKI5CamperSlot1
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer1
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+
+        part VLSKI5CamperSlot2
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer2
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+
+        part VLSKI5CamperSlot3
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer3
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+    }
+
+    template vehicle VLSKI5CamperSlots4
+    {
+        template = VLSKI5CamperSlots3,
+
+        part VLSKI5CamperSlot4
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer4
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+    }
+
+    template vehicle VLSKI5CamperSlots6
+    {
+        template = VLSKI5CamperSlots4,
+
+        part VLSKI5CamperSlot5
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer5
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+
+        part VLSKI5CamperSlot6
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }
+                }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSKI5CamperFreezer6
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalFreezer,
+                update = VLS.Update.UniversalFreezer,
+            }
+        }
+    }
+
+    template vehicle VLSKI5Passengers3
+    {
+        passenger VLSKI5Space1
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+    }
+
+    template vehicle VLSKI5Passengers4
+    {
+        template = VLSKI5Passengers3,
+
+        passenger VLSKI5Space1
+        {
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space4
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+    }
+
+    template vehicle VLSKI5Passengers6
+    {
+        template = VLSKI5Passengers4,
+
+        passenger VLSKI5Space1
+        {
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space4
+        {
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space5
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space6
+        {
+            hasRoof = true,
+            showPassenger = false,
+            position inside
+            {
+                offset = 0.0000 -0.2000 0.0000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            anim idle { anim = Idle, rate = 1.0, }
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+    }
+
+    template vehicle VLSKI5CamperSharedParts
+    {
+        part VLSKI5CamperWaterTank1
+        {
+            mechanicArea = Back,
+            area = SeatBackRight,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+
+        part VLSKI5CamperWaterTank2
+        {
+            mechanicArea = Back,
+            area = SeatBackRight,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+    }
+
+    template vehicle VLSKI5MapScamp13
+    {
+        template = VLSKI5Passengers3,
+
+        passenger VLSKI5Space1
+        {
+            position inside
+            {
+                offset = 0.3500 -0.2000 1.2000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            position inside
+            {
+                offset = 0.3500 -0.2000 0.5500,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            position inside
+            {
+                offset = 0.3500 -0.2000 -0.1000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger BackL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger BackR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+    }
+
+    template vehicle VLSKI5MapScamp16
+    {
+        template = VLSKI5Passengers4,
+
+        passenger VLSKI5Space1
+        {
+            position inside
+            {
+                offset = 0.1000 -0.2000 1.1000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            position inside
+            {
+                offset = 0.1000 -0.2000 0.3000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            position inside
+            {
+                offset = 0.1000 -0.2000 -0.5000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space4
+        {
+            position inside
+            {
+                offset = 0.0000 -0.2000 -0.7000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat BackR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger BackL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger BackR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+        part VLSKI5CamperSlot4 { container { seat = VLSKI5Space4, } }
+    }
+
+    template vehicle VLSKI5MapBambi16
+    {
+        template = VLSKI5Passengers4,
+
+        passenger VLSKI5Space1
+        {
+            position inside
+            {
+                offset = 0.1500 -0.2000 1.3000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            position inside
+            {
+                offset = 0.1500 -0.2000 0.7000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            position inside
+            {
+                offset = 0.1500 -0.2000 0.0500,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space4
+        {
+            position inside
+            {
+                offset = 0.1500 -0.2000 -0.5500,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontB
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SideB
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+        part VLSKI5CamperSlot4 { container { seat = VLSKI5Space4, } }
+    }
+
+    template vehicle VLSKI5MapFlyingCloud22
+    {
+        template = VLSKI5Passengers6,
+
+        passenger VLSKI5Space1
+        {
+            position inside
+            {
+                offset = 0.3440 -0.2000 2.9600,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space2
+        {
+            position inside
+            {
+                offset = -0.6000 -0.2000 1.6000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space3
+        {
+            position inside
+            {
+                offset = -0.6000 -0.2000 0.3500,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space4
+        {
+            position inside
+            {
+                offset = 0.4080 -0.2000 -1.8200,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space5
+        {
+            position inside
+            {
+                offset = -0.2500 -0.2000 -0.5000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger VLSKI5Space6
+        {
+            position inside
+            {
+                offset = 0.2500 -0.2000 -0.5000,
+                rotate = 0.0000 0.0000 0.0000,
+            }
+            switchSeat FrontB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat SideB
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat FrontR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearL
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat RearR
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontB
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger SideB
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space2
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space3
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space4
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space5
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+            switchSeat VLSKI5Space6
+            {
+                anim = Climb_WindowB,
+                rate = 0.23,
+                sound = VehicleChangeSeat,
+            }
+        }
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+        part VLSKI5CamperSlot4 { container { seat = VLSKI5Space4, } }
+        part VLSKI5CamperSlot5 { container { seat = VLSKI5Space5, } }
+        part VLSKI5CamperSlot6 { container { seat = VLSKI5Space6, } }
+    }
+
+    vehicle Trailer87Scamp13
+    {
+        template = VLSKI5CamperSlots3/part/VLSKI5CamperSlot1,
+        template = VLSKI5CamperSlots3/part/VLSKI5CamperFreezer1,
+        template = VLSKI5CamperSlots3/part/VLSKI5CamperSlot2,
+        template = VLSKI5CamperSlots3/part/VLSKI5CamperFreezer2,
+        template = VLSKI5CamperSharedParts,
+        template = VLSKI5MapScamp13/passenger/VLSKI5Space1,
+        template = VLSKI5MapScamp13/passenger/VLSKI5Space2,
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+
+
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger BackL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger BackR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+    }
+    vehicle Trailer87Scamp16
+    {
+        template = VLSKI5CamperSlots3,
+        template = VLSKI5CamperSharedParts,
+        template = VLSKI5MapScamp16/passenger/VLSKI5Space1,
+        template = VLSKI5MapScamp16/passenger/VLSKI5Space2,
+        template = VLSKI5MapScamp16/passenger/VLSKI5Space3,
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+
+
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger BackL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger BackR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+    }
+    vehicle Trailer61Bambi16
+    {
+        template = VLSKI5CamperSlots3,
+        template = VLSKI5CamperSharedParts,
+        template = VLSKI5MapBambi16/passenger/VLSKI5Space1,
+        template = VLSKI5MapBambi16/passenger/VLSKI5Space2,
+        template = VLSKI5MapBambi16/passenger/VLSKI5Space3,
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+
+
+        passenger FrontB
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger SideB
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+    }
+    vehicle Trailer54FlyingCloud22
+    {
+        template = VLSKI5CamperSlots4,
+        template = VLSKI5CamperSharedParts,
+        template = VLSKI5MapFlyingCloud22/passenger/VLSKI5Space1,
+        template = VLSKI5MapFlyingCloud22/passenger/VLSKI5Space2,
+        template = VLSKI5MapFlyingCloud22/passenger/VLSKI5Space3,
+        template = VLSKI5MapFlyingCloud22/passenger/VLSKI5Space4,
+
+        part VLSKI5CamperSlot1 { container { seat = VLSKI5Space1, } }
+        part VLSKI5CamperSlot2 { container { seat = VLSKI5Space2, } }
+        part VLSKI5CamperSlot3 { container { seat = VLSKI5Space3, } }
+        part VLSKI5CamperSlot4 { container { seat = VLSKI5Space4, } }
+
+
+        passenger FrontB
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger SideB
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger FrontL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger FrontR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearL
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger RearR
+        {
+            switchSeat VLSKI5Space1 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space2 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space3 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSKI5Space4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+    }
+}
