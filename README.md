@@ -4,245 +4,205 @@
 
 ## 简体中文
 
-Vehicle Living Slots 是建立在 Project Zomboid Build 42.20 原版车辆系统之上的生活空间
-扩展层。它不重做车辆、座位、容器、电器和流体系统，而是把可安装生活设备接入原版维修、
-物品栏、座位、TimedAction 和多人同步流程。
+Vehicle Living Slots（房车生活）是面向 Project Zomboid Build 42.20 的车辆生活空间 Mod。
+它把原版家具、家电和流体容器接入受支持车辆，并继续使用原版维修、座位、物品栏和
+TimedAction 流程。
 
-- 当前发布版本：`3.5.0`
-- 基础 Mod：`VehicleLivingSlots`（`RC3.3.1`）
-- 可选 KI5 适配：`VehicleLivingSlotsKI5Campers`（`RC3.5.0`）
-- 最低游戏版本：`42.20.2`
+- 当前版本：`3.5.0`
+- 基础 Mod ID：`VehicleLivingSlots`（`RC3.3.1`）
+- KI5 适配 Mod ID：`VehicleLivingSlotsKI5Campers`（`RC3.5.0`）
+- Workshop ID：`3791192579`
+- 外部依赖：基础 Mod 无；KI5 适配需要 KI5 Campers 和 damnlib
+- 当前唯一认可回滚基线：`v3.5.0`
 
-完整实现记录见[技术参考](workshop/docs/TECHNICAL_REFERENCE.md)。
+完整实现、协议、兼容规则和已知边界见
+[TECHNICAL_REFERENCE.md](https://github.com/Kinkairy/Project-Zomboid-Vehicle-Living-Slots/blob/main/workshop/docs/TECHNICAL_REFERENCE.md)。
 
-### 核心架构
+### 核心设计
 
-```text
-精确车型 profile
-  -> 生活槽、乘客位置、水箱和电源映射
-  -> 原版物品安装
-  -> 通用设备能力
-  -> 原版 UI / TimedAction
-  -> 服务端验证、修改和同步
-```
+- 原版逻辑优先：进入、切座、睡眠、休息、物品转移、微波炉和流体面板尽量复用原版流程。
+- 只支持已经核对的精确车辆 script ID，不对未知车辆、残骸或烧毁车型做通配注入。
+- 生活设备按 capability 统一实现；车型只声明生活槽、乘客位置、水箱和电源映射。
+- 安装后的仍是原版物品，名称、耐久、内容物、电量和流体不转存到代理物品。
+- 只有生活槽安装床铺时，对应乘客位置才可进入、休息和睡觉。
+- 多人模式由服务器验证并提交最终状态；客户端只发送操作意图和对象 ID。
+- KI5 适配层不重新打包或替换 KI5 资源，只把四个精确车型接入 VLS 通用能力。
 
-基础 Mod 负责全部通用能力；车型和兼容 Mod 只提供 profile 与位置映射。因此床铺、储物、
-微波炉、冰箱、电视、供电和用水始终只有一套实现，不会按车型复制。
+### 架构
 
-### 原版逻辑优先
+| 模块 | 职责 |
+| --- | --- |
+| `VLS_Config.lua` 与车辆脚本 | 车型 profile、设备 capability、生活槽、乘客、水箱和电源声明 |
+| `VLS_Client.lua` 与共享 TimedAction | 圆形菜单、床位、微波炉、流体面板和容器侧栏 |
+| `VLS_ApplianceServer.lua` | 电器、供电、制冷、流体和车辆零件同步 |
+| `VLS_InstallGuard.lua` | 安装、拆卸、容器清空和 Moveable 身份校验 |
+| 维修图模块 | 原版风格的设备预览、副电瓶和水箱附加图层 |
+| `VLS_KI5Campers_*` | KI5 车型、座位图、双水箱、原电瓶和瓦斯适配 |
 
-车辆进入、切换座位、睡眠、休息、物品转移、微波炉面板、流体转移和维修安装尽量直接复用
-原版流程。VLS 只在原版接口无法直接表示“安装在车辆上的家具”时增加局部适配器，不全局替换
-原版菜单或 UI。
+多人数据流：客户端发起菜单或 TimedAction，服务器按 ID 重新定位当前车辆、零件和原物品，
+验证车型、距离、区域、容量和操作条件后才修改状态并同步结果。单人模式复用相同的共享规则，
+不维护第二套玩法实现。
 
-每个生活槽与一个隐藏乘客位置对应。只有槽内安装床铺时，该位置才可进入、休息和睡觉；安装
-柜子或电器时，它仍是设备位置，不会变成虚假座位。
+### 生活空间与设备
 
-### Profile 与设备能力
+- 原版 SUV 和 PickUpVan 增加 1 个生活槽，Van 增加 3 个，StepVan 增加 5 个。
+- KI5 的 Scamp 13、Scamp 16、Bambi 16 和 Flying Cloud 22 分别增加 2、3、3、4 个生活槽，
+  同时保留 KI5 原有座位、门、储物和进入判定。
+- 原版睡袋、行军床、床垫、柜子、操作台、微波炉、小冰箱、水桶和电视通过设备 profile
+  获得床铺、储物、烹饪、制冷、用水或电视能力。
+- 容器容量、类型和声音由设备 profile 决定。主容器、冷冻格或固定水箱未清空时不能拆卸。
+- 维修界面显示物品本身的耐久和剩余材料，不用车辆 part 状态覆盖原物品数据。
 
-只有登记过的精确车辆 script ID 才会进入 VLS：
+### 供电与流体
 
-| 车辆类别 | 新增生活槽 | 固定水箱 | 电源 |
-| --- | ---: | ---: | --- |
-| 原版 SUV / PickUpVan | 1 | 0 | VLS 副电瓶 |
-| 原版 Van | 3 | 0 | VLS 副电瓶 |
-| 原版 StepVan | 5 | 1 | VLS 副电瓶 |
-| KI5 露营拖车 | 2–4 | 2 | KI5 原有电瓶 |
+所有受电设备走同一套电源接口。原版车辆使用 VLS 副电瓶；KI5 房车直接使用原有电瓶，不增加
+第二块电瓶。微波炉、冰箱、电视和净水过程只消费这一份电源状态。
 
-原版睡袋、行军床、床垫、柜子、操作台、微波炉、小冰箱、饮水机水桶和电视通过统一的设备
-profile 转换为床铺、储物、烹饪、制冷、用水或电视能力。车型只声明有哪些槽，不直接实现
-设备功能。
+固定水箱、安装在生活槽中的原版水桶和玩家携带的流体容器使用同一个 endpoint 模型。车内
+转移复用原版流体面板；车外加水采用原版车辆加油式持续动作。StepVan 配置 1 个固定水箱，
+四种 KI5 房车统一配置 2 个固定水箱。
 
-### 保留真实物品状态
+### 兼容与边界
 
-安装到车辆上的仍是玩家持有的原版物品。物品类型、名称、耐久、内容物、电量和流体继续保存
-在原物品与车辆 part 上，VLS 不创建代理物品或第二份持久化数据。
+- 目标版本仅为 Project Zomboid Build 42.20。
+- 车辆、part、乘客和容器 ID 都属于存档接口；没有独立迁移设计时不会修改。
+- 基础 Mod 可以单独使用；KI5 适配必须同时加载基础 Mod、KI5 Campers 和 damnlib。
+- KI5 房车继续使用原有电瓶；适配层不增加 VLS 墙柜位，也不修改原有进入逻辑。
+- KI5 瓦斯适配分开显示瓦斯桶耐久和剩余瓦斯，并提供服务端验证的车旁喷灯补气。
+- VLS 不替换原版维修面板或整张车辆底图；生活槽保留在右侧列表，左图只增加必要图层。
+- 未公开开发版的临时 ID 不属于迁移合同；`v3.5.0` 的当前 ID 集合是公开兼容边界。
 
-维修界面因此可以同时显示物品耐久和剩余材料。存储设备必须清空后才能拆卸，固定水箱必须
-排空后才能拆卸，避免利用安装和拆卸复制物品或流体。
-
-### 统一供电与流体
-
-所有受电设备走同一套电源接口：原版车辆解析 VLS 副电瓶，KI5 房车解析其原有电瓶。微波炉、
-冰箱、电视和净水过程只是统一耗电管线的消费者，不维护各自独立的电量。
-
-固定水箱、安装在生活槽中的原版水桶和玩家携带的流体容器使用同一个流体 endpoint 模型。
-车内转移复用原版流体面板；车外给固定水箱加水采用原版车辆加油式的持续动作。容量、净水
-类型和余量显示继续由原版 `FluidContainer` 与维修界面负责。
-
-### 多人服务端权威
-
-客户端只发送操作意图以及车辆、零件和物品标识。服务端在提交时重新定位玩家、车辆、零件和
-原物品，并验证车型 profile、距离、区域、当前状态、容量和允许操作，然后才修改容器、流体、
-电量或设备状态并同步结果。
+### 仓库结构
 
 ```text
-客户端操作
-  -> 服务端重新解析当前世界状态
-  -> 验证身份、距离、零件、容量和材料
-  -> 调用唯一的通用实现
-  -> 同步物品与车辆零件
+workshop/docs/TECHNICAL_REFERENCE.md                       完整技术参考
+recovery/                                                  唯一认可的 3.5.0 恢复载体
+workshop/Contents/mods/VehicleLivingSlots                  基础 Mod 源码与元数据
+workshop/Contents/mods/VehicleLivingSlotsKI5Campers        KI5 适配源码与元数据
+workshop/install_local.ps1                                 本地安装器
+CHANGELOG.md                                               公开变更记录
+CONTRIBUTING.md                                            贡献说明
+SECURITY.md                                                漏洞报告方式
 ```
 
-动作过程中发生的状态变化以服务端提交时的真实状态为准，不能依靠客户端旧快照完成重复转移
-或越权操作。
+公开仓库不包含内部测试工具、服务器地址、发布凭据、原始日志或私有运维流程。
 
-### KI5 兼容层
+### 获取
 
-KI5 适配层不重新打包或替换 KI5 的车辆资源和整车定义。它只为以下四个精确车型增加 VLS
-profile：1987 Scamp 13、1987 Scamp 16、1961 Bambi 16 和 1954 Flying Cloud 22。
+Steam 创意工坊：[房车生活 / Mobile Living](https://steamcommunity.com/sharedfiles/filedetails/?id=3791192579)
+（当前保持隐藏）。源码安装时，将 `workshop/Contents/mods` 下需要的 Mod 目录复制到
+Project Zomboid Mods 目录。
 
-适配层保留 KI5 原有座位、门、储物、电瓶和进入判定，只增加 2–4 个生活槽、两个净水箱及
-必要的座位连接。所有生活设备直接使用 KI5 原有电瓶，不增加第二块电瓶，也不增加 VLS 墙柜位。
-
-KI5 瓦斯适配把瓦斯桶物品耐久与剩余瓦斯分开显示，并修正完好瓦斯桶被显示为 10% 的问题。
-车旁喷灯补气保留原版动作形式，但完成时仍由服务端重新验证喷灯、车辆位置和瓦斯来源。
-
-### 维修图与兼容边界
-
-VLS 不替换原版维修面板或整张车辆底图。原版车辆左图只增加副电瓶和固定水箱；通用生活槽与
-设备继续显示在右侧零件列表。新增图层把白色边框/连线与状态蒙版分开，继续使用原版条件色、
-缺件闪烁、悬停和点击逻辑。
-
-车辆、part、乘客和容器 ID 都属于存档接口。VLS 只注册已经核对的完整车型，不对未知车辆、
-残骸或烧毁车型做通配注入；没有独立迁移设计时不会随意修改既有 ID。
-
-VLS 原创代码和文档采用 [MIT License](LICENSE)。[NOTICE.md](NOTICE.md) 中列出的维修图 PNG
-不属于 MIT 授权范围，其权利仍归原权利方所有。
-
----
+这是非官方社区项目，与 The Indie Stone、KI5 和 damnlib 作者无隶属关系。VLS 原创代码和
+文档采用 [MIT License](LICENSE)；[NOTICE.md](NOTICE.md) 中列出的维修图 PNG 不属于 MIT
+授权范围。
 
 ## English
 
-Vehicle Living Slots is a living-space extension layer built on the vanilla
-Project Zomboid Build 42.20 vehicle system. It does not rebuild vehicles,
-passengers, containers, appliances, or fluids. Instead, installable living
-equipment is connected to the original mechanics, inventory, passenger,
-TimedAction, and multiplayer synchronization flows.
+Vehicle Living Slots is a vehicle-living-space Mod for Project Zomboid Build 42.20. It connects
+vanilla furniture, appliances, and fluid containers to supported vehicles while retaining the
+vanilla mechanics, passenger, inventory, and TimedAction flows.
 
 - Current release: `3.5.0`
-- Base Mod: `VehicleLivingSlots` (`RC3.3.1`)
-- Optional KI5 adapter: `VehicleLivingSlotsKI5Campers` (`RC3.5.0`)
-- Minimum game version: `42.20.2`
+- Base Mod ID: `VehicleLivingSlots` (`RC3.3.1`)
+- KI5 adapter Mod ID: `VehicleLivingSlotsKI5Campers` (`RC3.5.0`)
+- Workshop ID: `3791192579`
+- External dependencies: none for the base Mod; KI5 Campers and damnlib for the adapter
+- Sole accepted rollback baseline: `v3.5.0`
 
-See the [technical reference](workshop/docs/TECHNICAL_REFERENCE.md) for the
-complete implementation record.
+See
+[TECHNICAL_REFERENCE.md](https://github.com/Kinkairy/Project-Zomboid-Vehicle-Living-Slots/blob/main/workshop/docs/TECHNICAL_REFERENCE.md)
+for the complete implementation, protocol, compatibility rules, and known boundaries.
 
-### Core architecture
+### Core Design
 
-```text
-exact vehicle profile
-  -> living slots, passengers, tanks, and power mapping
-  -> original inventory-item installation
-  -> shared equipment capability
-  -> vanilla UI / TimedAction
-  -> server validation, mutation, and synchronization
-```
+- Vanilla first: entry, seat switching, sleep, rest, item transfer, microwave, and fluid UI reuse
+  original flows wherever possible.
+- Only verified exact vehicle script IDs are supported; unknown, wrecked, and burnt vehicles never
+  receive wildcard injection.
+- Equipment capabilities are implemented once; vehicle profiles declare only slots, passengers,
+  tanks, and power mapping.
+- Installed equipment remains the original vanilla item, including name, condition, contents, charge,
+  and fluids.
+- A passenger position becomes usable only while its living slot contains bed-capable equipment.
+- In multiplayer, the server validates and commits final state; clients submit intent and object IDs only.
+- The KI5 adapter does not repackage or replace KI5 assets. It maps four exact vehicles into shared VLS
+  capabilities.
 
-The base Mod owns every shared capability. Vehicle classes and compatibility
-Mods provide only profiles and layout mappings. Beds, storage, microwaves,
-refrigeration, televisions, power, and water therefore have one implementation
-rather than a copy per vehicle.
+### Architecture
 
-### Vanilla first
+| Module | Responsibility |
+| --- | --- |
+| `VLS_Config.lua` and vehicle scripts | Vehicle profiles, equipment capabilities, slots, passengers, tanks, and power |
+| `VLS_Client.lua` and shared TimedActions | Radial menus, beds, microwave, fluid panel, and container sidebar |
+| `VLS_ApplianceServer.lua` | Appliances, power, refrigeration, fluids, and vehicle-part synchronization |
+| `VLS_InstallGuard.lua` | Installation, removal, empty-container, and Moveable-identity validation |
+| Mechanics modules | Vanilla-style equipment previews and additive battery/tank overlays |
+| `VLS_KI5Campers_*` | KI5 vehicles, seat diagrams, two tanks, native battery, and propane integration |
 
-Vehicle entry, seat switching, sleep, rest, item transfer, the microwave panel,
-fluid transfer, and mechanics installation reuse vanilla flows wherever
-possible. VLS adds scoped adapters only where vanilla interfaces cannot directly
-represent furniture installed as a vehicle part. It does not globally replace
-vanilla menus or UI classes.
+In multiplayer, the client starts a menu action or TimedAction. The server relocates the current vehicle,
+part, and original item by ID, validates the profile, distance, area, capacity, and operation, and only
+then changes state and synchronizes the result. Single-player reuses the same shared rules.
 
-Each living slot maps to one hidden passenger position. That position becomes
-enterable, restable, and sleepable only while the slot contains bed-capable
-equipment. A cabinet or appliance remains equipment and never becomes a fake
-seat.
+### Living Spaces and Equipment
 
-### Profiles and equipment capabilities
+- Vanilla SUV and PickUpVan profiles add one living slot, Van adds three, and StepVan adds five.
+- KI5 Scamp 13, Scamp 16, Bambi 16, and Flying Cloud 22 add two, three, three, and four living slots
+  respectively while retaining native seats, doors, storage, and entry checks.
+- Vanilla sleeping bags, cots, mattresses, cabinets, counters, microwaves, mini fridges, water bottles,
+  and televisions receive bed, storage, cooking, cooling, water, or television capabilities through
+  equipment profiles.
+- Capacity, container type, and sound come from the equipment profile. A non-empty main container,
+  freezer, or fixed tank blocks removal.
+- The mechanics UI presents item condition and remaining material without replacing original item data
+  with vehicle-part condition.
 
-Only exact registered vehicle script IDs enter VLS behavior:
+### Power and Fluids
 
-| Vehicle class | Living slots | Fixed tanks | Power |
-| --- | ---: | ---: | --- |
-| Vanilla SUV / PickUpVan | 1 | 0 | VLS auxiliary battery |
-| Vanilla Van | 3 | 0 | VLS auxiliary battery |
-| Vanilla StepVan | 5 | 1 | VLS auxiliary battery |
-| KI5 camper | 2–4 | 2 | Native KI5 battery |
+All powered equipment uses one power resolver. Vanilla vehicles use the VLS auxiliary battery; KI5
+campers use their native battery and receive no second battery. Microwaves, refrigeration, televisions,
+and water purification consume that one power state.
 
-Vanilla sleeping bags, cots, mattresses, cabinets, counters, microwaves, mini
-fridges, water-dispenser bottles, and televisions are resolved through shared
-equipment profiles into bed, storage, cooking, cooling, water, or television
-capabilities. Vehicles declare slots; they do not implement devices.
+Fixed tanks, installed vanilla water bottles, and carried fluid containers use one endpoint model.
+Interior transfer reuses the vanilla fluid panel; exterior filling uses a refuelling-style continuous
+action. StepVan has one fixed tank, while every supported KI5 camper has two.
 
-### Real item state
+### Compatibility and Boundaries
 
-The installed object remains the player's original vanilla item. Type, name,
-condition, contents, charge, and fluid stay on the item and vehicle part. VLS
-does not create proxy objects or a second persistent state model.
+- The supported target is Project Zomboid Build 42.20 only.
+- Vehicle, part, passenger, and container IDs are save interfaces and are not changed without a separate
+  migration design.
+- The base Mod works alone. The KI5 adapter requires the base Mod, KI5 Campers, and damnlib.
+- KI5 campers keep their native battery; the adapter adds no VLS locker and does not replace native entry.
+- KI5 propane integration separates tank condition from remaining propane and provides a
+  server-validated vehicle-side blowtorch refill.
+- VLS does not replace the vanilla mechanics panel or complete base image. Living slots remain in the
+  right-side list; only required layers are added to the diagram.
+- Temporary IDs from unpublished builds are outside the migration contract. The `v3.5.0` ID set is the
+  public compatibility boundary.
 
-The mechanics UI can therefore show item condition and remaining material
-separately. Storage must be empty before removal, and fixed tanks must contain
-no water, preventing installation/removal from duplicating items or fluids.
-
-### Unified power and fluids
-
-Every powered appliance uses one power resolver. Vanilla vehicles resolve the
-VLS auxiliary battery; KI5 campers resolve their native battery. Microwaves,
-refrigeration, televisions, and water purification are consumers of the same
-power pipeline and never maintain independent charge values.
-
-Fixed tanks, installed vanilla water bottles, and carried portable containers
-use one fluid-endpoint model. Interior transfer reuses the vanilla fluid panel;
-exterior tank filling uses a vehicle-refuelling-style continuous action.
-Capacity, clean-water type, and remaining amount stay owned by the vanilla
-`FluidContainer` and mechanics presentation.
-
-### Server-authoritative multiplayer
-
-Clients submit intent plus vehicle, part, and item identities. At commit time,
-the server relocates the actor, vehicle, part, and original item, validates the
-profile, distance, area, current state, capacity, and operation, and only then
-changes container, fluid, battery, or appliance state and synchronizes it.
+### Repository Layout
 
 ```text
-client action
-  -> server resolves current world state
-  -> validate identities, distance, parts, capacity, and material
-  -> call the single shared implementation
-  -> synchronize items and vehicle parts
+workshop/docs/TECHNICAL_REFERENCE.md                       Complete technical reference
+recovery/                                                  Sole accepted 3.5.0 recovery artifacts
+workshop/Contents/mods/VehicleLivingSlots                  Base Mod source and metadata
+workshop/Contents/mods/VehicleLivingSlotsKI5Campers        KI5 adapter source and metadata
+workshop/install_local.ps1                                 Local installer
+CHANGELOG.md                                               Public change history
+CONTRIBUTING.md                                            Contribution guide
+SECURITY.md                                                Vulnerability reporting
 ```
 
-Changes that happen while an action is running are judged from server state at
-commit time, not from a stale client snapshot.
+The public repository excludes internal test harnesses, server addresses, publishing credentials, raw
+logs, and private operational procedures.
 
-### KI5 adapter boundary
+### Distribution
 
-The KI5 adapter does not repackage or replace KI5 vehicle resources or complete
-vehicle definitions. It registers VLS profiles only for 1987 Scamp 13, 1987
-Scamp 16, 1961 Bambi 16, and 1954 Flying Cloud 22.
+Steam Workshop: [Vehicle Living Slots / Mobile Living](https://steamcommunity.com/sharedfiles/filedetails/?id=3791192579)
+(currently hidden). For a source installation, copy the required Mod directories under
+`workshop/Contents/mods` into the Project Zomboid Mods directory.
 
-Native KI5 seats, doors, storage, battery, and entry validation remain. The
-adapter adds two to four living slots, two clean-water tanks, and the required
-seat links. All living equipment uses the native KI5 battery; no second battery
-or VLS locker part is added.
-
-Propane integration separates tank-item condition from remaining propane and
-corrects the false 10% condition display. Vehicle-side blowtorch refill keeps
-the vanilla action shape, while the server revalidates the torch, vehicle area,
-and propane source at completion.
-
-### Mechanics overlay and compatibility
-
-VLS does not replace the vanilla mechanics panel or complete vehicle base
-image. Vanilla profiles add only the auxiliary battery and fixed tank to the
-left diagram; living slots and appliances remain in the right-side parts list.
-White guides and condition masks stay separate so vanilla condition tint,
-missing-part flash, hover, and click behavior remain intact.
-
-Vehicle, part, passenger, and container IDs are save interfaces. VLS registers
-only verified intact vehicles, never wildcard-injects unknown, wrecked, or burnt
-variants, and does not change established IDs without a separate migration
-design.
-
-Original VLS code and documentation use the [MIT License](LICENSE). The
-mechanics-overlay PNG files listed in [NOTICE.md](NOTICE.md) are excluded from
-MIT and remain subject to their original rights.
+This is an unofficial community project and is not affiliated with The Indie Stone, KI5, or the damnlib
+authors. Original VLS code and documentation use the [MIT License](LICENSE); the mechanics-overlay PNG
+files listed in [NOTICE.md](NOTICE.md) are excluded from MIT.
