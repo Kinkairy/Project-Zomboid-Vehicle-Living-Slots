@@ -1,7 +1,11 @@
+require "Entity/TimedActions/ISHandcraftAction"
+require "TimedActions/ISDeviceBatteryAction"
+
+-- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: shared
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "RC3.3.1"
+VLS.VERSION = "RC3.6"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
@@ -216,6 +220,7 @@ VLS.equipmentProfiles = {
     },
     ["Base.Mov_SmallPineCabinet"] = {
         capability = "storage",
+        genericCraftSurface = true,
         capacity = VLS.CABINET_CAPACITY,
         previewSprite = "furniture_storage_01_48",
         containerType = "sidetable",
@@ -290,6 +295,7 @@ for _, family in ipairs(lowerCounterFamilies) do
     local openSound, closeSound, transferSound = family[3], family[4], family[5]
     VLS.equipmentProfiles["Base.Mov_" .. name .. "Counter"] = {
         capability = "storage",
+        genericCraftSurface = true,
         capacity = VLS.COUNTER_CAPACITY,
         previewSprite = "fixtures_counters_01_" .. (sprite + 5),
         containerType = "counter",
@@ -475,6 +481,49 @@ function VLS.getEquipmentCapability(item)
     return profile and profile.capability or nil
 end
 
+-- A vehicle provides a vanilla generic handcraft surface only when one of the
+-- approved lower cabinets/counters is actually installed in one of that same
+-- supported vehicle's universal living slots.
+function VLS.isGenericCraftSurfaceEquipment(item)
+    local profile = VLS.getEquipmentProfile(item)
+    return profile ~= nil and profile.genericCraftSurface == true
+end
+
+function VLS.getInstalledGenericCraftSurfacePart(vehicle)
+    local vehicleProfile = vehicle and VLS.getVehicleProfile(vehicle) or nil
+    if not vehicleProfile then return nil end
+
+    for _, partId in ipairs(vehicleProfile.universalParts or {}) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.isGenericCraftSurfaceEquipment(
+                part:getInventoryItem()) then
+            return part
+        end
+    end
+
+    return nil
+end
+
+function VLS.hasGenericCraftSurface(vehicle)
+    return VLS.getInstalledGenericCraftSurfacePart(vehicle) ~= nil
+end
+
+function VLS.getVehicleGenericCraftSurface(playerObj)
+    local vehicle = playerObj and playerObj:getVehicle() or nil
+    if vehicle and VLS.hasGenericCraftSurface(vehicle) then
+        return vehicle
+    end
+    return nil
+end
+
+function VLS.canUseVehicleGenericCraftSurface(playerObj, vehicle)
+    return playerObj ~= nil
+        and vehicle ~= nil
+        and playerObj:getVehicle() == vehicle
+        and VLS.isSupportedVehicle(vehicle)
+        and VLS.hasGenericCraftSurface(vehicle)
+end
+
 function VLS.isBedEquipment(item)
     return VLS.getEquipmentCapability(item) == "bed"
 end
@@ -599,7 +648,7 @@ function VLS.getSeatEquipmentDisplayName(vehicle, seat)
     return item and item:getDisplayName() or VLS.getPartDisplayName(part, nil)
 end
 
-local CONTAINER_PROFILE_VERSION = 1
+local CONTAINER_PROFILE_VERSION = 2
 
 local function applyContainerProfile(container, profile, fallbackType)
     if not container then return end
@@ -652,6 +701,17 @@ function VLS.getFreezerPartForUniversal(vehicle, universalPartId)
     return freezerId and vehicle and vehicle:getPartById(freezerId) or nil
 end
 
+function VLS.ensureUniversalContainerProfile(part)
+    if not VLS.isUniversalPart(part) then return nil end
+    local container = part:getItemContainer()
+    if not container then return nil end
+    local profile = VLS.getEquipmentProfile(part:getInventoryItem())
+    applyContainerProfile(container,
+        profile and profile.capacity and profile or nil,
+        VLS.UNIVERSAL_PART_ID)
+    return profile
+end
+
 function VLS.syncUniversalSlot(part)
     if not VLS.isUniversalPart(part) then return end
     local container = part:getItemContainer()
@@ -665,15 +725,17 @@ function VLS.syncUniversalSlot(part)
     local itemChanged = data.vlsEquipmentItemId ~= itemId
     local profileChanged = data.vlsContainerProfileVersion
         ~= CONTAINER_PROFILE_VERSION
-    if itemChanged or profileChanged then
-        applyContainerProfile(container,
-            profile and profile.capacity and profile or nil,
-            VLS.UNIVERSAL_PART_ID)
-        data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
-        if (capability == "cooking" or capability == "cooling")
-                and vehicle and vehicle.setNeedPartsUpdate then
-            vehicle:setNeedPartsUpdate(true)
-        end
+
+    -- Part modData and the installed item can arrive before the client-side
+    -- ItemContainer fields. Reapply the desired profile on every lifecycle
+    -- pass; applyContainerProfile itself writes only fields that differ.
+    VLS.ensureUniversalContainerProfile(part)
+    data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
+
+    if (itemChanged or profileChanged)
+            and (capability == "cooking" or capability == "cooling")
+            and vehicle and vehicle.setNeedPartsUpdate then
+        vehicle:setNeedPartsUpdate(true)
     end
     if itemChanged then
         data.vlsEquipmentItemId = itemId
@@ -707,15 +769,18 @@ local function syncOneFreezerSlot(vehicle, universalPartId)
     local data = freezer:getModData()
     local item = fridge and fridge:getInventoryItem()
     local itemId = item and item:getID() or -1
-    if data.vlsEquipmentItemId ~= itemId
-            or data.vlsContainerProfileVersion ~= CONTAINER_PROFILE_VERSION then
-        applyContainerProfile(container, containerProfile, freezerId)
-        data.vlsEquipmentItemId = itemId
-        data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
-        if not containerProfile then
-            container:setCustomTemperature(1.0)
-            container:setAgeFactor(1.0)
-        end
+    local stateChanged = data.vlsEquipmentItemId ~= itemId
+        or data.vlsContainerProfileVersion ~= CONTAINER_PROFILE_VERSION
+
+    -- Keep the hidden freezer container's runtime profile in sync even when
+    -- replicated modData already says the correct appliance is installed.
+    applyContainerProfile(container, containerProfile, freezerId)
+    data.vlsEquipmentItemId = itemId
+    data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
+
+    if stateChanged and not containerProfile then
+        container:setCustomTemperature(1.0)
+        container:setAgeFactor(1.0)
     end
 end
 
@@ -867,6 +932,97 @@ function VLS.copyTelevisionStateToItem(part, item)
     target:setTurnedOnRaw(false)
     return true
 end
+
+local VLS_TELEVISION_ACTION_PREFIX = "VLS_TV_DEVICE:"
+
+function VLS.getTelevisionPartForDevicePart(devicePart)
+    if not devicePart or not instanceof(devicePart, "VehiclePart") then
+        return nil
+    end
+    local vehicle = devicePart:getVehicle()
+    if not VLS.isSupportedVehicle(vehicle) then return nil end
+    local universalId = VLS.UNIVERSAL_PART_BY_FREEZER[devicePart:getId()]
+    local part = universalId and VLS.getInstalledPart(vehicle, universalId)
+        or nil
+    if not part
+            or VLS.getEquipmentCapability(part:getInventoryItem())
+                ~= "television"
+            or VLS.getTelevisionDevicePart(part) ~= devicePart then
+        return nil
+    end
+    return part
+end
+
+function VLS.getTelevisionDeviceActionParameter(devicePart)
+    local part = VLS.getTelevisionPartForDevicePart(devicePart)
+    local vehicle = part and part:getVehicle() or nil
+    if not vehicle then return nil end
+    return VLS_TELEVISION_ACTION_PREFIX
+        .. tostring(vehicle:getId()) .. ":" .. devicePart:getId()
+end
+
+function VLS.resolveTelevisionDeviceActionParameter(character, parameter)
+    if type(parameter) ~= "string"
+            or string.sub(parameter, 1, #VLS_TELEVISION_ACTION_PREFIX)
+                ~= VLS_TELEVISION_ACTION_PREFIX then
+        return nil, false
+    end
+
+    local vehicleText, devicePartId = string.match(parameter,
+        "^VLS_TV_DEVICE:(%d+):(.+)$")
+    local vehicleId = tonumber(vehicleText)
+    local vehicle = character and character:getVehicle() or nil
+    if not vehicleId or not vehicle or vehicle:getId() ~= vehicleId
+            or not VLS.isSupportedVehicle(vehicle) then
+        return nil, true
+    end
+
+    local devicePart = vehicle:getPartById(devicePartId)
+    local televisionPart = VLS.getTelevisionPartForDevicePart(devicePart)
+    local deviceData = televisionPart
+        and VLS.getTelevisionDeviceData(televisionPart) or nil
+    return deviceData, true
+end
+
+VLS.televisionDeviceActionHooks = VLS.televisionDeviceActionHooks or {}
+
+function VLS.installTelevisionDeviceActionHooks()
+    if not ISDeviceBatteryAction then return end
+    local hooks = VLS.televisionDeviceActionHooks
+
+    if ISDeviceBatteryAction.getDeviceDataParameter
+            ~= hooks.getDeviceDataParameterWrapper then
+        local previous = ISDeviceBatteryAction.getDeviceDataParameter
+        hooks.getDeviceDataParameterWrapper = function(self, character,
+                device, deviceType)
+            if deviceType == "VehiclePart" then
+                local parameter =
+                    VLS.getTelevisionDeviceActionParameter(device)
+                if parameter then return parameter end
+            end
+            return previous(self, character, device, deviceType)
+        end
+        ISDeviceBatteryAction.getDeviceDataParameter =
+            hooks.getDeviceDataParameterWrapper
+    end
+
+    if ISDeviceBatteryAction.getDeviceDataFromParameter
+            ~= hooks.getDeviceDataFromParameterWrapper then
+        local previous = ISDeviceBatteryAction.getDeviceDataFromParameter
+        hooks.getDeviceDataFromParameterWrapper = function(self, character,
+                parameter)
+            local deviceData, handled =
+                VLS.resolveTelevisionDeviceActionParameter(
+                    character, parameter)
+            if handled then return deviceData end
+            return previous(self, character, parameter)
+        end
+        ISDeviceBatteryAction.getDeviceDataFromParameter =
+            hooks.getDeviceDataFromParameterWrapper
+    end
+end
+
+VLS.installTelevisionDeviceActionHooks()
 
 function VLS.Create.UniversalSlot(vehicle, part)
     VLS.syncUniversalSlot(part)
@@ -1021,6 +1177,51 @@ end
 function VLS.getFoodRotSpeed()
     local value = SandboxVars and SandboxVars.FoodRotSpeed or 3
     return ({ 1.7, 1.4, 1.0, 0.7, 0.4 })[value] or 1.0
+end
+
+-- Preserve the temperature trajectory a Food item has already reached while a
+-- VLS refrigerator/freezer is genuinely powered. This rejects a stale item
+-- synchronization that jumps heat upward, but does not snap newly inserted hot
+-- food directly to the refrigerator target.
+function VLS.preservePoweredFoodHeat(item, state, targetHeat)
+    if not item or not state or not instanceof(item, "Food") then
+        return false
+    end
+
+    local currentHeat = tonumber(item:getHeat()) or 1.0
+    local target = tonumber(targetHeat) or 1.0
+    local previousHeat = tonumber(state.heat)
+
+    if previousHeat == nil then
+        state.heat = currentHeat
+        state.targetHeat = target
+        return false
+    end
+
+    local epsilon = 0.0001
+    local correctedHeat = currentHeat
+
+    if previousHeat > target + epsilon then
+        -- Normal powered cooling is monotonic toward the target.
+        if currentHeat > previousHeat + epsilon then
+            correctedHeat = previousHeat
+        end
+    elseif previousHeat < target - epsilon then
+        -- Food moved from a freezer to a fridge may warm, but not beyond the
+        -- currently powered container's target.
+        if currentHeat > target + epsilon then
+            correctedHeat = target
+        end
+    elseif currentHeat > target + epsilon then
+        correctedHeat = target
+    end
+
+    local changed = math.abs(correctedHeat - currentHeat) > epsilon
+    if changed then item:setHeat(correctedHeat) end
+
+    state.heat = correctedHeat
+    state.targetHeat = target
+    return changed
 end
 
 local function getApplianceBalanceOption(optionName, fallback, maximum)
@@ -1454,5 +1655,60 @@ function VLS.ContainerAccess.UniversalFreezer(vehicle, part, character)
     end
     return character ~= nil and character:getVehicle() == vehicle
 end
+
+
+-- Revalidate queued/running AnySurfaceCraft actions that use a VLS vehicle as
+-- their real IsoObject. Leaving the vehicle or removing the final approved
+-- cabinet prevents the queued action from producing output or consuming input.
+VLS.genericCraftSurfaceActionHooks =
+    VLS.genericCraftSurfaceActionHooks or {}
+
+function VLS.installGenericCraftSurfaceActionHooks()
+    local hooks = VLS.genericCraftSurfaceActionHooks
+
+    local function isVLSVehicleSurfaceAction(action)
+        return action ~= nil
+            and action.craftRecipe ~= nil
+            and action.craftRecipe:isAnySurfaceCraft()
+            and action.isoObject ~= nil
+            and instanceof(action.isoObject, "BaseVehicle")
+            and VLS.isSupportedVehicle(action.isoObject)
+    end
+
+    local function isStillValid(action)
+        if not isVLSVehicleSurfaceAction(action) then return true end
+        return VLS.canUseVehicleGenericCraftSurface(
+            action.character, action.isoObject)
+    end
+
+    if ISHandcraftAction
+            and ISHandcraftAction.isValid
+            and ISHandcraftAction.isValid ~= hooks.isValidWrapper then
+        local previousIsValid = ISHandcraftAction.isValid
+
+        hooks.isValidWrapper = function(self)
+            if not isStillValid(self) then return false end
+            return previousIsValid(self)
+        end
+
+        ISHandcraftAction.isValid = hooks.isValidWrapper
+    end
+
+    if ISHandcraftAction
+            and ISHandcraftAction.performRecipe
+            and ISHandcraftAction.performRecipe
+                ~= hooks.performRecipeWrapper then
+        local previousPerformRecipe = ISHandcraftAction.performRecipe
+
+        hooks.performRecipeWrapper = function(self)
+            if not isStillValid(self) then return end
+            return previousPerformRecipe(self)
+        end
+
+        ISHandcraftAction.performRecipe = hooks.performRecipeWrapper
+    end
+end
+
+VLS.installGenericCraftSurfaceActionHooks()
 
 return VLS

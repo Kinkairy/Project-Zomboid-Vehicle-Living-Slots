@@ -20,6 +20,10 @@ synchronization. Clean-water tanks use Project Zomboid's fluid containers and
 the original transfer panel. Incoming water purification and every appliance
 power change are server-validated.
 
+Vehicle-installed crafting and microwave windows remain vanilla UI. Narrow
+context guards keep them valid only while the player, vehicle, installed item,
+and required capability still match; ordinary world UI continues unchanged.
+
 The KI5 adapter declares vehicle-specific part IDs, tank order, seat-diagram
 positions, container icons, and propane sources. It does not duplicate the base
 appliance, water, or power implementation.
@@ -33,5 +37,5 @@ vehicle parts. Empty-before-removal guards prevent storage and fluid duplication
 
 ## Release identity
 
-Release `v3.5.0` is represented by the exact payload in `workshop/Contents`,
+Release `v3.6.0` is represented by the exact payload in `workshop/Contents`,
 the matching manifest, and the SHA-256 record for the release ZIP.

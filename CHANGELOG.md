@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.5.0
+## 3.6.0
 
 - Adds configurable living spaces to supported vanilla SUVs, PickUpVans, Vans,
   and StepVans while preserving the intended original seats.
@@ -11,5 +11,11 @@
 - Uses KI5's original battery for living equipment, corrects propane-tank
   condition and remaining-material display, and allows a mounted propane tank
   to refill a carried blowtorch beside the camper.
+- Keeps installed refrigerator, microwave, and television containers bound to
+  their original item state when moved between supported vehicles, including
+  cooling presentation, localized names, correct icons, and television media.
+- Lets an installed approved cabinet provide the vanilla crafting surface and
+  keeps the vehicle microwave settings window open while its vehicle context
+  remains valid.
 - Includes Simplified Chinese, Traditional Chinese, and English text and
   server-authoritative multiplayer synchronization.

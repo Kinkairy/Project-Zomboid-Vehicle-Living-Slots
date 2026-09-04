@@ -2,6 +2,11 @@ if isClient() then return end
 
 require "VLS_Config"
 
+-- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: server
+if VLS.installGenericCraftSurfaceActionHooks then
+    VLS.installGenericCraftSurfaceActionHooks()
+end
+
 VLS.Server = VLS.Server or {}
 
 local trackedVehicles = {}
@@ -319,7 +324,7 @@ function VLS.Server.fillWaterTank(player, args)
 end
 
 local function processCooledFood(item, currentHours, vehicleId, containerId,
-        freezer, seen)
+        freezer, seen, targetHeat)
     if not instanceof(item, "Food") then return end
 
     local itemId = item:getID()
@@ -331,16 +336,24 @@ local function processCooledFood(item, currentHours, vehicleId, containerId,
         state = {
             age = item:getAge(),
             freezing = item:getFreezingTime(),
+            heat = item:getHeat(),
             lastHours = currentHours,
             vehicleId = vehicleId,
             containerId = containerId,
         }
         cooledFood[itemId] = state
-        return
     end
 
+    local heatChanged = VLS.preservePoweredFoodHeat(
+        item, state, targetHeat)
     local elapsedHours = currentHours - state.lastHours
-    if elapsedHours <= 0 then return end
+    if elapsedHours <= 0 then
+        if heatChanged then
+            if item.syncItemFields then item:syncItemFields() end
+            sendItemStats(item)
+        end
+        return
+    end
 
     if freezer and item:canBeFrozen() then
         state.freezing = math.min(100,
@@ -365,10 +378,12 @@ end
 local function processCooledContainer(container, currentHours, vehicleId,
         containerId, freezer, seen)
     if not container then return end
+    local targetHeat = freezer and 0.1 or 0.2
     local items = container:getItems()
     for index = 0, items:size() - 1 do
         local item = items:get(index)
-        processCooledFood(item, currentHours, vehicleId, containerId, freezer, seen)
+        processCooledFood(item, currentHours, vehicleId, containerId,
+            freezer, seen, targetHeat)
         if instanceof(item, "InventoryContainer") then
             processCooledContainer(item:getInventory(), currentHours, vehicleId,
                 containerId, freezer, seen)

@@ -1,4 +1,4 @@
-# Vehicle Living Slots 3.5.0 Technical Design / 房车生活 3.5.0 技术设计
+# Vehicle Living Slots 3.6.0 Technical Design / 房车生活 3.6.0 技术设计
 
 [简体中文](#简体中文) | [English](#english)
 
@@ -6,10 +6,10 @@
 
 本文档说明当前公开版本的关键技术设计。适用范围：Project Zomboid Build 42.20，
 Workshop `3791192579`，基础 Mod ID `VehicleLivingSlots`，KI5 适配 Mod ID
-`VehicleLivingSlotsKI5Campers`，公开版本 `3.5.0`。
+`VehicleLivingSlotsKI5Campers`，公开版本 `3.6.0`。
 
-基础 Mod 的组件版本为 `RC3.3.1`；KI5 适配组件版本为 `RC3.5.0`。两者共同组成
-`v3.5.0`，后者不会替换前者。
+基础 Mod 的组件版本为 `RC3.6`；KI5 适配组件版本为 `RC3.5.0`。两者共同组成
+`v3.6.0`，后者不会替换前者。
 
 ### 1. 最高实现原则
 
@@ -79,6 +79,9 @@ Workshop `3791192579`，基础 Mod ID `VehicleLivingSlots`，KI5 适配 Mod ID
 Moveable 物品可能没有稳定的普通物品类型，因此安装校验同时使用受控的原版 world sprite
 映射。该映射只识别明确支持的家具，不全局替换原版 `VehicleUtils`。
 
+安装认可橱柜后，车辆本身作为原版制作表面使用。适配层只在玩家仍位于同一受支持车辆且橱柜
+仍存在时保持原版制作窗口有效；离车或拆除最后一个橱柜后恢复原版关闭条件。
+
 ### 5. 座位、进入、休息与睡眠
 
 生活空间只有安装具有 `bed` capability 的设备时，才启用对应乘客位置。安装柜子、家电、
@@ -100,6 +103,8 @@ KI5 适配保留原有乘客、门、床位、储物、进入动画和座位数�
 
 微波炉、小冰箱、电视和净水过程消费同一份车辆电源状态。微波炉界面继续使用原版
 `ISMicrowaveUI`；VLS 只提供车辆安装物品所缺少的窄接口，并由服务器保存最终设置和耗电。
+车辆微波炉窗口只在玩家仍位于同一车辆、同一微波炉仍安装时适配原版距离检查；普通世界
+微波炉以及原版旋钮、按钮和参数更新流程不变。
 
 冰箱继续使用原版 `fridge` 与 `freezer` 容器及物品老化流程。VLS 只根据当前供电状态设置车辆
 容器的冷藏、冷冻和断电环境，不建立平行食物或库存系统。
@@ -163,7 +168,7 @@ VLS 不替换原版维修面板或整张车辆底图。生活空间和一般设�
 - 精确车型白名单以当前游戏和 KI5 脚本为依据，上游新增或改名车型不会自动获得支持；
 - 运行时界面、寻路、动画、多人重连和存档恢复仍需真实游戏环境回归，静态测试不能替代实测；
 - 基础 Mod 可单独启用；KI5 适配必须同时满足三个依赖；
-- `v3.5.0` 是当前唯一版本载体和唯一认可回滚基线，基础组件 `RC3.3.1` 不是第二个公开版本；
+- `v3.6.0` 是当前唯一版本载体和唯一认可回滚基线，KI5 适配组件 `RC3.5.0` 不是第二个公开版本；
 - 修复必须从认可基线建立隔离候选，先通过私有门禁和测试档验收，再经明确授权发布；
 - 不直接在正式服、客户端运行副本或 Workshop 载荷上开发和热改。
 
@@ -182,10 +187,10 @@ VLS 不替换原版维修面板或整张车辆底图。生活空间和一般设�
 
 This document describes the key technical design of the current public release. Scope: Project
 Zomboid Build 42.20, Workshop `3791192579`, base Mod ID `VehicleLivingSlots`, KI5 adapter Mod ID
-`VehicleLivingSlotsKI5Campers`, public release `3.5.0`.
+`VehicleLivingSlotsKI5Campers`, public release `3.6.0`.
 
-The base component is `RC3.3.1`; the KI5 adapter component is `RC3.5.0`. Together they form
-`v3.5.0`; the adapter does not replace the base Mod.
+The base component is `RC3.6`; the KI5 adapter component is `RC3.5.0`. Together they form
+`v3.6.0`; the adapter does not replace the base Mod.
 
 ### 1. Highest implementation principles
 
@@ -263,6 +268,11 @@ Because Moveables do not always retain a stable ordinary item type, installation
 allowlist of vanilla world sprites. This resolver recognizes only supported furniture and does not
 replace vanilla `VehicleUtils` globally.
 
+After an approved cabinet is installed, the vehicle itself acts as the vanilla crafting surface. The
+adapter keeps the vanilla crafting window valid only while the player remains in that same supported
+vehicle and a qualifying cabinet is still installed; leaving or removing the final cabinet restores
+the vanilla close condition.
+
 ### 5. Seats, entry, rest, and sleep
 
 A living space enables its passenger position only while bed-capable equipment is installed. Cabinets,
@@ -287,6 +297,9 @@ Every powered capability resolves through one interface:
 Microwaves, refrigeration, televisions, and water purification consume the same vehicle power state.
 Microwave interaction retains vanilla `ISMicrowaveUI`; VLS supplies only the narrow interface missing
 from a vehicle-installed item, while the server stores final settings and consumption.
+For a vehicle microwave, the vanilla distance check is adapted only while the player remains in the
+same vehicle and the same microwave is installed. World microwaves and the vanilla controls, buttons,
+and parameter-update flow remain unchanged.
 
 Refrigerators retain vanilla `fridge` and `freezer` containers and item-ageing behavior. VLS sets the
 vehicle-container cooling, freezing, and unpowered environment from current power state instead of
@@ -360,8 +373,8 @@ propane, battery, or fluid item data with vehicle-part condition.
 - Runtime UI, pathfinding, animation, multiplayer reconnect, and save restoration require real-game
   regression tests; static validation cannot replace them.
 - The base Mod works alone; the KI5 adapter requires all three dependencies.
-- `v3.5.0` is the sole public version and sole accepted rollback baseline. Base component `RC3.3.1` is
-  not a second public release.
+- `v3.6.0` is the sole public version and sole accepted rollback baseline. KI5 adapter component
+  `RC3.5.0` is not a second public release.
 - Repairs branch from the accepted baseline, pass private gates and a test-world acceptance cycle, and
   require explicit authorization before publication.
 - Development and hot edits never occur in formal-server, client-runtime, or Workshop payload copies.

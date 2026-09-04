@@ -1,4 +1,8 @@
 require "VLS_Config"
+require "Entity/ISEntityUI"
+require "ISUI/ISInventoryPaneContextMenu"
+require "ISUI/Crafting/ISHandcraftWindow"
+-- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: client
 require "ISUI/ISWorldObjectContextMenu"
 require "ISUI/Fireplace/ISMicrowaveUI"
 require "Fluids/ISFluidTransferUI"
@@ -36,6 +40,220 @@ local vanillaFluidPanelClickedDropBox = ISFluidContainerPanel.clickedDropBox
 local pendingBedSleep = {}
 local pendingBedRest = {}
 local coolingTickCounter = 0
+
+VLS.microwaveWindowClientHooks = VLS.microwaveWindowClientHooks or {}
+local MicrowaveWindowHooks = VLS.microwaveWindowClientHooks
+
+-- ItemStatsPacket carries the server-side base display name together with the
+-- authoritative food state. Dedicated servers commonly run in English, so
+-- restore only the client-local base name for non-custom food shown inside a
+-- VLS appliance. Food:getName() continues to add the vanilla localized state
+-- prefixes, while player-assigned names remain untouched.
+local function getVLSAppliancePart(container)
+    if not container then return nil end
+    local outermost = container:getOutermostContainer()
+    local part = outermost and outermost:getVehiclePart()
+        or container:getVehiclePart()
+    local vehicle = part and part:getVehicle()
+    if not VLS.isSupportedVehicle(vehicle) then return nil end
+    if VLS.isFreezerPart(part) then return part end
+    if not VLS.isUniversalPart(part) then return nil end
+    local capability = VLS.getEquipmentCapability(part:getInventoryItem())
+    if capability ~= "cooling" and capability ~= "cooking" then return nil end
+    return part
+end
+
+local function restoreOfficialVLSFoodNames(container)
+    if not getVLSAppliancePart(container) then return end
+
+    local function restoreContents(current)
+        local items = current and current:getItems()
+        if not items then return end
+        for index = 0, items:size() - 1 do
+            local item = items:get(index)
+            if instanceof(item, "Food") and not item:isCustomName() then
+                local officialName = getItemNameFromFullType(item:getFullType())
+                if officialName and officialName ~= ""
+                        and item:getDisplayName() ~= officialName then
+                    item:setName(officialName)
+                end
+            end
+            if instanceof(item, "InventoryContainer") then
+                restoreContents(item:getInventory())
+            end
+        end
+    end
+
+    restoreContents(container)
+end
+
+local function processVisibleApplianceNames()
+    for playerNum = 0, 3 do
+        local loot = getPlayerLoot(playerNum)
+        local pane = loot and loot.inventoryPane or nil
+        restoreOfficialVLSFoodNames(pane and pane.inventory or nil)
+    end
+end
+
+-- The crafting window searches through ISEntityUI, while inventory right-click
+-- crafting calls Java HandcraftLogic:findCraftSurface() directly. Adapt both
+-- narrow entry points and keep every other vanilla crafting operation intact.
+VLS.genericCraftSurfaceClientHooks =
+    VLS.genericCraftSurfaceClientHooks or {}
+local CraftSurfaceHooks = VLS.genericCraftSurfaceClientHooks
+
+local function makeVLSHandcraftLogicProxy(realLogic)
+    local proxy = {}
+    local methodCache = {}
+
+    setmetatable(proxy, {
+        __index = function(_, key)
+            local cached = methodCache[key]
+            if cached then return cached end
+
+            local method
+            if key == "findCraftSurface" then
+                method = function(_, playerObj, radius)
+                    local surface = realLogic:findCraftSurface(
+                        playerObj, radius)
+                    if surface then return surface end
+                    return VLS.getVehicleGenericCraftSurface(playerObj)
+                end
+            else
+                method = function(_, ...)
+                    local realMethod = realLogic[key]
+                    return realMethod(realLogic, ...)
+                end
+            end
+
+            methodCache[key] = method
+            return method
+        end,
+    })
+
+    return proxy
+end
+
+local function installGenericCraftSurfaceClientHooks()
+    if VLS.installGenericCraftSurfaceActionHooks then
+        VLS.installGenericCraftSurfaceActionHooks()
+    end
+
+    if ISEntityUI and ISEntityUI.FindCraftSurface
+            and ISEntityUI.FindCraftSurface
+                ~= CraftSurfaceHooks.findCraftSurfaceWrapper then
+        local previousFindCraftSurface = ISEntityUI.FindCraftSurface
+
+        CraftSurfaceHooks.findCraftSurfaceWrapper = function(playerObj, radius)
+            local surface = previousFindCraftSurface(playerObj, radius)
+            if surface then return surface end
+            return VLS.getVehicleGenericCraftSurface(playerObj)
+        end
+
+        ISEntityUI.FindCraftSurface =
+            CraftSurfaceHooks.findCraftSurfaceWrapper
+    end
+
+    -- Vanilla closes every handcraft window whose surface is an IsoObject as
+    -- soon as the player is inside any vehicle.  A VLS cabinet deliberately
+    -- uses that same vehicle as its real AnySurfaceCraft object, so suppress
+    -- only the vanilla proximity branch while the player is still inside the
+    -- same supported vehicle and an approved cabinet remains installed.
+    -- Outside that narrow case, including cabinet removal or leaving the
+    -- vehicle, the original update path remains authoritative.
+    if ISHandcraftWindow
+            and ISHandcraftWindow.update
+            and ISHandcraftWindow.update
+                ~= CraftSurfaceHooks.handcraftWindowUpdateWrapper then
+        local previousHandcraftWindowUpdate = ISHandcraftWindow.update
+
+        CraftSurfaceHooks.handcraftWindowUpdateWrapper = function(self)
+            local surface = self and self.isoObject or nil
+            if surface
+                    and instanceof(surface, "BaseVehicle")
+                    and VLS.isSupportedVehicle(surface) then
+                if not VLS.canUseVehicleGenericCraftSurface(
+                        self.player, surface) then
+                    self:close()
+                    return false
+                end
+
+                self.isoObject = nil
+                local results = { pcall(previousHandcraftWindowUpdate, self) }
+                self.isoObject = surface
+
+                if not results[1] then error(results[2], 0) end
+                return unpack(results, 2)
+            end
+
+            return previousHandcraftWindowUpdate(self)
+        end
+
+        ISHandcraftWindow.update =
+            CraftSurfaceHooks.handcraftWindowUpdateWrapper
+    end
+
+    if ISInventoryPaneContextMenu
+            and ISInventoryPaneContextMenu.OnNewCraft
+            and ISInventoryPaneContextMenu.OnNewCraft
+                ~= CraftSurfaceHooks.onNewCraftWrapper then
+        local previousOnNewCraft = ISInventoryPaneContextMenu.OnNewCraft
+
+        CraftSurfaceHooks.onNewCraftWrapper = function(selectedItem, recipe,
+                playerNum, all, eatPercentage)
+            local playerObj = type(playerNum) == "number"
+                and getSpecificPlayer(playerNum) or playerNum
+            local isAnySurfaceRecipe = recipe
+                and recipe.isAnySurfaceCraft
+                and recipe:isAnySurfaceCraft()
+
+            if not isAnySurfaceRecipe
+                    or not VLS.getVehicleGenericCraftSurface(playerObj)
+                    or not HandcraftLogic
+                    or not HandcraftLogic.new then
+                return previousOnNewCraft(selectedItem, recipe, playerNum,
+                    all, eatPercentage)
+            end
+
+            local realHandcraftLogicClass = HandcraftLogic
+            HandcraftLogic = {
+                new = function(character, craftBench, isoObject)
+                    local realLogic = realHandcraftLogicClass.new(
+                        character, craftBench, isoObject)
+                    return makeVLSHandcraftLogicProxy(realLogic)
+                end,
+            }
+
+            local results = { pcall(previousOnNewCraft,
+                selectedItem, recipe, playerNum, all, eatPercentage) }
+            HandcraftLogic = realHandcraftLogicClass
+
+            if not results[1] then error(results[2], 0) end
+            return unpack(results, 2)
+        end
+
+        ISInventoryPaneContextMenu.OnNewCraft =
+            CraftSurfaceHooks.onNewCraftWrapper
+    end
+end
+
+if CraftSurfaceHooks.onGameStartCallback
+        and Events.OnGameStart.Remove then
+    Events.OnGameStart.Remove(CraftSurfaceHooks.onGameStartCallback)
+end
+CraftSurfaceHooks.onGameStartCallback =
+    installGenericCraftSurfaceClientHooks
+Events.OnGameStart.Add(CraftSurfaceHooks.onGameStartCallback)
+
+if CraftSurfaceHooks.onCreatePlayerCallback
+        and Events.OnCreatePlayer.Remove then
+    Events.OnCreatePlayer.Remove(CraftSurfaceHooks.onCreatePlayerCallback)
+end
+CraftSurfaceHooks.onCreatePlayerCallback =
+    installGenericCraftSurfaceClientHooks
+Events.OnCreatePlayer.Add(CraftSurfaceHooks.onCreatePlayerCallback)
+
+installGenericCraftSurfaceClientHooks()
 
 local function getReachableBed(vehicle, playerObj)
     if not vehicle or not playerObj or playerObj:getVehicle() then return nil end
@@ -229,6 +447,7 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
         vehicle = vehicle,
         part = part,
         playerObj = playerObj,
+        isVLSMicrowaveProxy = true,
     }
     proxy.power = {
         isPowered = function()
@@ -288,6 +507,64 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
 
     return proxy
 end
+
+local function isVLSMicrowaveWindowValid(ui, proxy)
+    local playerObj = ui and ui.character or nil
+    local vehicle = proxy and proxy.vehicle or nil
+    local part = proxy and proxy.part or nil
+    local item = part and part:getInventoryItem() or nil
+    return playerObj and vehicle and part
+        and playerObj:getVehicle() == vehicle
+        and VLS.getInstalledPart(vehicle, part:getId()) == part
+        and VLS.getEquipmentCapability(item) == "cooking"
+end
+
+local function installMicrowaveWindowClientHook()
+    if not ISMicrowaveUI or not ISMicrowaveUI.update
+            or ISMicrowaveUI.update == MicrowaveWindowHooks.updateWrapper then
+        return
+    end
+
+    local previousMicrowaveWindowUpdate = ISMicrowaveUI.update
+    MicrowaveWindowHooks.updateWrapper = function(self)
+        local proxy = self and self.oven or nil
+        if not proxy or proxy.isVLSMicrowaveProxy ~= true then
+            return previousMicrowaveWindowUpdate(self)
+        end
+
+        if not isVLSMicrowaveWindowValid(self, proxy) then
+            self:close()
+            return
+        end
+
+        -- Vanilla closes a microwave panel when the player is more than three
+        -- tiles from the IsoStove.  A VLS microwave is a vehicle-part proxy,
+        -- and a seat in a long camper can legitimately be farther than three
+        -- tiles from the vehicle origin.  Preserve the complete vanilla update
+        -- while making its distance probe represent the already-validated
+        -- same-vehicle interaction for this call only.
+        local previousGetX = proxy.getX
+        local previousGetY = proxy.getY
+        proxy.getX = function() return self.character:getX() end
+        proxy.getY = function() return self.character:getY() end
+        local results = { pcall(previousMicrowaveWindowUpdate, self) }
+        proxy.getX = previousGetX
+        proxy.getY = previousGetY
+
+        if not results[1] then error(results[2], 0) end
+        return unpack(results, 2)
+    end
+
+    ISMicrowaveUI.update = MicrowaveWindowHooks.updateWrapper
+end
+
+if MicrowaveWindowHooks.onCreatePlayerCallback
+        and Events.OnCreatePlayer.Remove then
+    Events.OnCreatePlayer.Remove(MicrowaveWindowHooks.onCreatePlayerCallback)
+end
+MicrowaveWindowHooks.onCreatePlayerCallback = installMicrowaveWindowClientHook
+Events.OnCreatePlayer.Add(MicrowaveWindowHooks.onCreatePlayerCallback)
+installMicrowaveWindowClientHook()
 
 local function onVLSMicrowaveClick(ui, button)
     if button.internal == "CLOSE" then
@@ -446,11 +723,10 @@ function VLSMicrowaveToggleHandler:new()
     return o
 end
 
-if not VLS.microwaveLootControlsApplied then
-    VLS.microwaveLootControlsApplied = true
-    ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
-    ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
-end
+-- AddHandler updates an existing handler with the same Type. Register on
+-- every client Lua load so reconnect/reload cannot leave stale classes.
+ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
+ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
 
 local function onVLSFluidTransferClick(ui, button)
     if button.internal ~= "TRANSFER" then
@@ -716,6 +992,7 @@ local function protectCooledFood(item, currentHours, vehicleId, containerId,
         state = {
             age = item:getAge(),
             freezing = item:getFreezingTime(),
+            heat = item:getHeat(),
             lastHours = currentHours,
             vehicleId = vehicleId,
             containerId = containerId,
@@ -747,9 +1024,7 @@ local function protectCooledFood(item, currentHours, vehicleId, containerId,
     state.age = state.age + elapsedHours * VLS.getFoodRotSpeed()
         / 24 * ageFactor
     item:setAge(state.age)
-    -- Do not force Food.heat here. With auxiliary power, the original
-    -- Food.updateAge path interpolates heat from the container's custom
-    -- temperature and drives the vanilla blue refrigeration background.
+    VLS.preservePoweredFoodHeat(item, state, freezer and 0.1 or 0.2)
     item:setFreezingTime(state.freezing)
     item:setLastAged(currentHours)
 end
@@ -769,28 +1044,51 @@ local function protectCooledContainer(container, currentHours, vehicleId,
     end
 end
 
+local function getDisplayedCoolingVehicle(playerNum)
+    local loot = getPlayerLoot(playerNum)
+    local pane = loot and loot.inventoryPane or nil
+    local container = pane and pane.inventory or nil
+    if not container then return nil end
+
+    local outermost = container:getOutermostContainer()
+    local part = outermost and outermost:getVehiclePart()
+        or container:getVehiclePart()
+    return part and part:getVehicle() or nil
+end
+
 local function processVisibleCooling()
     local seen = {}
+    local seenVehicles = {}
     local currentHours = getGameTime():getWorldAgeHours()
-    for playerNum = 0, 3 do
-        local playerObj = getSpecificPlayer(playerNum)
-        local vehicle = playerObj and playerObj:getVehicle()
-        local fridges = vehicle
-            and VLS.getInstalledCapabilityParts(vehicle, "cooling") or {}
-        if #fridges > 0 and VLS.hasAuxBatteryPower(vehicle,
-                VLS.getFridgeDrainPerMinute()) then
-            VLS.refreshApplianceEnvironment(vehicle)
-            for _, fridge in ipairs(fridges) do
-                protectCooledContainer(fridge:getItemContainer(), currentHours,
-                    vehicle:getId(), fridge:getId(), false, seen)
-                local freezer = VLS.getFreezerPartForUniversal(vehicle,
-                    fridge:getId())
-                protectCooledContainer(freezer and freezer:getItemContainer(),
-                    currentHours, vehicle:getId(), freezer and freezer:getId()
-                        or VLS.FREEZER_PART_BY_UNIVERSAL[fridge:getId()], true, seen)
-            end
+
+    local function processVehicle(vehicle)
+        if not vehicle or seenVehicles[vehicle]
+                or not VLS.isSupportedVehicle(vehicle) then return end
+        seenVehicles[vehicle] = true
+
+        local fridges = VLS.getInstalledCapabilityParts(vehicle, "cooling")
+        if #fridges <= 0 or not VLS.hasAuxBatteryPower(vehicle,
+                VLS.getFridgeDrainPerMinute()) then return end
+
+        VLS.refreshApplianceEnvironment(vehicle)
+        for _, fridge in ipairs(fridges) do
+            protectCooledContainer(fridge:getItemContainer(), currentHours,
+                vehicle:getId(), fridge:getId(), false, seen)
+            local freezer = VLS.getFreezerPartForUniversal(vehicle,
+                fridge:getId())
+            protectCooledContainer(freezer and freezer:getItemContainer(),
+                currentHours, vehicle:getId(), freezer and freezer:getId()
+                    or VLS.FREEZER_PART_BY_UNIVERSAL[fridge:getId()],
+                true, seen)
         end
     end
+
+    for playerNum = 0, 3 do
+        local playerObj = getSpecificPlayer(playerNum)
+        processVehicle(playerObj and playerObj:getVehicle() or nil)
+        processVehicle(getDisplayedCoolingVehicle(playerNum))
+    end
+
     for itemId in pairs(locallyCooledFood) do
         if not seen[itemId] then locallyCooledFood[itemId] = nil end
     end
@@ -801,6 +1099,7 @@ local function processClientState()
     coolingTickCounter = coolingTickCounter + 1
     if coolingTickCounter >= 30 then
         coolingTickCounter = 0
+        processVisibleApplianceNames()
         processVisibleCooling()
     end
 end
@@ -832,33 +1131,8 @@ local function getVLSTelevisionForDevice(devicePart)
     return part
 end
 
--- Vanilla media controls pass a world square for every non-inventory device.
--- A vehicle television lives on a VehiclePart, so preserve that exact vanilla
--- action while adapting only its DeviceData lookup.
-if not VLS.televisionDeviceParameterHookApplied then
-    VLS.televisionDeviceParameterHookApplied = true
-    local vanillaDeviceDataParameter =
-        ISDeviceBatteryAction.getDeviceDataParameter
-    local vanillaDeviceDataFromParameter =
-        ISDeviceBatteryAction.getDeviceDataFromParameter
-
-    function ISDeviceBatteryAction:getDeviceDataParameter(character, device,
-            deviceType)
-        if deviceType == "VehiclePart" and getVLSTelevisionForDevice(device) then
-            return { vlsTelevisionDeviceData = device:getDeviceData() }
-        end
-        return vanillaDeviceDataParameter(self, character, device, deviceType)
-    end
-
-    function ISDeviceBatteryAction:getDeviceDataFromParameter(character,
-            parameter)
-        if type(parameter) == "table" and parameter.vlsTelevisionDeviceData then
-            return parameter.vlsTelevisionDeviceData
-        end
-        return vanillaDeviceDataFromParameter(self, character, parameter)
-    end
-end
-
+-- Television media-action parameters are adapted in shared VLS_Config.lua
+-- so client and server resolve the same stable vehicle/part descriptor.
 if not VLS.televisionPowerActionHookApplied then
     VLS.televisionPowerActionHookApplied = true
     local vanillaRadioToggleValid = ISRadioAction.isValidToggleOnOff
@@ -1051,6 +1325,7 @@ local function refreshVehicleContainerLabels(page, phase)
         local part = container and container:getVehiclePart()
         local vehicle = part and part:getVehicle()
         if VLS.isSupportedVehicle(vehicle) then
+            restoreOfficialVLSFoodNames(container)
             local name
             if VLS.isFreezerPart(part) then
                 name = getText("IGUI_ContainerTitle_freezer")
@@ -1065,9 +1340,26 @@ local function refreshVehicleContainerLabels(page, phase)
                 button.name = name
                 button.tooltip = name
                 local item = part:getInventoryItem()
+                if VLS.isUniversalPart(part)
+                        and VLS.ensureUniversalContainerProfile then
+                    VLS.ensureUniversalContainerProfile(part)
+                end
+                local iconType = container:getType()
+                if VLS.isFreezerPart(part) then
+                    iconType = "freezer"
+                elseif VLS.isUniversalPart(part) then
+                    local equipmentProfile = VLS.getEquipmentProfile(item)
+                    if equipmentProfile and equipmentProfile.containerType then
+                        iconType = equipmentProfile.containerType
+                    end
+                end
+                if VLS.getContainerIconOverride then
+                    iconType = VLS.getContainerIconOverride(part, iconType)
+                        or iconType
+                end
                 local icon = part:getId() == VLS.WEAPON_PART_ID
                     and item and item:getTex()
-                    or ContainerButtonIcons[container:getType()]
+                    or ContainerButtonIcons[iconType]
                 if icon then button:setImage(icon) end
             end
             if VLS.isFreezerPart(part) then
@@ -1114,13 +1406,17 @@ if not VLS.microwaveTransferHookApplied then
     VLS.microwaveTransferHookApplied = true
     local vanillaInventoryTransferStart = ISInventoryTransferAction.start
 
-    local function isVLSMicrowaveContainer(container, character)
-        if not container or container:getType() ~= "microwave" then return false end
+    local function getVLSMicrowavePart(container)
+        if not container or container:getType() ~= "microwave" then return nil end
         local part = container:getVehiclePart()
         local vehicle = part and part:getVehicle()
-        return vehicle ~= nil and character and character:getVehicle() == vehicle
-            and VLS.getInstalledPart(vehicle, part:getId()) == part
-            and VLS.getEquipmentCapability(part:getInventoryItem()) == "cooking"
+        if not VLS.isSupportedVehicle(vehicle) or not VLS.isUniversalPart(part)
+                or VLS.getInstalledPart(vehicle, part:getId()) ~= part
+                or VLS.getEquipmentCapability(part:getInventoryItem())
+                    ~= "cooking" then
+            return nil
+        end
+        return part
     end
 
     function ISInventoryTransferAction:start()
@@ -1128,9 +1424,9 @@ if not VLS.microwaveTransferHookApplied then
         local containers = { self.srcContainer, self.destContainer }
         for index = 1, 2 do
             local container = containers[index]
-            if container and not changed[container]
-                    and isVLSMicrowaveContainer(container, self.character) then
-                local part = container:getVehiclePart()
+            local part = container and not changed[container]
+                and getVLSMicrowavePart(container) or nil
+            if part then
                 if part:getModData().vlsMicrowaveActive then
                     sendApplianceCommand(self.character, "stopMicrowave", {
                         vehicle = part:getVehicle():getId(),
