@@ -1,6 +1,12 @@
 # Changelog
 
-## 3.6.0
+## 3.7.0
+
+- Fixes multiplayer water-fill availability and rainy-ground false detection.
+- Extends valid inlet-side water-source detection to four tiles, preserves
+  existing tank contents on failed transfers, and charges only actual inflow.
+- Reduces redundant refrigerator processing and keeps appliance UI hooks
+  safe across reloads.
 
 - Adds configurable living spaces to supported vanilla SUVs, PickUpVans, Vans,
   and StepVans while preserving the intended original seats.

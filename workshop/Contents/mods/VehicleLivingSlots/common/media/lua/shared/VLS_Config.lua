@@ -5,7 +5,7 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "RC3.6"
+VLS.VERSION = "RC3.7"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
@@ -33,9 +33,11 @@ VLS.LARGE_VAN_WATER_TANK_ITEMS = {
     ["Base.NormalGasTank2"] = true,
     ["Base.BigGasTank2"] = true,
 }
-VLS.WATER_TANK_SOURCE_RANGE = 2
+VLS.WATER_TANK_SOURCE_RANGE = 4
 VLS.WATER_TANK_PLAYER_AREA_SCALE = 1.30
 VLS.WATER_TANK_PLAYER_MIN_HALF_EXTENT = 0.85
+VLS.APPLIANCE_CONTAINER_MAX_DEPTH = 8
+VLS.APPLIANCE_CONTAINER_MAX_ITEMS = 512
 VLS.WATER_TANK_PART_IDS = {
     [VLS.LARGE_VAN_WATER_TANK_PART_ID] = true,
 }
@@ -651,19 +653,74 @@ end
 local CONTAINER_PROFILE_VERSION = 2
 
 local function applyContainerProfile(container, profile, fallbackType)
-    if not container then return end
+    if not container then return false end
+    local changed = false
     local capacity = profile and profile.capacity or 0
-    if container:getCapacity() ~= capacity then container:setCapacity(capacity) end
+    if container:getCapacity() ~= capacity then
+        container:setCapacity(capacity)
+        changed = true
+    end
     local containerType = profile and profile.containerType or fallbackType
     local openSound = profile and profile.containerOpenSound or "VehicleTrunkOpen"
     local closeSound = profile and profile.containerCloseSound or "VehicleTrunkClose"
     local putSound = profile and profile.containerPutSound or "VehicleTrunkTransferItem"
     local takeSound = profile and profile.containerTakeSound or "VehicleTrunkTransferItem"
-    if container:getType() ~= containerType then container:setType(containerType) end
-    if container:getOpenSound() ~= openSound then container:setOpenSound(openSound) end
-    if container:getCloseSound() ~= closeSound then container:setCloseSound(closeSound) end
-    if container:getPutSound() ~= putSound then container:setPutSound(putSound) end
-    if container:getTakeSound() ~= takeSound then container:setTakeSound(takeSound) end
+    if container:getType() ~= containerType then
+        container:setType(containerType)
+        changed = true
+    end
+    if container:getOpenSound() ~= openSound then
+        container:setOpenSound(openSound)
+        changed = true
+    end
+    if container:getCloseSound() ~= closeSound then
+        container:setCloseSound(closeSound)
+        changed = true
+    end
+    if container:getPutSound() ~= putSound then
+        container:setPutSound(putSound)
+        changed = true
+    end
+    if container:getTakeSound() ~= takeSound then
+        container:setTakeSound(takeSound)
+        changed = true
+    end
+    return changed
+end
+
+-- Appliance inventories may contain bags inside bags. Keep every client and
+-- server traversal on the same bounded, cycle-safe implementation so a bad or
+-- unusually deep item graph cannot turn a visible refrigerator into an
+-- unbounded per-tick scan.
+function VLS.walkApplianceContainer(container, visitor, state)
+    state = state or {
+        visited = {},
+        items = 0,
+        maxDepth = VLS.APPLIANCE_CONTAINER_MAX_DEPTH,
+        maxItems = VLS.APPLIANCE_CONTAINER_MAX_ITEMS,
+    }
+    if not container or state.visited[container]
+            or (state.depth or 0) > state.maxDepth
+            or state.items >= state.maxItems then
+        return state
+    end
+
+    state.visited[container] = true
+    local items = container:getItems()
+    if not items then return state end
+    local parentDepth = state.depth or 0
+    for index = 0, items:size() - 1 do
+        if state.items >= state.maxItems then break end
+        local item = items:get(index)
+        state.items = state.items + 1
+        visitor(item, state)
+        if instanceof(item, "InventoryContainer") then
+            state.depth = parentDepth + 1
+            VLS.walkApplianceContainer(item:getInventory(), visitor, state)
+            state.depth = parentDepth
+        end
+    end
+    return state
 end
 
 function VLS.getInstalledCapabilityPart(vehicle, capability)
@@ -706,16 +763,16 @@ function VLS.ensureUniversalContainerProfile(part)
     local container = part:getItemContainer()
     if not container then return nil end
     local profile = VLS.getEquipmentProfile(part:getInventoryItem())
-    applyContainerProfile(container,
+    local changed = applyContainerProfile(container,
         profile and profile.capacity and profile or nil,
         VLS.UNIVERSAL_PART_ID)
-    return profile
+    return profile, changed
 end
 
 function VLS.syncUniversalSlot(part)
-    if not VLS.isUniversalPart(part) then return end
+    if not VLS.isUniversalPart(part) then return false end
     local container = part:getItemContainer()
-    if not container then return end
+    if not container then return false end
     local item = part:getInventoryItem()
     local profile = VLS.getEquipmentProfile(item)
     local capability = profile and profile.capability
@@ -729,7 +786,7 @@ function VLS.syncUniversalSlot(part)
     -- Part modData and the installed item can arrive before the client-side
     -- ItemContainer fields. Reapply the desired profile on every lifecycle
     -- pass; applyContainerProfile itself writes only fields that differ.
-    VLS.ensureUniversalContainerProfile(part)
+    local _, containerChanged = VLS.ensureUniversalContainerProfile(part)
     data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
 
     if (itemChanged or profileChanged)
@@ -746,14 +803,15 @@ function VLS.syncUniversalSlot(part)
         container:setCustomTemperature(1.0)
         container:setAgeFactor(1.0)
     end
+    return itemChanged or profileChanged or containerChanged
 end
 
 local function syncOneFreezerSlot(vehicle, universalPartId)
     local freezerId = VLS.FREEZER_PART_BY_UNIVERSAL[universalPartId]
-    if not freezerId then return end
+    if not freezerId then return false end
     local freezer = vehicle:getPartById(freezerId)
     local container = freezer and freezer:getItemContainer()
-    if not container then return end
+    if not container then return false end
     local fridge = VLS.getInstalledPart(vehicle, universalPartId)
     if fridge and VLS.getEquipmentCapability(fridge:getInventoryItem()) ~= "cooling" then
         fridge = nil
@@ -774,7 +832,8 @@ local function syncOneFreezerSlot(vehicle, universalPartId)
 
     -- Keep the hidden freezer container's runtime profile in sync even when
     -- replicated modData already says the correct appliance is installed.
-    applyContainerProfile(container, containerProfile, freezerId)
+    local containerChanged = applyContainerProfile(
+        container, containerProfile, freezerId)
     data.vlsEquipmentItemId = itemId
     data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
 
@@ -782,18 +841,20 @@ local function syncOneFreezerSlot(vehicle, universalPartId)
         container:setCustomTemperature(1.0)
         container:setAgeFactor(1.0)
     end
+    return stateChanged or containerChanged
 end
 
 function VLS.syncFreezerSlot(vehicle, universalPartId)
-    if not VLS.isSupportedVehicle(vehicle) then return end
+    if not VLS.isSupportedVehicle(vehicle) then return false end
     if universalPartId then
-        syncOneFreezerSlot(vehicle, universalPartId)
-        return
+        return syncOneFreezerSlot(vehicle, universalPartId)
     end
+    local changed = false
     local profile = VLS.getVehicleProfile(vehicle)
     for _, partId in ipairs(profile.universalParts) do
-        syncOneFreezerSlot(vehicle, partId)
+        if syncOneFreezerSlot(vehicle, partId) then changed = true end
     end
+    return changed
 end
 
 local function ensureTelevisionPresets(deviceData)
@@ -856,14 +917,14 @@ local function copyTelevisionMetadata(target, source)
 end
 
 function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
-    if not VLS.isUniversalPart(part) then return end
+    if not VLS.isUniversalPart(part) then return false end
     local item = part:getInventoryItem()
     local television = VLS.getEquipmentCapability(item) == "television"
         and instanceof(item, "Radio")
     local source = television and item:getDeviceData() or nil
     television = television and source and source:getIsTelevision()
     local devicePart = VLS.getTelevisionDevicePart(part)
-    if not devicePart then return end
+    if not devicePart then return false end
     local deviceData = devicePart:getDeviceData()
     local data = devicePart:getModData()
 
@@ -881,11 +942,11 @@ function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
             vehicle:transmitPartItem(devicePart)
             vehicle:transmitPartModData(devicePart)
         end
-        return
+        return changed
     end
 
     if not deviceData then deviceData = devicePart:createSignalDevice() end
-    if not deviceData then return end
+    if not deviceData then return false end
 
     local itemId = item:getID()
     local changed = false
@@ -914,6 +975,7 @@ function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
         vehicle:transmitPartItem(devicePart)
         vehicle:transmitPartModData(devicePart)
     end
+    return changed
 end
 
 function VLS.copyTelevisionStateToItem(part, item)
@@ -1026,8 +1088,9 @@ VLS.installTelevisionDeviceActionHooks()
 
 function VLS.Create.UniversalSlot(vehicle, part)
     VLS.syncUniversalSlot(part)
-    VLS.syncFreezerSlot(vehicle)
+    VLS.syncFreezerSlot(vehicle, part and part:getId())
     VLS.syncTelevisionDevice(vehicle, part, false)
+    VLS.refreshApplianceEnvironment(vehicle, part, true)
     if VLS.Server and VLS.Server.trackVehicle then
         VLS.Server.trackVehicle(vehicle)
     end
@@ -1035,21 +1098,22 @@ end
 
 function VLS.PartComplete.UniversalSlot(vehicle, part)
     VLS.syncUniversalSlot(part)
-    VLS.syncFreezerSlot(vehicle)
+    VLS.syncFreezerSlot(vehicle, part and part:getId())
     VLS.syncTelevisionDevice(vehicle, part, true)
+    VLS.refreshApplianceEnvironment(vehicle, part, true)
     if VLS.Server and VLS.Server.trackVehicle then
         VLS.Server.trackVehicle(vehicle)
     end
 end
 
 function VLS.Update.UniversalSlot(vehicle, part, elapsedMinutes)
-    VLS.syncUniversalSlot(part)
-    VLS.syncFreezerSlot(vehicle)
-    VLS.syncTelevisionDevice(vehicle, part, false)
+    local changed = VLS.syncUniversalSlot(part)
+    if VLS.syncFreezerSlot(vehicle, part and part:getId()) then changed = true end
+    if VLS.syncTelevisionDevice(vehicle, part, false) then changed = true end
     if VLS.Server and VLS.Server.updateAppliance then
-        VLS.Server.updateAppliance(vehicle, part, elapsedMinutes or 0)
+        VLS.Server.updateAppliance(vehicle, part, elapsedMinutes or 0, changed)
     else
-        VLS.refreshApplianceEnvironment(vehicle)
+        VLS.refreshApplianceEnvironment(vehicle, part, changed)
     end
 end
 
@@ -1420,6 +1484,44 @@ function VLS.isPureWaterFluid(fluidContainer)
         >= fluidContainer:getAmount()
 end
 
+-- IsoObject:getFluidAmount() also reports rain puddles on ordinary floor
+-- sprites. These are not stable tank intake endpoints in multiplayer; do not
+-- let a wet road win the scan before a real river, tap, or water container.
+function VLS.getTankWaterSourceAmount(source)
+    if not source or not source.getFluidAmount or not source:getSquare()
+            or source:getObjectIndex() < 0 then return 0 end
+    local fluid = source:getFluidContainer()
+    if fluid and fluid:getAmount() > 0 then
+        if not VLS.isPureWaterFluid(fluid) then return 0 end
+    else
+        local props = source:getProperties()
+        if props and props:has(IsoFlagType.solidfloor)
+                and not props:has(IsoFlagType.water)
+                and not props:has(IsoFlagType.waterPiped)
+                and not source:isWaterInfinite() then return 0 end
+    end
+    return math.max(0, source:getFluidAmount())
+end
+
+function VLS.canAcceptNormalizedWater(target, amount)
+    if not target or amount <= 0 then return false end
+    local preview = FluidContainer.CreateContainer()
+    preview:setCapacity(amount)
+    preview:addFluid(Fluid.Water, amount)
+    local accepted = FluidContainer.CanTransfer(preview, target)
+    FluidContainer.DisposeContainer(preview)
+    return accepted
+end
+
+function VLS.getWaterTankFillAmount(vehicle, tank, source)
+    local target = tank and tank:getFluidContainer()
+    if not target then return 0 end
+    local amount = math.max(0, math.min(VLS.getTankWaterSourceAmount(source),
+        target:getCapacity() - target:getAmount(),
+        VLS.getWaterPurificationCapacity(vehicle)))
+    return VLS.canAcceptNormalizedWater(target, amount) and amount or 0
+end
+
 -- Preserve the script-defined GasTank center and vehicle-local orientation.
 -- Script areas are only 0.4725 tiles wide on the supported vehicles, so a
 -- percentage-only expansion adds less than a tenth of a tile per edge. Keep
@@ -1544,14 +1646,32 @@ function VLS.PartComplete.VehicleWaterTankUninstalled(vehicle, part, item)
     vehicle:transmitPartModData(part)
 end
 
-function VLS.refreshApplianceEnvironment(vehicle)
-    if not VLS.isSupportedVehicle(vehicle) then return end
+local function setContainerEnvironment(container, temperature, ageFactor,
+        processItems, force)
+    if not container then return false end
+    local changed = force == true
+    if math.abs(container:getCustomTemperature() - temperature) > 0.000001 then
+        container:setCustomTemperature(temperature)
+        changed = true
+    end
+    if math.abs(container:getAgeFactor() - ageFactor) > 0.000001 then
+        container:setAgeFactor(ageFactor)
+        changed = true
+    end
+    if changed and processItems then container:addItemsToProcessItems() end
+    return changed
+end
+
+function VLS.refreshApplianceEnvironment(vehicle, onlyPart, force)
+    if not VLS.isSupportedVehicle(vehicle) then return false end
+    local anyChanged = false
     local profile = VLS.getVehicleProfile(vehicle)
     for _, partId in ipairs(profile.universalParts) do
         local part = vehicle:getPartById(partId)
-        if part then
-            VLS.syncUniversalSlot(part)
-            VLS.syncFreezerSlot(vehicle, partId)
+        if part and (not onlyPart or onlyPart == part) then
+            local partForce = force == true
+            if VLS.syncUniversalSlot(part) then partForce = true end
+            if VLS.syncFreezerSlot(vehicle, partId) then partForce = true end
             local container = part:getItemContainer()
             local capability = VLS.getEquipmentCapability(part:getInventoryItem())
             local required = 0.0001
@@ -1566,35 +1686,40 @@ function VLS.refreshApplianceEnvironment(vehicle)
                 if data.vlsMicrowaveActive and powered then
                     local temperature = math.max(50, math.min(130,
                         data.vlsMicrowaveTemperature or 90))
-                    container:setCustomTemperature(1.0 + temperature / 100)
-                    container:addItemsToProcessItems()
+                    if setContainerEnvironment(container,
+                            1.0 + temperature / 100, 1.0, true, partForce) then
+                        anyChanged = true
+                    end
                 else
-                    container:setCustomTemperature(1.0)
+                    if setContainerEnvironment(container, 1.0, 1.0,
+                            false, partForce) then anyChanged = true end
                 end
-                container:setAgeFactor(1.0)
             elseif capability == "cooling" then
-                container:setCustomTemperature(powered and 0.2 or 1.0)
-                container:setAgeFactor(powered and VLS.getFridgeAgeFactor() or 1.0)
-                container:addItemsToProcessItems()
+                if setContainerEnvironment(container,
+                        powered and 0.2 or 1.0,
+                        powered and VLS.getFridgeAgeFactor() or 1.0,
+                        powered, partForce) then anyChanged = true end
                 local freezer = VLS.getFreezerPartForUniversal(vehicle, partId)
                 local freezerContainer = freezer and freezer:getItemContainer()
                 if freezerContainer then
-                    freezerContainer:setCustomTemperature(powered and 0.1 or 1.0)
-                    freezerContainer:setAgeFactor(powered and 0.0 or 1.0)
-                    freezerContainer:addItemsToProcessItems()
+                    if setContainerEnvironment(freezerContainer,
+                            powered and 0.1 or 1.0,
+                            powered and 0.0 or 1.0,
+                            powered, partForce) then anyChanged = true end
                 end
             else
-                container:setCustomTemperature(1.0)
-                container:setAgeFactor(1.0)
+                if setContainerEnvironment(container, 1.0, 1.0,
+                        false, partForce) then anyChanged = true end
                 local freezer = VLS.getFreezerPartForUniversal(vehicle, partId)
                 local freezerContainer = freezer and freezer:getItemContainer()
                 if freezerContainer then
-                    freezerContainer:setCustomTemperature(1.0)
-                    freezerContainer:setAgeFactor(1.0)
+                    if setContainerEnvironment(freezerContainer, 1.0, 1.0,
+                            false, partForce) then anyChanged = true end
                 end
             end
         end
     end
+    return anyChanged
 end
 
 function VLS.canUninstallManagedPart(part)

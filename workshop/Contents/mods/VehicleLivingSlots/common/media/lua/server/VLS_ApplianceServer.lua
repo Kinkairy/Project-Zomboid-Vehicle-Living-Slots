@@ -12,9 +12,32 @@ VLS.Server = VLS.Server or {}
 local trackedVehicles = {}
 local cooledFood = {}
 
+local function hasManagedAppliance(vehicle)
+    local profile = vehicle and VLS.getVehicleProfile(vehicle)
+    if not profile then return false end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        local capability = part
+            and VLS.getEquipmentCapability(part:getInventoryItem()) or nil
+        if capability == "cooling" then return true end
+        if capability == "cooking"
+                and part:getModData().vlsMicrowaveActive then
+            return true
+        end
+        if capability == "television" then
+            local deviceData = VLS.getTelevisionDeviceData(part)
+            if deviceData and deviceData:getIsTurnedOn() then return true end
+        end
+    end
+    return false
+end
+
 function VLS.Server.trackVehicle(vehicle)
-    if vehicle and VLS.isSupportedVehicle(vehicle) then
+    if vehicle and VLS.isSupportedVehicle(vehicle)
+            and hasManagedAppliance(vehicle) then
         trackedVehicles[vehicle:getId()] = true
+    elseif vehicle then
+        trackedVehicles[vehicle:getId()] = nil
     end
 end
 
@@ -116,35 +139,41 @@ local function makeNormalizedWater(amount)
     return container
 end
 
-local function canAcceptNormalizedWater(target, amount)
-    local preview = makeNormalizedWater(amount)
-    local accepted = FluidContainer.CanTransfer(preview, target)
-    FluidContainer.DisposeContainer(preview)
-    return accepted
+local canAcceptNormalizedWater = VLS.canAcceptNormalizedWater
+
+local function commitPurificationPower(vehicle, amount)
+    local cost = VLS.getWaterPurificationCost(amount)
+    if cost <= 0 then return true end
+    local part = VLS.getAuxBatteryPart(vehicle)
+    local item = part and part:getInventoryItem()
+    if not item then return false end
+    local charge = item:getCurrentUsesFloat()
+    if charge + 0.000001 < cost then return false end
+    item:setUsedDelta(math.max(0, charge - cost))
+    vehicle:transmitPartUsedDelta(part)
+    return true
 end
 
-local function normalizeExistingTank(target)
-    local amount = target:getAmount()
-    if amount <= 0 then return end
-    local primary = target:getPrimaryFluid()
-    local fluidType = primary and primary:getFluidTypeString() or nil
-    if (fluidType == "Base.Water" or fluidType == "Water")
-            and target:getPrimaryFluidAmount() + 0.0001 >= amount then
-        return
-    end
-    target:Empty()
-    target:addFluid(Fluid.Water, amount)
+local function addCapturedCleanWater(vehicle, captured, target)
+    local moved = captured:getAmount()
+    if moved <= 0 or not canAcceptNormalizedWater(target, moved) then return 0 end
+
+    local normalized = makeNormalizedWater(moved)
+    local before = target:getAmount()
+    FluidContainer.Transfer(normalized, target, moved)
+    local added = math.max(0, target:getAmount() - before)
+    FluidContainer.DisposeContainer(normalized)
+    if added <= 0 then return 0 end
+    if not commitPurificationPower(vehicle, added) then return 0 end
+    return added
 end
 
-local function transferNormalizedWater(vehicle, source, target, amount)
+local function transferNormalizedWater(vehicle, source, target, requestedAmount)
     if not VLS.isPureWaterFluid(source) then return 0 end
-    amount = math.max(0, math.min(amount, source:getAmount(),
-        target:getCapacity() - target:getAmount(),
+    local amount = math.max(0, math.min(tonumber(requestedAmount) or 0,
+        source:getAmount(), target:getCapacity() - target:getAmount(),
         VLS.getWaterPurificationCapacity(vehicle)))
-    if amount <= 0 then return 0 end
-
-    normalizeExistingTank(target)
-    if not canAcceptNormalizedWater(target, amount) then return 0 end
+    if amount <= 0 or not canAcceptNormalizedWater(target, amount) then return 0 end
 
     local captured = FluidContainer.CreateContainer()
     captured:setCapacity(amount)
@@ -153,15 +182,9 @@ local function transferNormalizedWater(vehicle, source, target, amount)
         return 0
     end
     FluidContainer.Transfer(source, captured, amount)
-    local moved = captured:getAmount()
+    local added = addCapturedCleanWater(vehicle, captured, target)
     FluidContainer.DisposeContainer(captured)
-    if moved <= 0 then return 0 end
-
-    local normalized = makeNormalizedWater(moved)
-    FluidContainer.Transfer(normalized, target, moved)
-    FluidContainer.DisposeContainer(normalized)
-    VLS.consumeAuxBattery(vehicle, VLS.getWaterPurificationCost(moved))
-    return moved
+    return added
 end
 
 local function resolveFluidTransferEndpoint(player, vehicle, descriptor)
@@ -203,12 +226,13 @@ function VLS.Server.transferWaterStep(player, args)
             or not source or not target or not source:canPlayerEmpty() then return 0 end
 
     local amount = math.max(0, tonumber(args.amount) or 0)
-    if amount <= 0 or not FluidContainer.CanTransfer(source, target) then return 0 end
+    if amount <= 0 then return 0 end
     local moved
     if VLS.isWaterTankPart(targetPart) then
         moved = transferNormalizedWater(vehicle, source, target, amount)
         if moved <= 0 then return 0 end
     else
+        if not FluidContainer.CanTransfer(source, target) then return 0 end
         local before = source:getAmount()
         FluidContainer.Transfer(source, target, amount)
         moved = math.max(0, before - source:getAmount())
@@ -255,9 +279,7 @@ local function resolveWaterSource(args)
     if not objects or index < 0 or index >= objects:size() then return nil end
     local source = objects:get(index)
     if not source or source:getObjectIndex() ~= index
-            or source:getFluidAmount() <= 0 then return nil end
-    local fluid = source:getFluidContainer()
-    if fluid and not VLS.isPureWaterFluid(fluid) then return nil end
+            or VLS.getTankWaterSourceAmount(source) <= 0 then return nil end
     return source
 end
 
@@ -269,31 +291,17 @@ local function transferWaterTankFillStep(player, vehicle, tank, part, source,
         return 0
     end
     if not VLS.isWaterSourceNearTank(vehicle, part, source) then return 0 end
-    if source:getObjectIndex() < 0 or source:getFluidAmount() <= 0 then return 0 end
-    local sourceFluid = source:getFluidContainer()
-    if sourceFluid and not VLS.isPureWaterFluid(sourceFluid) then return 0 end
-
     local target = tank:getFluidContainer()
     local amount = math.max(0, math.min(tonumber(requestedAmount) or 0,
-        source:getFluidAmount(),
-        target:getCapacity() - target:getAmount(),
-        VLS.getWaterPurificationCapacity(vehicle)))
+        VLS.getWaterTankFillAmount(vehicle, tank, source)))
     if amount <= 0 then return 0 end
-
-    normalizeExistingTank(target)
-    if not canAcceptNormalizedWater(target, amount) then return 0 end
 
     local captured = FluidContainer.CreateContainer()
     captured:setCapacity(amount)
     source:transferFluidTo(captured, amount)
-    local moved = captured:getAmount()
+    local moved = addCapturedCleanWater(vehicle, captured, target)
     FluidContainer.DisposeContainer(captured)
     if moved <= 0 then return 0 end
-
-    local normalized = makeNormalizedWater(moved)
-    FluidContainer.Transfer(normalized, target, moved)
-    FluidContainer.DisposeContainer(normalized)
-    VLS.consumeAuxBattery(vehicle, VLS.getWaterPurificationCost(moved))
 
     if source.sync then source:sync() end
     VLS.syncVehicleWaterTank(vehicle, part)
@@ -344,11 +352,10 @@ local function processCooledFood(item, currentHours, vehicleId, containerId,
         cooledFood[itemId] = state
     end
 
-    local heatChanged = VLS.preservePoweredFoodHeat(
-        item, state, targetHeat)
+    local changed = VLS.preservePoweredFoodHeat(item, state, targetHeat)
     local elapsedHours = currentHours - state.lastHours
     if elapsedHours <= 0 then
-        if heatChanged then
+        if changed then
             if item.syncItemFields then item:syncItemFields() end
             sendItemStats(item)
         end
@@ -363,32 +370,34 @@ local function processCooledFood(item, currentHours, vehicleId, containerId,
         state.freezing = math.max(0,
             state.freezing - elapsedHours / 3 * 100)
     end
-    item:setFreezingTime(state.freezing)
+    if math.abs(item:getFreezingTime() - state.freezing) > 0.000001 then
+        item:setFreezingTime(state.freezing)
+        changed = true
+    end
 
     local ageFactor = state.freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
     state.age = state.age + elapsedHours * VLS.getFoodRotSpeed()
         / 24 * ageFactor
     state.lastHours = currentHours
-    item:setAge(state.age)
-    item:setLastAged(currentHours)
-    if item.syncItemFields then item:syncItemFields() end
-    sendItemStats(item)
+    if math.abs(item:getAge() - state.age) > 0.000001 then
+        item:setAge(state.age)
+        changed = true
+    end
+    if changed then
+        item:setLastAged(currentHours)
+        if item.syncItemFields then item:syncItemFields() end
+        sendItemStats(item)
+    end
 end
 
 local function processCooledContainer(container, currentHours, vehicleId,
         containerId, freezer, seen)
     if not container then return end
     local targetHeat = freezer and 0.1 or 0.2
-    local items = container:getItems()
-    for index = 0, items:size() - 1 do
-        local item = items:get(index)
+    VLS.walkApplianceContainer(container, function(item)
         processCooledFood(item, currentHours, vehicleId, containerId,
             freezer, seen, targetHeat)
-        if instanceof(item, "InventoryContainer") then
-            processCooledContainer(item:getInventory(), currentHours, vehicleId,
-                containerId, freezer, seen)
-        end
-    end
+    end)
 end
 
 local function processTrackedVehicle(vehicle, elapsedMinutes, currentHours, seen)
@@ -441,7 +450,10 @@ local function processTrackedVehicle(vehicle, elapsedMinutes, currentHours, seen
         if changed then vehicle:transmitPartModData(part) end
     end
 
-    VLS.refreshApplianceEnvironment(vehicle)
+    for _, partId in ipairs(profile.universalParts) do
+        local part = vehicle:getPartById(partId)
+        if part then VLS.refreshApplianceEnvironment(vehicle, part, false) end
+    end
 end
 
 local function onEveryOneMinute()
@@ -449,7 +461,7 @@ local function onEveryOneMinute()
     local seen = {}
     for vehicleId in pairs(trackedVehicles) do
         local vehicle = getVehicleById(vehicleId)
-        if vehicle then
+        if vehicle and vehicle:getSquare() and hasManagedAppliance(vehicle) then
             processTrackedVehicle(vehicle, 1, currentHours, seen)
         else
             trackedVehicles[vehicleId] = nil
@@ -460,15 +472,10 @@ local function onEveryOneMinute()
     end
 end
 
-local function onPlayerUpdate(player)
-    local vehicle = player and player:getVehicle()
-    if vehicle then VLS.Server.trackVehicle(vehicle) end
-end
-
-function VLS.Server.updateAppliance(vehicle, part, elapsedMinutes)
+function VLS.Server.updateAppliance(vehicle, part, elapsedMinutes, forceRefresh)
     if not VLS.isUniversalPart(part) then return end
     VLS.Server.trackVehicle(vehicle)
-    VLS.refreshApplianceEnvironment(vehicle)
+    VLS.refreshApplianceEnvironment(vehicle, part, forceRefresh)
 end
 
 local commands = {
@@ -489,5 +496,4 @@ if not VLS.serverHooksApplied then
     VLS.serverHooksApplied = true
     Events.OnClientCommand.Add(onClientCommand)
     Events.EveryOneMinute.Add(onEveryOneMinute)
-    Events.OnPlayerUpdate.Add(onPlayerUpdate)
 end

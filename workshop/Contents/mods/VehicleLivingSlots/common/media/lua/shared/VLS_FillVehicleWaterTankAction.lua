@@ -4,19 +4,6 @@ require "VLS_Config"
 VLSFillVehicleWaterTankAction = ISRefuelFromGasPump:derive(
     "VLSFillVehicleWaterTankAction")
 
-local function getSourceAmount(source)
-    if not source or not source.getFluidAmount then return 0 end
-    return math.max(0, source:getFluidAmount())
-end
-
-local function getAvailableAmount(vehicle, tank, source)
-    local fluid = tank and tank:getFluidContainer()
-    if not fluid then return 0 end
-    return math.max(0, math.min(getSourceAmount(source),
-        fluid:getCapacity() - fluid:getAmount(),
-        VLS.getWaterPurificationCapacity(vehicle)))
-end
-
 local WaterSourceAdapter = {}
 WaterSourceAdapter.__index = WaterSourceAdapter
 
@@ -66,6 +53,7 @@ function VLSFillVehicleWaterTankAction:isValid()
         return false
     end
     return VLS.isWaterSourceNearTank(self.vehicle, part, self.source)
+        and VLS.getWaterTankFillAmount(self.vehicle, tank, self.source) > 0
 end
 
 VLSFillVehicleWaterTankAction.waitToStart = ISRefuelFromGasPump.waitToStart
@@ -89,7 +77,7 @@ function VLSFillVehicleWaterTankAction:new(character, part, source)
     o.source = source
     o.tank = o.vehicle and VLS.getInstalledWaterTank(o.vehicle,
         part and part:getId()) or nil
-    local amount = getAvailableAmount(o.vehicle, o.tank, source)
+    local amount = VLS.getWaterTankFillAmount(o.vehicle, o.tank, source)
     o.fuelStation = WaterSourceAdapter:new(character, o.vehicle, part,
         source, amount)
     o.stopOnWalk = true

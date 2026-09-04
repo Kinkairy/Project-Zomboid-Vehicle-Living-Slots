@@ -65,34 +65,15 @@ end
 
 local function restoreOfficialVLSFoodNames(container)
     if not getVLSAppliancePart(container) then return end
-
-    local function restoreContents(current)
-        local items = current and current:getItems()
-        if not items then return end
-        for index = 0, items:size() - 1 do
-            local item = items:get(index)
-            if instanceof(item, "Food") and not item:isCustomName() then
-                local officialName = getItemNameFromFullType(item:getFullType())
-                if officialName and officialName ~= ""
-                        and item:getDisplayName() ~= officialName then
-                    item:setName(officialName)
-                end
-            end
-            if instanceof(item, "InventoryContainer") then
-                restoreContents(item:getInventory())
+    VLS.walkApplianceContainer(container, function(item)
+        if instanceof(item, "Food") and not item:isCustomName() then
+            local officialName = getItemNameFromFullType(item:getFullType())
+            if officialName and officialName ~= ""
+                    and item:getDisplayName() ~= officialName then
+                item:setName(officialName)
             end
         end
-    end
-
-    restoreContents(container)
-end
-
-local function processVisibleApplianceNames()
-    for playerNum = 0, 3 do
-        local loot = getPlayerLoot(playerNum)
-        local pane = loot and loot.inventoryPane or nil
-        restoreOfficialVLSFoodNames(pane and pane.inventory or nil)
-    end
+    end)
 end
 
 -- The crafting window searches through ISEntityUI, while inventory right-click
@@ -236,22 +217,6 @@ local function installGenericCraftSurfaceClientHooks()
             CraftSurfaceHooks.onNewCraftWrapper
     end
 end
-
-if CraftSurfaceHooks.onGameStartCallback
-        and Events.OnGameStart.Remove then
-    Events.OnGameStart.Remove(CraftSurfaceHooks.onGameStartCallback)
-end
-CraftSurfaceHooks.onGameStartCallback =
-    installGenericCraftSurfaceClientHooks
-Events.OnGameStart.Add(CraftSurfaceHooks.onGameStartCallback)
-
-if CraftSurfaceHooks.onCreatePlayerCallback
-        and Events.OnCreatePlayer.Remove then
-    Events.OnCreatePlayer.Remove(CraftSurfaceHooks.onCreatePlayerCallback)
-end
-CraftSurfaceHooks.onCreatePlayerCallback =
-    installGenericCraftSurfaceClientHooks
-Events.OnCreatePlayer.Add(CraftSurfaceHooks.onCreatePlayerCallback)
 
 installGenericCraftSurfaceClientHooks()
 
@@ -558,12 +523,6 @@ local function installMicrowaveWindowClientHook()
     ISMicrowaveUI.update = MicrowaveWindowHooks.updateWrapper
 end
 
-if MicrowaveWindowHooks.onCreatePlayerCallback
-        and Events.OnCreatePlayer.Remove then
-    Events.OnCreatePlayer.Remove(MicrowaveWindowHooks.onCreatePlayerCallback)
-end
-MicrowaveWindowHooks.onCreatePlayerCallback = installMicrowaveWindowClientHook
-Events.OnCreatePlayer.Add(MicrowaveWindowHooks.onCreatePlayerCallback)
 installMicrowaveWindowClientHook()
 
 local function onVLSMicrowaveClick(ui, button)
@@ -1029,66 +988,60 @@ local function protectCooledFood(item, currentHours, vehicleId, containerId,
     item:setLastAged(currentHours)
 end
 
-local function protectCooledContainer(container, currentHours, vehicleId,
-        containerId, freezer, seen)
-    if not container then return end
-    local items = container:getItems()
-    for index = 0, items:size() - 1 do
-        local item = items:get(index)
-        protectCooledFood(item, currentHours, vehicleId, containerId,
-            freezer, seen)
-        if instanceof(item, "InventoryContainer") then
-            protectCooledContainer(item:getInventory(), currentHours, vehicleId,
-                containerId, freezer, seen)
-        end
-    end
-end
-
-local function getDisplayedCoolingVehicle(playerNum)
-    local loot = getPlayerLoot(playerNum)
-    local pane = loot and loot.inventoryPane or nil
-    local container = pane and pane.inventory or nil
-    if not container then return nil end
-
-    local outermost = container:getOutermostContainer()
-    local part = outermost and outermost:getVehiclePart()
-        or container:getVehiclePart()
-    return part and part:getVehicle() or nil
-end
-
-local function processVisibleCooling()
+local function processVisibleAppliances()
     local seen = {}
-    local seenVehicles = {}
+    local seenContainers = {}
     local currentHours = getGameTime():getWorldAgeHours()
+    local foundVisibleVLSContainer = false
 
-    local function processVehicle(vehicle)
-        if not vehicle or seenVehicles[vehicle]
-                or not VLS.isSupportedVehicle(vehicle) then return end
-        seenVehicles[vehicle] = true
+    local function processContainer(container)
+        if not container or seenContainers[container] then return end
+        seenContainers[container] = true
+        local part = getVLSAppliancePart(container)
+        if not part then return end
+        foundVisibleVLSContainer = true
 
-        local fridges = VLS.getInstalledCapabilityParts(vehicle, "cooling")
-        if #fridges <= 0 or not VLS.hasAuxBatteryPower(vehicle,
-                VLS.getFridgeDrainPerMinute()) then return end
-
-        VLS.refreshApplianceEnvironment(vehicle)
-        for _, fridge in ipairs(fridges) do
-            protectCooledContainer(fridge:getItemContainer(), currentHours,
-                vehicle:getId(), fridge:getId(), false, seen)
-            local freezer = VLS.getFreezerPartForUniversal(vehicle,
-                fridge:getId())
-            protectCooledContainer(freezer and freezer:getItemContainer(),
-                currentHours, vehicle:getId(), freezer and freezer:getId()
-                    or VLS.FREEZER_PART_BY_UNIVERSAL[fridge:getId()],
-                true, seen)
+        local vehicle = part:getVehicle()
+        local freezer = VLS.isFreezerPart(part)
+        local universalPart = part
+        if freezer then
+            local universalId = VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()]
+            universalPart = universalId
+                and VLS.getInstalledPart(vehicle, universalId) or nil
         end
+        if not universalPart then return end
+
+        VLS.refreshApplianceEnvironment(vehicle, universalPart, false)
+        local cooling = VLS.getEquipmentCapability(
+            universalPart:getInventoryItem()) == "cooling"
+            and VLS.hasAuxBatteryPower(vehicle,
+                VLS.getFridgeDrainPerMinute())
+        local containerId = part:getId()
+        VLS.walkApplianceContainer(container, function(item)
+            if instanceof(item, "Food") and not item:isCustomName() then
+                local officialName = getItemNameFromFullType(item:getFullType())
+                if officialName and officialName ~= ""
+                        and item:getDisplayName() ~= officialName then
+                    item:setName(officialName)
+                end
+            end
+            if cooling then
+                protectCooledFood(item, currentHours, vehicle:getId(),
+                    containerId, freezer, seen)
+            end
+        end)
     end
 
     for playerNum = 0, 3 do
-        local playerObj = getSpecificPlayer(playerNum)
-        processVehicle(playerObj and playerObj:getVehicle() or nil)
-        processVehicle(getDisplayedCoolingVehicle(playerNum))
+        local loot = getPlayerLoot(playerNum)
+        local pane = loot and loot.inventoryPane or nil
+        processContainer(pane and pane.inventory or nil)
     end
 
+    if not foundVisibleVLSContainer then
+        table.wipe(locallyCooledFood)
+        return
+    end
     for itemId in pairs(locallyCooledFood) do
         if not seen[itemId] then locallyCooledFood[itemId] = nil end
     end
@@ -1099,8 +1052,7 @@ local function processClientState()
     coolingTickCounter = coolingTickCounter + 1
     if coolingTickCounter >= 30 then
         coolingTickCounter = 0
-        processVisibleApplianceNames()
-        processVisibleCooling()
+        processVisibleAppliances()
     end
 end
 
@@ -1203,20 +1155,15 @@ local function getNearbyWaterSource(vehicle, tankPart)
         for dx = -range, range do
             local square = getCell():getGridSquare(centerSquare:getX() + dx,
                 centerSquare:getY() + dy, centerSquare:getZ())
-            if not square or not square:getObjects() then return nil end
-            local objects = square:getObjects()
-            for index = 0, objects:size() - 1 do
-                local object = objects:get(index)
-                local amount = object and object.getFluidAmount
-                    and object:getFluidAmount() or 0
-                local sourceFluid = object and object.getFluidContainer
-                    and object:getFluidContainer() or nil
-                if amount > 0 and object:getObjectIndex() >= 0
-                        and (not sourceFluid
-                            or VLS.isPureWaterFluid(sourceFluid))
-                        and VLS.isWaterSourceNearTank(vehicle, tankPart,
-                            object) then
-                    return object
+            local objects = square and square:getObjects() or nil
+            if objects then
+                for index = 0, objects:size() - 1 do
+                    local object = objects:get(index)
+                    if VLS.getTankWaterSourceAmount(object) > 0
+                            and VLS.isWaterSourceNearTank(vehicle, tankPart,
+                                object) then
+                        return object
+                    end
                 end
             end
         end
@@ -1229,6 +1176,7 @@ local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
     if not playerObj or playerObj:getVehicle() or not source
             or VLS.getInstalledWaterTank(vehicle,
                 tankPart:getId()) ~= tank then return end
+    if VLS.getWaterTankFillAmount(vehicle, tank, source) <= 0 then return end
     local path = ISPathFindAction:pathToVehicleArea(playerObj,
         vehicle, tankPart:getArea())
     path:setOnFail(function(character)
@@ -1241,7 +1189,7 @@ local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
 end
 
 local function getFillableWaterInteraction(vehicle, playerObj)
-    if not vehicle or vehicle:isEngineStarted()
+    if not vehicle or vehicle:isEngineStarted() or not vehicle:isStopped()
             or playerObj:DistToProper(vehicle) >= 4 then return nil end
     local tank, part = VLS.getFillableWaterTank(vehicle)
     if not part then return nil end
@@ -1249,7 +1197,9 @@ local function getFillableWaterInteraction(vehicle, playerObj)
     local fluid = tank and tank:getFluidContainer()
     if not fluid or fluid:getAmount() >= fluid:getCapacity() then return nil end
     local source = getNearbyWaterSource(vehicle, part)
-    if not source then return nil end
+    if not source or VLS.getWaterTankFillAmount(vehicle, tank, source) <= 0 then
+        return nil
+    end
     return tank, part, source
 end
 
@@ -1578,3 +1528,29 @@ if not VLS.bedSeatUIHookApplied then
             1, 1, 1, 1, UIFont.Medium)
     end
 end
+
+-- Reload-sensitive adapters share one idempotent installer. This keeps the
+-- global event surface small while still rebinding after the game recreates
+-- UI classes during startup or player creation.
+VLS.clientRuntimeHookRefresh = VLS.clientRuntimeHookRefresh or {}
+local RuntimeHookRefresh = VLS.clientRuntimeHookRefresh
+
+local function installVLSRuntimeHooks()
+    installGenericCraftSurfaceClientHooks()
+    installMicrowaveWindowClientHook()
+    if VLS.installTelevisionDeviceActionHooks then
+        VLS.installTelevisionDeviceActionHooks()
+    end
+end
+
+if RuntimeHookRefresh.onGameStart and Events.OnGameStart.Remove then
+    Events.OnGameStart.Remove(RuntimeHookRefresh.onGameStart)
+end
+if RuntimeHookRefresh.onCreatePlayer and Events.OnCreatePlayer.Remove then
+    Events.OnCreatePlayer.Remove(RuntimeHookRefresh.onCreatePlayer)
+end
+RuntimeHookRefresh.onGameStart = installVLSRuntimeHooks
+RuntimeHookRefresh.onCreatePlayer = installVLSRuntimeHooks
+Events.OnGameStart.Add(RuntimeHookRefresh.onGameStart)
+Events.OnCreatePlayer.Add(RuntimeHookRefresh.onCreatePlayer)
+installVLSRuntimeHooks()

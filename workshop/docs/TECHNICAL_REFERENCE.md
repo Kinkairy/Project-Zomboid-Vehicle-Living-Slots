@@ -20,9 +20,30 @@ synchronization. Clean-water tanks use Project Zomboid's fluid containers and
 the original transfer panel. Incoming water purification and every appliance
 power change are server-validated.
 
+Outside tank intake searches four tiles on the inlet-facing side. It accepts
+real water sources, not rain puddles on ordinary floor sprites. Menu visibility,
+timed-action validation and server transfer share the same source, capacity,
+purification-power and clean-water compatibility checks. The original vehicle
+pathing and refuelling animation remain in use.
+
 Vehicle-installed crafting and microwave windows remain vanilla UI. Narrow
 context guards keep them valid only while the player, vehicle, installed item,
 and required capability still match; ordinary world UI continues unchanged.
+
+Water-source discovery searches the complete inlet-facing four-tile range.
+Tank purification validates clean-water compatibility, remaining capacity, and
+available power before mutation, preserves existing contents, and charges only
+the amount accepted. A failed request changes neither endpoint nor battery.
+
+Refrigeration uses one bounded, cycle-safe nested-container traversal. The
+server processes only loaded vehicles with an appliance that needs management
+and synchronizes food only after an actual state change. The client performs
+its visible-state correction only for the currently open VLS appliance
+container, avoiding a continuous whole-vehicle inventory scan.
+
+Crafting, microwave, and television adapters share one idempotent reload hook.
+Television channels, volume, media, and settings remain on the original game
+actions; VLS adapts only the installed vehicle endpoint and auxiliary power.
 
 The KI5 adapter declares vehicle-specific part IDs, tank order, seat-diagram
 positions, container icons, and propane sources. It does not duplicate the base
