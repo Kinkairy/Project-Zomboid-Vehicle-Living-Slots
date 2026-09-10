@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.8.0
+
+- Publishes the current RC3.8 Workshop payload for the base and KI5 adapter Mods.
+- Repairs living-slot initialization and authorized access so each supported slot can
+  restore its device container profile without replacing the original container.
+- Adds the root-level `ag-handoff/` collaboration record with the task brief, sanitized
+  evidence, review, patch, validation, and complete corrected source files.
+- Offline candidate checks pass; in-game, save/reconnect, formal-server, and Workshop
+  runtime acceptance remain unverified.
+
 ## 3.7.0
 
 - Fixes multiplayer water-fill availability and rainy-ground false detection.

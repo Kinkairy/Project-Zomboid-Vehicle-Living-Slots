@@ -1,0 +1,7 @@
+PASS config_init_contract
+PASS 16_living_slot_bindings_retargeted
+PASS create_update_bindings_preserved
+PASS access_fallback_is_after_identity_checks
+PASS damage_and_runtime_support_files_unchanged
+RESULT 5/5 static candidate checks passed; no game/runtime/save was touched
+static_exit=0

@@ -1,4 +1,4 @@
-# Vehicle Living Slots 3.7.0 Technical Design / 房车生活 3.7.0 技术设计
+# Vehicle Living Slots 3.8.0 Technical Design / 房车生活 3.8.0 技术设计
 
 [简体中文](#简体中文) | [English](#english)
 
@@ -6,10 +6,14 @@
 
 本文档说明当前公开版本的关键技术设计。适用范围：Project Zomboid Build 42.20，
 Workshop `3791192579`，基础 Mod ID `VehicleLivingSlots`，KI5 适配 Mod ID
-`VehicleLivingSlotsKI5Campers`，公开版本 `3.7.0`。
+`VehicleLivingSlotsKI5Campers`，公开版本 `3.8.0`。
 
-基础 Mod 的组件版本为 `RC3.7`；KI5 适配组件版本为 `RC3.5.0`。两者共同组成
-`v3.7.0`，后者不会替换前者。
+基础 Mod 与 KI5 适配组件版本均为 `RC3.8`。两者共同组成
+`v3.8.0`，后者不会替换前者。
+
+协作资料集中放在仓库根目录的 [`ag-handoff/`](ag-handoff/README.md)，与可加载的
+`workshop/` Mod 载荷分开。当前柜子容量修复候选、证据、评审和完整修正文件均见
+[`ag-handoff/fixes/cabinet-capacity/`](ag-handoff/fixes/cabinet-capacity/README.md)。
 
 ### 1. 最高实现原则
 
@@ -168,7 +172,7 @@ VLS 不替换原版维修面板或整张车辆底图。生活空间和一般设�
 - 精确车型白名单以当前游戏和 KI5 脚本为依据，上游新增或改名车型不会自动获得支持；
 - 运行时界面、寻路、动画、多人重连和存档恢复仍需真实游戏环境回归，静态测试不能替代实测；
 - 基础 Mod 可单独启用；KI5 适配必须同时满足三个依赖；
-- `v3.7.0` 是当前唯一版本载体和唯一认可回滚基线，KI5 适配组件 `RC3.5.0` 不是第二个公开版本；
+- `v3.8.0` 是当前唯一版本载体和唯一公开回滚包，KI5 适配组件 `RC3.8` 不是第二个公开版本；
 - 修复必须从认可基线建立隔离候选，先通过私有门禁和测试档验收，再经明确授权发布；
 - 不直接在正式服、客户端运行副本或 Workshop 载荷上开发和热改。
 
@@ -187,10 +191,15 @@ VLS 不替换原版维修面板或整张车辆底图。生活空间和一般设�
 
 This document describes the key technical design of the current public release. Scope: Project
 Zomboid Build 42.20, Workshop `3791192579`, base Mod ID `VehicleLivingSlots`, KI5 adapter Mod ID
-`VehicleLivingSlotsKI5Campers`, public release `3.7.0`.
+`VehicleLivingSlotsKI5Campers`, public release `3.8.0`.
 
-The base component is `RC3.7`; the KI5 adapter component is `RC3.5.0`. Together they form
-`v3.7.0`; the adapter does not replace the base Mod.
+The base and KI5 adapter components are both `RC3.8`. Together they form
+`v3.8.0`; the adapter does not replace the base Mod.
+
+Collaboration material lives under [`ag-handoff/`](ag-handoff/README.md) at the repository root,
+separate from the loadable Mod payload under `workshop/`. The cabinet-capacity candidate, evidence,
+review, and complete corrected files are under
+[`ag-handoff/fixes/cabinet-capacity/`](ag-handoff/fixes/cabinet-capacity/README.md).
 
 ### 1. Highest implementation principles
 
@@ -373,15 +382,15 @@ propane, battery, or fluid item data with vehicle-part condition.
 - Runtime UI, pathfinding, animation, multiplayer reconnect, and save restoration require real-game
   regression tests; static validation cannot replace them.
 - The base Mod works alone; the KI5 adapter requires all three dependencies.
-- `v3.7.0` is the sole public version and sole accepted rollback baseline. KI5 adapter component
-  `RC3.5.0` is not a second public release.
+- `v3.8.0` is the sole public version and current public recovery package. The KI5 adapter component
+  `RC3.8` is not a second public release.
 - Repairs branch from the accepted baseline, pass private gates and a test-world acceptance cycle, and
   require explicit authorization before publication.
 - Development and hot edits never occur in formal-server, client-runtime, or Workshop payload copies.
 
-The public repository contains only the current payload, sole recovery version, installer, and necessary
-documentation. Internal validators, server addresses, publishing credentials, raw logs, and private
-operations remain private.
+The public repository contains the current payload, the current recovery package, historical recovery
+material, collaboration handoff, installer, and necessary documentation. Internal validators, server
+addresses, publishing credentials, raw logs, and private operations remain private.
 
 For the compact package contract, see
 [TECHNICAL_REFERENCE.md](workshop/docs/TECHNICAL_REFERENCE.md). Steam Workshop:

@@ -3,6 +3,48 @@ require "Vehicles/ISUI/ISVehicleMechanics"
 require "Vehicles/ISUI/ISVehiclePartMenu"
 
 local previewTextures = {}
+VLS.mechanicsUIProviders = VLS.mechanicsUIProviders or {}
+function VLS.registerMechanicsUIProvider(id, provider)
+    VLS.mechanicsUIProviders[id] = provider
+    VLS.mechanicsDisplayProviders[id] = provider.matches
+end
+local function providerFor(part)
+    for _, provider in pairs(VLS.mechanicsUIProviders) do
+        if provider.matches(part) then return provider end
+    end
+end
+function VLS.getMechanicsItemName(part, item)
+    local provider = providerFor(part)
+    if provider and provider.itemName then return provider.itemName(part, item) end
+    return item:getDisplayName()
+end
+function VLS.getMechanicsPartName(part)
+    local provider = providerFor(part)
+    if provider and provider.name then return provider.name(part) end
+    if part:getInventoryItem() and VLS.isUniversalPart(part) then
+        return VLS.getPartDisplayName(part)
+    end
+    return getText("IGUI_VehiclePart" .. part:getId())
+end
+local function hidden(part)
+    local provider = providerFor(part)
+    return provider and provider.hidden and provider.hidden(part) or false
+end
+local function remaining(part)
+    local item = part:getInventoryItem()
+    if not item then return nil end
+    local provider = providerFor(part)
+    if provider and provider.remaining then return provider.remaining(part) end
+    if part:getId() == VLS.AUX_BATTERY_PART_ID then
+        return item:getCurrentUsesFloat()
+    elseif VLS.isWaterTankPart(part) then
+        local capacity = part:getContainerCapacity()
+        return capacity > 0 and part:getContainerContentAmount()/capacity or 0
+    elseif VLS.getEquipmentCapability(item) == "waterDispenser" then
+        local fluid = item:getFluidContainer()
+        return fluid and fluid:getCapacity() > 0 and fluid:getAmount()/fluid:getCapacity() or 0
+    end
+end
 
 local function getCanonicalCandidates(typeToItem, itemType)
     local candidates = {}
@@ -26,7 +68,7 @@ end
 
 local function addInstallCandidate(mechanics, part, itemMenu, itemType, candidate)
     local condition = VLS.getItemConditionPercent(candidate)
-    local name = candidate:getDisplayName()
+    local name = VLS.getMechanicsItemName(part, candidate)
     if condition then name = name .. " (" .. condition .. "%)" end
     local itemOption = itemMenu:addOption(name, mechanics.chr,
         ISVehiclePartMenu.onInstallPart, part, candidate)
@@ -81,8 +123,10 @@ local function getPreviewTexture(itemType)
     return nil
 end
 
+VLS.getMechanicsPreviewTexture = getPreviewTexture
+
 local function applyFurnitureIcons(mechanics, part)
-    if not mechanics or not mechanics.context or not VLS.isManagedPart(part)
+    if not mechanics or not mechanics.context or not VLS.usesNormalizedPartCondition(part)
             or part:getInventoryItem() or not part:getItemType() then
         return
     end
@@ -101,6 +145,9 @@ local function applyFurnitureIcons(mechanics, part)
             typeToItem, itemType, option) or typeToItem[itemType]
         local iconItem = candidates and candidates[1] or nil
         local profile = VLS.getEquipmentProfileByType(itemType)
+        if option and profile and profile.moveableName then
+            option.name = Translator.getMoveableDisplayName(profile.moveableName)
+        end
         if option and profile and profile.previewSprite then
             local texture = getPreviewTexture(itemType)
             if texture then
@@ -114,156 +161,132 @@ local function applyFurnitureIcons(mechanics, part)
             option.iconTexture = nil
             option.itemForTexture = iconItem
         end
+        if option and not VLS.isInstallationEnabled(part, itemType) then
+            option.notAvailable = true
+        end
 
-        local itemMenu = option and option.subOption
-            and mechanics.context:getSubMenu(option.subOption) or nil
-        if itemMenu and candidates then
-            for j, candidate in ipairs(candidates) do
-                local candidateOption = itemMenu.options[j]
-                if candidateOption then
-                    local condition = VLS.getItemConditionPercent(candidate)
-                    if condition then
-                        candidateOption.name = candidate:getDisplayName()
-                            .. " (" .. condition .. "%)"
-                    end
+    end
+end
+local function normalizeMenu(mechanics, part, menu)
+    if not menu then return end
+    for _, option in ipairs(menu.options or {}) do
+        local item = option.itemForTexture
+        if item then
+            local name = VLS.getMechanicsItemName(part, item)
+            local condition = VLS.getItemConditionPercent(item)
+            option.name = condition and (name.." ("..condition.."%)") or name
+            if not part:getInventoryItem() and not VLS.isInstallationEnabled(part, item) then
+                option.notAvailable = true
+            end
+        end
+        if option.subOption then
+            normalizeMenu(mechanics, part, mechanics.context:getSubMenu(option.subOption))
+        end
+    end
+end
+
+-- A cached read-only view supplies display values to the ORIGINAL renderer.
+-- Never pass the view to Java APIs, actions, selection or networking.
+local function displayRow(row, part)
+    local view = row.vlsMechanicsDisplayRow
+    if not view or view.realPart ~= part then
+        local proxy = {getCondition=function() return VLS.getDisplayPartCondition(part) end}
+        setmetatable(proxy, {__index=function(t,key)
+            local value=part[key]
+            if type(value)=="function" then
+                local bound=function(_,...) return value(part,...) end
+                rawset(t,key,bound);return bound
+            end
+            return value
+        end})
+        view=setmetatable({item=setmetatable({part=proxy},{__index=row.item}),realPart=part},{__index=row})
+        row.vlsMechanicsDisplayRow=view
+    end
+    local name=VLS.getMechanicsPartName(part)
+    local fraction=remaining(part)
+    if fraction then
+        name=name..": "..math.floor(fraction*100).."% "..getText("IGUI_invpanel_Remaining")
+    end
+    view.item.name=name
+    return view
+end
+local function refreshRows(panel)
+    for _,list in ipairs({panel.listbox,panel.bodyworklist}) do
+        if list and list.items then
+            for i=#list.items,1,-1 do
+                local row=list.items[i]
+                local part=row.item and row.item.part
+                if part and VLS.usesNormalizedPartCondition(part) then
+                    if hidden(part) then list:removeItemByIndex(i)
+                    else row.item.name=VLS.getMechanicsPartName(part) end
                 end
             end
         end
     end
 end
 
-local function getManagedPartDisplayName(part)
-    local inventoryItem = part and part:getInventoryItem()
-    if inventoryItem and VLS.isUniversalPart(part) then
-        return inventoryItem:getDisplayName()
-    end
-    return getText("IGUI_VehiclePart" .. part:getId())
-end
-
-local function drawManagedPartRow(list, y, item)
-    local part = item.item.part
-
-    if item.itemindex == list.selected then
-        list:drawRect(0, y, list:getWidth(), item.height, 0.1, 1.0, 1.0, 1.0)
-    elseif item.itemindex == list.mouseoverselected
-            and ((list.parent.context and not list.parent.context:isVisible())
-                or not list.parent.context) then
-        list:drawRect(0, y, list:getWidth(), item.height, 0.05, 1.0, 1.0, 1.0)
-    end
-
-    -- Universal living spaces describe their installed furniture or appliance.
-    -- Dedicated water, battery and weapon slots keep their scripted slot name.
-    local displayName = getManagedPartDisplayName(part)
-    local inventoryItem = part:getInventoryItem()
-    local textR, textG, textB = list.parent.partRGB.r,
-        list.parent.partRGB.g, list.parent.partRGB.b
-    if not inventoryItem then
-        textR, textG, textB = 1.0, 0.0, 0.0
-    end
-    list:drawText(displayName, 20, y, textR, textG, textB,
-        list.parent.partRGB.a, UIFont.Small)
-
-    local charge = ""
-    if part:getId() == VLS.AUX_BATTERY_PART_ID and inventoryItem then
-        charge = ": " .. math.floor(inventoryItem:getCurrentUsesFloat() * 100)
-            .. "% " .. getText("IGUI_invpanel_Remaining")
-        list:drawText(charge,
-            getTextManager():MeasureStringX(UIFont.Small, displayName) + 20,
-            y, list.parent.partRGB.r, list.parent.partRGB.g,
-            list.parent.partRGB.b, list.parent.partRGB.a, UIFont.Small)
-    elseif VLS.isWaterTankPart(part) and inventoryItem then
-        local capacity = part:getContainerCapacity()
-        local amount = capacity > 0 and math.floor(
-            part:getContainerContentAmount() / capacity * 100) or 0
-        charge = ": " .. amount .. "% " .. getText("IGUI_invpanel_Remaining")
-        list:drawText(charge,
-            getTextManager():MeasureStringX(UIFont.Small, displayName) + 20,
-            y, list.parent.partRGB.r, list.parent.partRGB.g,
-            list.parent.partRGB.b, list.parent.partRGB.a, UIFont.Small)
-    elseif inventoryItem
-            and VLS.getEquipmentCapability(inventoryItem) == "waterDispenser" then
-        local fluid = inventoryItem:getFluidContainer()
-        local capacity = fluid and fluid:getCapacity() or 0
-        local amount = capacity > 0 and math.floor(
-            fluid:getAmount() / capacity * 100) or 0
-        charge = ": " .. amount .. "% " .. getText("IGUI_invpanel_Remaining")
-        list:drawText(charge,
-            getTextManager():MeasureStringX(UIFont.Small, displayName) + 20,
-            y, list.parent.partRGB.r, list.parent.partRGB.g,
-            list.parent.partRGB.b, list.parent.partRGB.a, UIFont.Small)
-    end
-
-    if inventoryItem then
-        local condition = VLS.getDisplayPartCondition(part)
-        local condRGB = list.parent:getConditionRGB(condition)
-        list:drawText(" (" .. condition .. "%)",
-            getTextManager():MeasureStringX(UIFont.Small, displayName)
-                + getTextManager():MeasureStringX(UIFont.Small, charge) + 22,
-            y, condRGB.r, condRGB.g, condRGB.b,
-            list.parent.partRGB.a, UIFont.Small)
-    end
-
-    return y + list.itemheight
-end
-
 if not VLS.mechanicsIconHookApplied then
-    VLS.mechanicsIconHookApplied = true
-    local vanillaDoPartContextMenu = ISVehicleMechanics.doPartContextMenu
-
-    function ISVehicleMechanics:doPartContextMenu(part, x, y)
-        local result = vanillaDoPartContextMenu(self, part, x, y)
-        applyFurnitureIcons(self, part)
+    VLS.mechanicsIconHookApplied=true
+    local original=ISVehicleMechanics.doPartContextMenu
+    function ISVehicleMechanics:doPartContextMenu(part,...)
+        local provider=part and providerFor(part)
+        if provider and provider.prepare then provider.prepare(part) end
+        local result=original(self,part,...)
+        if part and VLS.usesNormalizedPartCondition(part) then
+            applyFurnitureIcons(self,part)
+            normalizeMenu(self,part,self.context)
+        end
         return result
     end
 end
-
 if not VLS.mechanicsDisplayHookApplied then
-    VLS.mechanicsDisplayHookApplied = true
-
-    local vanillaDoDrawItem = ISVehicleMechanics.doDrawItem
-    function ISVehicleMechanics:doDrawItem(y, item, alt)
-        local part = item and item.item and item.item.part
-        if part and VLS.isManagedPart(part) then
-            return drawManagedPartRow(self, y, item)
+    VLS.mechanicsDisplayHookApplied=true
+    local draw=ISVehicleMechanics.doDrawItem
+    function ISVehicleMechanics:doDrawItem(y,row,alt)
+        local part=row and row.item and row.item.part
+        if part and VLS.usesNormalizedPartCondition(part) then
+            if hidden(part) then return y end
+            return draw(self,y,displayRow(row,part),alt)
         end
-        return vanillaDoDrawItem(self, y, item, alt)
+        return draw(self,y,row,alt)
     end
-
-    local vanillaRecalculate = ISVehicleMechanics.recalculGeneralCondition
-    function ISVehicleMechanics:recalculGeneralCondition()
-        vanillaRecalculate(self)
-        if not VLS.isSupportedVehicle(self.vehicle) then
-            return
-        end
-
-        local delta = 0
-        for i = 0, self.vehicle:getPartCount() - 1 do
-            local part = self.vehicle:getPartByIndex(i)
-            if part:getInventoryItem() and VLS.isManagedPart(part) then
-                delta = delta + VLS.getDisplayPartCondition(part) - part:getCondition()
+    local init=ISVehicleMechanics.initParts
+    function ISVehicleMechanics:initParts(...)
+        local result=init(self,...)
+        refreshRows(self)
+        return result
+    end
+    local recalculate=ISVehicleMechanics.recalculGeneralCondition
+    function ISVehicleMechanics:recalculGeneralCondition(...)
+        local result=recalculate(self,...)
+        if not self.vehicle or not VLS.isSupportedVehicle(self.vehicle) then return result end
+        local count=self.vehicle:getPartCount()
+        local delta,removed=0,0
+        for i=0,count-1 do
+            local part=self.vehicle:getPartByIndex(i)
+            if hidden(part) then removed=removed+1
+            elseif part:getInventoryItem() then
+                delta=delta+VLS.getDisplayPartCondition(part)-part:getCondition()
             end
         end
-        if delta ~= 0 and self.vehicle:getPartCount() > 0 then
-            self.generalCondition = round(
-                self.generalCondition + delta / self.vehicle:getPartCount(), 2)
-            self.generalCondRGB = self:getConditionRGB(self.generalCondition)
+        if count>removed and (delta~=0 or removed>0) then
+            self.generalCondition=round((self.generalCondition*count+delta)/(count-removed),2)
+            self.generalCondRGB=self:getConditionRGB(self.generalCondition)
         end
+        refreshRows(self)
+        return result
     end
-
-    local vanillaOverlayTooltip = ISVehicleMechanics.renderCarOverlayTooltip
-    function ISVehicleMechanics:renderCarOverlayTooltip(partProps, part, carType)
-        local result = vanillaOverlayTooltip(self, partProps, part, carType)
-        if result and part and part:getInventoryItem() and VLS.isManagedPart(part)
-                and self.tooltip then
-            self.tooltip:setName(getManagedPartDisplayName(part))
-            local rawCondition = part:getCondition()
-            local displayCondition = VLS.getDisplayPartCondition(part)
-            if self.tooltip.description and rawCondition ~= displayCondition then
-                self.tooltip.description = self.tooltip.description:gsub(
-                    tostring(rawCondition) .. "%%",
-                    tostring(displayCondition) .. "%%", 1)
+    local overlay=ISVehicleMechanics.renderCarOverlayTooltip
+    function ISVehicleMechanics:renderCarOverlayTooltip(partProps,part,carType)
+        local result=overlay(self,partProps,part,carType)
+        if result and part and part:getInventoryItem() and VLS.usesNormalizedPartCondition(part) and self.tooltip then
+            self.tooltip:setName(VLS.getMechanicsPartName(part))
+            local raw,percent=part:getCondition(),VLS.getDisplayPartCondition(part)
+            if self.tooltip.description and raw~=percent then
+                self.tooltip.description=self.tooltip.description:gsub(tostring(raw).."%%",tostring(percent).."%%",1)
             end
         end
         return result
     end
+    print("[VLS mechanics] native renderer with shared presentation adapter v1")
 end

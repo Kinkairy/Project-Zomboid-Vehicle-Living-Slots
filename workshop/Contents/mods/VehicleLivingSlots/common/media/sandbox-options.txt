@@ -1,25 +1,85 @@
 VERSION = 1,
 
 option VehicleLivingSlots.FridgePowerConsumption = {
-    type = double, min = 0.0, max = 100.0, default = 0.04,
+    type = double, min = 0.01, max = 100.0, default = 0.04,
     page = VehicleLivingSlots,
     translation = VehicleLivingSlots_FridgePowerConsumption,
 }
 
 option VehicleLivingSlots.MicrowavePowerConsumption = {
-    type = double, min = 0.0, max = 100.0, default = 0.4,
+    type = double, min = 0.01, max = 100.0, default = 0.4,
     page = VehicleLivingSlots,
     translation = VehicleLivingSlots_MicrowavePowerConsumption,
 }
 
 option VehicleLivingSlots.WaterPurificationPowerConsumption = {
-    type = double, min = 0.0, max = 100.0, default = 0.4,
+    type = double, min = 0.01, max = 100.0, default = 0.4,
     page = VehicleLivingSlots,
     translation = VehicleLivingSlots_WaterPurificationPowerConsumption,
 }
 
 option VehicleLivingSlots.TelevisionPowerConsumption = {
-    type = double, min = 0.0, max = 100.0, default = 0.4,
+    type = double, min = 0.01, max = 100.0, default = 0.4,
     page = VehicleLivingSlots,
     translation = VehicleLivingSlots_TelevisionPowerConsumption,
+}
+
+option VehicleLivingSlots.EnableBeds = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableBeds,
+}
+
+option VehicleLivingSlots.EnableCabinets = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableCabinets,
+}
+
+option VehicleLivingSlots.EnableWeaponCabinets = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableWeaponCabinets,
+}
+
+option VehicleLivingSlots.EnableMicrowaves = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableMicrowaves,
+}
+
+option VehicleLivingSlots.EnableFridges = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableFridges,
+}
+
+option VehicleLivingSlots.EnableWaterDispensers = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableWaterDispensers,
+}
+
+option VehicleLivingSlots.EnableTelevisions = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableTelevisions,
+}
+
+option VehicleLivingSlots.EnableAuxBatteries = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableAuxBatteries,
+}
+
+option VehicleLivingSlots.EnableWaterTanks = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableWaterTanks,
+}
+
+option VehicleLivingSlots.EnableRoofRack = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableRoofRack,
 }

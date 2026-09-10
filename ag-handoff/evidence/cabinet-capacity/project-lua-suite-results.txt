@@ -1,0 +1,279 @@
+RUN tests/vls_small_van_transaction_test.lua
+[VehicleLivingSlots] Server version RC3.8
+PASS fridge derives drain from the shared readable display scale
+PASS microwave uses the same readable display scale
+PASS both shared-scale sandbox options update their derived rates
+PASS rear seat title follows the installed universal-slot item
+PASS legacy zero setting clamps to positive drain and rejects empty battery
+PASS minimum drain still requires an installed auxiliary battery
+PASS green locker orientation 8 resolves to one installable type
+PASS green locker orientation 9 resolves to one installable type
+PASS green locker orientation 10 resolves to one installable type
+PASS green locker orientation 11 resolves to one installable type
+PASS Modern corner orientation 0 is excluded
+PASS Modern straight counter orientation 1
+PASS Modern corner orientation 2 is excluded
+PASS Modern straight counter orientation 3
+PASS Modern corner orientation 4 is excluded
+PASS Modern straight counter orientation 5
+PASS Modern corner orientation 6 is excluded
+PASS Modern straight counter orientation 7
+PASS Wooden corner orientation 0 is excluded
+PASS Wooden straight counter orientation 1
+PASS Wooden corner orientation 2 is excluded
+PASS Wooden straight counter orientation 3
+PASS Wooden corner orientation 4 is excluded
+PASS Wooden straight counter orientation 5
+PASS Wooden corner orientation 6 is excluded
+PASS Wooden straight counter orientation 7
+PASS Steel corner orientation 0 is excluded
+PASS Steel straight counter orientation 1
+PASS Steel corner orientation 2 is excluded
+PASS Steel straight counter orientation 3
+PASS Steel corner orientation 4 is excluded
+PASS Steel straight counter orientation 5
+PASS Steel corner orientation 6 is excluded
+PASS Steel straight counter orientation 7
+PASS Birch corner orientation 0 is excluded
+PASS Birch straight counter orientation 1
+PASS Birch corner orientation 2 is excluded
+PASS Birch straight counter orientation 3
+PASS Birch corner orientation 4 is excluded
+PASS Birch straight counter orientation 5
+PASS Birch corner orientation 6 is excluded
+PASS Birch straight counter orientation 7
+PASS Oak corner orientation 0 is excluded
+PASS Oak straight counter orientation 1
+PASS Oak corner orientation 2 is excluded
+PASS Oak straight counter orientation 3
+PASS Oak corner orientation 4 is excluded
+PASS Oak straight counter orientation 5
+PASS Oak corner orientation 6 is excluded
+PASS Oak straight counter orientation 7
+PASS Dark corner orientation 0 is excluded
+PASS Dark straight counter orientation 1
+PASS Dark corner orientation 2 is excluded
+PASS Dark straight counter orientation 3
+PASS Dark corner orientation 4 is excluded
+PASS Dark straight counter orientation 5
+PASS Dark corner orientation 6 is excluded
+PASS Dark straight counter orientation 7
+PASS Green corner orientation 0 is excluded
+PASS Green straight counter orientation 1
+PASS Green corner orientation 2 is excluded
+PASS Green straight counter orientation 3
+PASS Green corner orientation 4 is excluded
+PASS Green straight counter orientation 5
+PASS Green corner orientation 6 is excluded
+PASS Green straight counter orientation 7
+PASS White corner orientation 0 is excluded
+PASS White straight counter orientation 1
+PASS White corner orientation 2 is excluded
+PASS White straight counter orientation 3
+PASS White corner orientation 4 is excluded
+PASS White straight counter orientation 5
+PASS White corner orientation 6 is excluded
+PASS White straight counter orientation 7
+PASS microwave receives original capacity and container type
+PASS server rejects an actor outside the vehicle
+PASS server accepts a valid microwave toggle
+PASS microwave starts with server-owned timer state
+PASS inventory-transfer stop is idempotent and server-owned
+PASS stopping an already stopped microwave remains safe
+PASS microwave can restart after the transfer stop
+PASS microwave drains at the configured fridge-relative multiplier
+PASS microwave timer advances in game minutes
+PASS microwave applies the selected B42 container temperature
+PASS microwave stops and returns to ambient at timer expiry
+PASS mini fridge receives original main-container properties
+PASS installed fridge keeps the vehicle appliance-update loop active
+PASS mini fridge exposes its original freezer compartment
+PASS powered fridge and freezer use cooling temperatures
+PASS powered fridge and freezer expose original age factors to B42 containers
+PASS mini fridge derives its drain from configured full-battery life days
+PASS powered vehicle fridge uses the original sandbox refrigeration factor
+PASS powered vehicle freezer reaches the original four-hour frozen state
+PASS server synchronizes changed food state
+PASS server synchronizes the underlying B42 food item fields
+PASS vehicle bridge leaves heat interpolation to the original Food update
+PASS server prevents vanilla vehicle-container aging from double advancing food
+PASS server does not install a high-frequency player-update tracker
+PASS unpowered fridge and freezer return to ambient
+PASS unpowered fridge and freezer return to normal food aging
+PASS fluid UI endpoint rebinds after the installed bottle is synchronized
+PASS vehicle and inventory endpoints produce the shared transaction payload
+PASS installed original bottle transfers through the server
+PASS vanilla fluid engine moves the requested amount out of the vehicle bottle
+PASS both endpoints of a vehicle fluid transfer are synchronized
+PASS the same original transfer path supports filling the installed bottle
+PASS vehicle bottle transfer is bidirectional
+PASS an actor outside the vehicle cannot transfer the installed bottle
+PASS a stale installed-bottle identity cannot transfer fluid
+PASS two carried endpoints are not intercepted by the vehicle protocol
+PASS Van exposes every installed living-space bottle and no StepVan tank
+PASS water source gate accepts four inlet-facing tiles only
+PASS StepVan adds its profile water tank before the same living-space bottle path
+PASS two installed living-space bottles use the same transfer implementation
+PASS vehicle-to-vehicle transfer synchronizes both installed parts
+PASS rejected tank mixing changes neither source target nor auxiliary power
+PASS no-power purification failure is a zero-change transaction
+PASS successful purification preserves old tank contents and bills actual water
+PASS world source fixture exposes no private Java method
+PASS scripted infinite floor source retains vanilla-reported availability
+PASS finite and malformed floor properties cannot bypass puddle rejection
+PASS script property never invents water when vanilla reports zero
+PASS piped floor source remains available without private-method access
+PASS rainy road puddles cannot create a tank-fill menu
+PASS river tap and real water containers remain valid sources
+PASS actual client scan skips puddle and empty squares to find real water
+PASS actual client scan with only puddles returns no source without error
+PASS non-water container is rejected even when it reports fluid
+PASS removed water source cannot start filling
+PASS menu and action preflight reject zero purification power
+PASS menu and action preflight reject incompatible tank contents
+PASS powered compatible tank accepts a real source at four tiles
+PASS server rejects puddle requests without consuming anything
+PASS server fills at the four-tile boundary and bills actual transferred water
+PASS nested appliance traversal stops safely on a container cycle
+PASS unchanged fully frozen food emits no redundant server stats packet
+[VehicleLivingSlots] Server version RC3.8
+PASS server reload does not register duplicate event handlers
+RESULT VLS small-van transaction tests passed
+PASS disabled capability blocks same native item and category Base.Mattress
+PASS disabled capability retains installed recognition Base.Mattress
+PASS re-enable only changes eligibility Base.Mattress
+PASS disabled capability blocks same native item and category Base.SleepingBag_Green
+PASS disabled capability retains installed recognition Base.SleepingBag_Green
+PASS re-enable only changes eligibility Base.SleepingBag_Green
+PASS disabled capability blocks same native item and category Base.Mov_SmallPineCabinet
+PASS disabled capability retains installed recognition Base.Mov_SmallPineCabinet
+PASS re-enable only changes eligibility Base.Mov_SmallPineCabinet
+PASS disabled capability blocks same native item and category Base.Mov_SteelCounter
+PASS disabled capability retains installed recognition Base.Mov_SteelCounter
+PASS re-enable only changes eligibility Base.Mov_SteelCounter
+PASS disabled capability blocks same native item and category Base.Mov_Microwave
+PASS disabled capability retains installed recognition Base.Mov_Microwave
+PASS re-enable only changes eligibility Base.Mov_Microwave
+PASS disabled capability blocks same native item and category Base.Mov_Microwave2
+PASS disabled capability retains installed recognition Base.Mov_Microwave2
+PASS re-enable only changes eligibility Base.Mov_Microwave2
+PASS disabled capability blocks same native item and category Base.Mov_FridgeMini
+PASS disabled capability retains installed recognition Base.Mov_FridgeMini
+PASS re-enable only changes eligibility Base.Mov_FridgeMini
+PASS disabled capability blocks same native item and category Base.WaterDispenserBottle
+PASS disabled capability retains installed recognition Base.WaterDispenserBottle
+PASS re-enable only changes eligibility Base.WaterDispenserBottle
+PASS disabled capability blocks same native item and category Base.TvBlack
+PASS disabled capability retains installed recognition Base.TvBlack
+PASS re-enable only changes eligibility Base.TvBlack
+PASS disabled auxiliary installation retains existing power source
+PASS weapon cabinet policy affects new installation only
+PASS unknown category stays with native validation without string-method error
+PASS microwave toggle does not block fridge
+PASS disabled microwave preserves same live container contents and capacity
+PASS disabled water tank creation preserves existing tank and water
+PASS disabled new-vehicle water tank remains empty
+PASS re-enable has no restoration or spawn side effects
+PASS enabled installation queues through existing native adapter
+PASS disable after queue blocks before native completion and inventory debit
+PASS reenabled native action delegates exactly once
+PASS custom television completion applies same policy before any mutation
+PASS normal uninstall independent of installation switches
+RESULT sandbox capability retention and native action guards passed
+PASS shared positive minimum FridgePowerConsumption -1
+PASS shared positive minimum FridgePowerConsumption 0
+PASS shared positive minimum FridgePowerConsumption 0.001
+PASS shared positive minimum FridgePowerConsumption 0.01
+PASS native maximum retained FridgePowerConsumption
+PASS invalid default retained FridgePowerConsumption
+PASS original default retained FridgePowerConsumption
+PASS shared positive minimum MicrowavePowerConsumption -1
+PASS shared positive minimum MicrowavePowerConsumption 0
+PASS shared positive minimum MicrowavePowerConsumption 0.001
+PASS shared positive minimum MicrowavePowerConsumption 0.01
+PASS native maximum retained MicrowavePowerConsumption
+PASS invalid default retained MicrowavePowerConsumption
+PASS original default retained MicrowavePowerConsumption
+PASS shared positive minimum WaterPurificationPowerConsumption -1
+PASS shared positive minimum WaterPurificationPowerConsumption 0
+PASS shared positive minimum WaterPurificationPowerConsumption 0.001
+PASS shared positive minimum WaterPurificationPowerConsumption 0.01
+PASS native maximum retained WaterPurificationPowerConsumption
+PASS invalid default retained WaterPurificationPowerConsumption
+PASS original default retained WaterPurificationPowerConsumption
+PASS shared positive minimum TelevisionPowerConsumption -1
+PASS shared positive minimum TelevisionPowerConsumption 0
+PASS shared positive minimum TelevisionPowerConsumption 0.001
+PASS shared positive minimum TelevisionPowerConsumption 0.01
+PASS native maximum retained TelevisionPowerConsumption
+PASS invalid default retained TelevisionPowerConsumption
+PASS original default retained TelevisionPowerConsumption
+OK vls_small_van_transaction_test.lua
+RUN tests/vls_appliance_performance_test.lua
+PASS hidden page performs zero work across 60 ticks
+PASS collapsed page performs zero work across 60 ticks
+PASS hidden inventory pane performs zero work
+PASS non-VLS container performs zero appliance work
+PASS two local pages share one container walk and one appliance environment update
+PASS official names are restored and player custom names survive
+PASS each affected pane rebuilds its grouping using the changed name
+PASS the same walk also applies cooling protection to fridge and freezer food
+PASS buttonsAdded labels containers without a food traversal
+PASS one base callback applies KI5 icon overrides and retains freezer ordering
+PASS end resolves the final selection rather than the stale buttonsAdded selection
+PASS a changed end-phase name refreshes the selected pane grouping once
+PASS unchanged names do not rebuild inventory grouping
+PASS an inventory event immediately processes its visible selected container
+PASS the following periodic check reuses a recent event pass
+PASS the cached pass remains valid before its 30-tick deadline
+PASS event deduplication preserves a 30-tick protection deadline
+PASS a real later inventory event is never hidden by the periodic cache
+PASS closing the page clears cooling state and periodic container cache
+PASS reopening starts from current food state instead of stale protected age
+PASS unpowered appliances retain no local cooling protection
+RESULT VLS client appliance behavior: 21 passed
+OK vls_appliance_performance_test.lua
+RUN tests/vls_environment_performance_test.lua
+PASS onlyPart syncs target once with zero sibling lookup
+PASS cooling and freezer update their own slots
+PASS stale same-ID part is rejected without mutations
+PASS cross vehicle rejected
+PASS nonuniversal rejected
+PASS power loss normalizes fridge and freezer
+PASS equipment replacement normalizes slots
+PASS whole vehicle visits each installed universal once
+PASS server slotsSynced skips duplicate sync
+PASS Create synchronizes lifecycle once and preserves forced container processing
+PASS PartComplete synchronizes lifecycle once and preserves forced container processing
+PASS unchanged client lifecycle performs one sync and no process-list writes
+PASS universal lifecycle change preserves the force flag
+PASS freezer lifecycle change preserves the force flag
+PASS television lifecycle change preserves the force flag
+PASS server lifecycle forwards already-synchronized slots without a second sync
+PASS direct server refresh still synchronizes and honors force without the skip flag
+PASS empty slot and companion freezer normalize their environment
+PASS powered active microwave retains its configured cooking temperature
+PASS unpowered active microwave returns to ambient temperature
+PASS one server minute delegates its final environment refresh as a whole-vehicle pass
+RESULT environment performance dynamic tests passed
+OK vls_environment_performance_test.lua
+RUN tests/vls_mechanics_performance_test.lua
+[VehicleLivingSlotsKI5Campers] Adapter version RC3.8
+PASS base owns the shared overlay-registration event
+PASS original PartList registration remains available
+PASS shared event restores every registered base and KI5 part
+PASS base guide draws matching textures at vanilla overlay coordinates
+PASS KI5 guides share the wrapper and draw their matching textures
+PASS empty and unsupported overlay panels delegate without guide lookups
+[VLS mechanics] native renderer with shared presentation adapter v1
+PASS propane and managed display values change while non-managed stays raw
+PASS one post-vanilla correction traverses all installed parts once
+PASS actual panel condition uses one rounded combined correction
+PASS empty vehicle keeps vanilla calculation without an extension scan
+PASS unsupported vehicles retain the original calculation path
+PASS reloading does not add overlay events
+PASS reloading keeps one renderer and one condition wrapper
+PASS KI5 duplicate icon hook is absent while the shared override remains available
+OK vls_mechanics_performance_test.lua
+RESULT VLS Lua behavior files passed: 4
+project_suite_exit=0

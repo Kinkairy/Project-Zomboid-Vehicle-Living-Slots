@@ -1,0 +1,905 @@
+module Base
+{
+    /* BEGIN roof spotlight aliases */
+    model VLSRoofSpotlightLensModel
+    {
+        mesh = VLS/RoofSpotlightLens,
+        texture = FlashLight,
+        shader = VLSRoofLampOff,
+        static = true,
+        scale = 1.0,
+    }
+    model VLSRoofSpotlightGlowModel
+    {
+        mesh = VLS/RoofSpotlightLens,
+        texture = FlashLight,
+        shader = VLSRoofLampOn,
+        static = true,
+        scale = 1.0,
+    }
+    model VLSRoofSpotlightHousingModel
+    {
+        mesh = VLS/RoofSpotlightHousing,
+        texture = WorldItems/MetalBar_FullHalfQrt_Steel,
+        shader = VLSRoofBlackSteel,
+        static = true,
+        scale = 1.0,
+    }
+    /* END roof spotlight aliases */
+    /* 0.13-cargo.2: fixed fabricated rack and independent native cargo.
+       Nominal transforms are unchanged; offset tool applies one translation. */
+    model VLSRoofRackBodyModel
+    {
+        mesh = VLS/RackBody,
+        texture = WorldItems/MetalBar_FullHalfQrt_Steel,
+        scale = 1.0,
+        shader = VLSRoofBlackSteel,
+        static = true,
+    }
+    model VLSRoofToolCabinetModel
+    {
+        shader = basicEffect,
+        static = true,
+        mesh = VLS/SmallChest,
+        texture = VLS/SmallChest,
+        scale = 1.0,
+    }
+    model VLSRoofMattressModel
+    {
+        shader = VLSRoofCanvas,
+        static = true,
+        mesh = VLS/StepVanRoofPad,
+        texture = WorldItems/Tarp_Segment,
+        scale = 1.0,
+    }
+    model VLSRoofPropaneModel
+    {
+        mesh = WorldItems/PropaneTank,
+        texture = WorldItems/PropaneTank,
+        scale = .25,
+        shader = VLSRoofGround,
+        static = true,
+    }
+    model VLSRoofWheelModel
+    {
+        mesh = WorldItems/Wheel,
+        texture = Vehicles/vehicle_wheel04,
+        scale = .37,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSRoofPetrolModel
+    {
+        mesh = VLS/PetrolShaded,
+        texture = VLS/PetrolShaded,
+        scale = 0.4,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSRoofGeneratorModel
+    {
+        shader = basicEffect,
+        static = true,
+        mesh = VLS/GeneratorMatte,
+        texture = VLS/GeneratorMatte,
+        scale = 1.0,
+    }
+    model VLSRoofTentModel
+    {
+        mesh = WorldItems/TentRoll,
+        texture = VLS/TentShaded,
+        scale = 0.075,
+        shader = basicEffect,
+        static = true,
+    }
+    /* BEGIN reusable luggage aliases */
+    model VLSTravelCaseModel
+    {
+        mesh = VLS/TravelCaseShort,
+        texture = VLS/TravelCaseShaded,
+        scale = 0.125,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSTravelDuffelModel
+    {
+        mesh = WorldItems/Clothing/DuffelBag_Ground,
+        texture = clothes/bag/duffelbaggreen,
+        scale = 0.4,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSTravelDarkDuffelModel
+    {
+        mesh = WorldItems/Clothing/DuffelBag_Ground,
+        texture = clothes/bag/duffelbaggrey,
+        scale = 0.4,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSTravelBlueDuffelModel
+    {
+        mesh = WorldItems/Clothing/DuffelBag_Ground,
+        texture = clothes/bag/duffelbagblue,
+        scale = 0.4,
+        shader = basicEffect,
+        static = true,
+    }
+    /* END reusable luggage aliases */
+    template vehicle VLSRoofCargoTemplate
+    {
+        part VLSFixedRoofRack
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.VLSFixedRoofRack,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = true,
+            durability = 5,
+            model RackBody
+            {
+                file = VLSRoofRackBodyModel,
+                offset = 0.000000 0.010000 -0.200000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model MattressCover
+            {
+                file = VLSRoofMattressModel,
+                offset = 0.000000 0.492000 -0.480000,
+                rotate = 0 0 0,
+                scale = 1.0000000000,
+            }
+            /* BEGIN reusable luggage attachments */
+            model LuggageCase
+            {
+                file = VLSTravelCaseModel,
+                offset = -0.231000 0.622823 -0.310000,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            model LuggageDuffel
+            {
+                file = VLSTravelDuffelModel,
+                offset = 0.157278 0.625176 -0.399420,
+                rotate = 0 -3 0,
+                scale = 0.8241758242,
+            }
+            model LuggageDarkDuffel
+            {
+                file = VLSTravelDarkDuffelModel,
+                offset = -0.031328 0.625176 -0.404372,
+                rotate = 0 2 0,
+                scale = 0.8241758242,
+            }
+            model LuggageBlueDuffel
+            {
+                file = VLSTravelBlueDuffelModel,
+                offset = 0.089410 0.625176 -0.149499,
+                rotate = 0 88 0,
+                scale = 0.8241758242,
+            }
+            /* END reusable luggage attachments */
+            container
+            {
+                capacity = 300,
+                conditionAffectsCapacity = false,
+                test = VLSRoofCargo.Access,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = MetalWelding:5;Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+            }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.InitFixedRack,
+                update = VLSRoofCargo.UpdateFixedRack, }
+        }
+        /* BEGIN roof spotlight parts */
+        part VLSRoofHeadlight1
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Torch,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 1,
+            model RoofSpotlightHousing1
+            {
+                file = VLSRoofSpotlightHousingModel,
+                offset = 0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightLens1
+            {
+                file = VLSRoofSpotlightLensModel,
+                offset = 0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightGlow1
+            {
+                file = VLSRoofSpotlightGlowModel,
+                offset = 0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            table install
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                requireInstalled = VLSFixedRoofRack,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofLights.InstallComplete,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = VLSRoofLights.UninstallComplete,
+            }
+            lua
+            {
+                create = VLSRoofLights.Create,
+                init = VLSRoofLights.Init,
+                update = Vehicles.Update.Headlight,
+            }
+        }
+        part VLSRoofHeadlight2
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Torch,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 1,
+            model RoofSpotlightHousing2
+            {
+                file = VLSRoofSpotlightHousingModel,
+                offset = 0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightLens2
+            {
+                file = VLSRoofSpotlightLensModel,
+                offset = 0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightGlow2
+            {
+                file = VLSRoofSpotlightGlowModel,
+                offset = 0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            table install
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                requireInstalled = VLSFixedRoofRack,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofLights.InstallComplete,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = VLSRoofLights.UninstallComplete,
+            }
+            lua
+            {
+                create = VLSRoofLights.Create,
+                init = VLSRoofLights.Init,
+                update = Vehicles.Update.Headlight,
+            }
+        }
+        part VLSRoofHeadlight3
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Torch,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 1,
+            model RoofSpotlightHousing3
+            {
+                file = VLSRoofSpotlightHousingModel,
+                offset = -0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightLens3
+            {
+                file = VLSRoofSpotlightLensModel,
+                offset = -0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightGlow3
+            {
+                file = VLSRoofSpotlightGlowModel,
+                offset = -0.088800 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            table install
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                requireInstalled = VLSFixedRoofRack,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofLights.InstallComplete,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = VLSRoofLights.UninstallComplete,
+            }
+            lua
+            {
+                create = VLSRoofLights.Create,
+                init = VLSRoofLights.Init,
+                update = Vehicles.Update.Headlight,
+            }
+        }
+        part VLSRoofHeadlight4
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Torch,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 1,
+            model RoofSpotlightHousing4
+            {
+                file = VLSRoofSpotlightHousingModel,
+                offset = -0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightLens4
+            {
+                file = VLSRoofSpotlightLensModel,
+                offset = -0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            model RoofSpotlightGlow4
+            {
+                file = VLSRoofSpotlightGlowModel,
+                offset = -0.266400 0.570000 0.640000,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            table install
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                requireInstalled = VLSFixedRoofRack,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofLights.InstallComplete,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
+                time = 100,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = VLSRoofLights.UninstallComplete,
+            }
+            lua
+            {
+                create = VLSRoofLights.Create,
+                init = VLSRoofLights.Init,
+                update = Vehicles.Update.Headlight,
+            }
+        }
+        /* END roof spotlight parts */
+        part VLSRoofGenerator
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Generator;Base.Generator_Old;Base.Generator_Yellow;Base.Generator_Blue,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model GeneratorPreview
+            {
+                file = VLSRoofGeneratorModel,
+                offset = 0.206650 0.492000 0.343038,
+                rotate = 0 0 0,
+                scale = 0.2148060025,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofSmallChest
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Mov_SmallChest,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model ToolCabinetPreview
+            {
+                file = VLSRoofToolCabinetModel,
+                offset = -0.101650 0.492000 0.291693,
+                rotate = 0 0 0,
+                scale = 1.0000000000,
+            }
+            container
+            {
+                capacity = 10,
+                conditionAffectsCapacity = false,
+                test = VLSRoofCargo.Access,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofPetrol1
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.PetrolCan,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model PetrolCan1
+            {
+                file = VLSRoofPetrolModel,
+                offset = 0.229600 0.626171 0.070428,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofPetrol2
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.PetrolCan,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model PetrolCan2
+            {
+                file = VLSRoofPetrolModel,
+                offset = 0.129246 0.626171 0.070428,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofPetrol3
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.PetrolCan,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model PetrolCan3
+            {
+                file = VLSRoofPetrolModel,
+                offset = 0.028891 0.626171 0.070428,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofPropane1
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.PropaneTank,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model GasCanLeft
+            {
+                file = VLSRoofPropaneModel,
+                offset = -0.085908 0.625234 0.070428,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofPropane2
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.PropaneTank,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model GasCanRight
+            {
+                file = VLSRoofPropaneModel,
+                offset = -0.215154 0.625234 0.070428,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofSpare1
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.OldTire1;Base.NormalTire1;Base.ModernTire1;Base.OldTire2;Base.NormalTire2;Base.ModernTire2;Base.OldTire3;Base.NormalTire3;Base.ModernTire3,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model SpareTireLeft
+            {
+                file = VLSRoofWheelModel,
+                offset = 0.169350 0.492000 -0.757000,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofSpare2
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.OldTire1;Base.NormalTire1;Base.ModernTire1;Base.OldTire2;Base.NormalTire2;Base.ModernTire2;Base.OldTire3;Base.NormalTire3;Base.ModernTire3,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model SpareTireRight
+            {
+                file = VLSRoofWheelModel,
+                offset = -0.169350 0.492000 -0.757000,
+                rotate = 0 0 0,
+                scale = 0.8241758242,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        part VLSRoofTent
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.CampingTentKit2_Packed,
+            specificItem = false,
+            mechanicRequireKey = false,
+            setAllModelsVisible = true,
+            repairMechanic = false,
+            durability = 5,
+            model TentRoll
+            {
+                file = VLSRoofTentModel,
+                offset = -0.231000 0.690630 -0.310000,
+                rotate = 0 90 0,
+                scale = 1.2362637363,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 350,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.InstallTest,
+                complete = VLSRoofCargo.InstallComplete,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+                requireEmpty = true,
+            }
+            lua { create = VLSRoofCargo.Create, }
+        }
+        /* Legacy preview item retrieval only. New vehicles keep this empty. */
+        part VLSLowRoofRack
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.MetalBar,
+            specificItem = false,
+            mechanicRequireKey = false,
+            table install { skills = Mechanics:1, test = VLSRoofCargo.NeverInstall, }
+            table uninstall
+            {
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+            }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.InitLegacy, }
+        }
+        /* Legacy preview item retrieval only. New vehicles keep this empty. */
+        part VLSRoofMattress
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.Mattress,
+            specificItem = false,
+            mechanicRequireKey = false,
+            table install { skills = Mechanics:1, test = VLSRoofCargo.NeverInstall, }
+            table uninstall
+            {
+                time = 250,
+                skills = Mechanics:1,
+                test = VLSRoofCargo.UninstallTest,
+                complete = Vehicles.UninstallComplete.Default,
+            }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.InitLegacy, }
+        }
+    }
+    vehicle StepVan
+    {
+        template = VLSLargeVanLivingSystem,
+        template = VLSRoofCargoTemplate,
+    }
+}

@@ -32,59 +32,8 @@ local GUIDES = {
     VLSKI5CamperWaterTank2 = "vls_water_tank_right_guide",
 }
 
-local function registerPart(partId, spec)
-    local part = ISCarMechanicsOverlay.PartList[partId] or {}
-    part.img = spec.img
-    part.vehicles = part.vehicles or {}
-    for prefix, coords in pairs(spec.vehicles) do
-        part.vehicles[prefix] = coords
-    end
-    ISCarMechanicsOverlay.PartList[partId] = part
-end
 local function registerKI5WaterTankOverlays()
-    for partId, spec in pairs(PARTS) do
-        registerPart(partId, spec)
-    end
-end
-
-local function getOverlayProperties(vehicle)
-    local overlayName = vehicle:getScriptName()
-    if vehicle:getScript():getCarMechanicsOverlay() then
-        overlayName = vehicle:getScript():getCarMechanicsOverlay()
-    end
-    return ISCarMechanicsOverlay.CarList[overlayName]
-end
-
-local function drawKI5WaterTankGuides(panel)
-    local props = panel.vehicle and getOverlayProperties(panel.vehicle)
-    if not props then return end
-    for partId, imageName in pairs(GUIDES) do
-        if panel.vehicle:getPartById(partId) then
-            local texture = getTexture(
-                "media/ui/vehicles/mechanic overlay/" ..
-                props.imgPrefix .. imageName .. ".png"
-            )
-            if texture then
-                panel:drawTextureScaledUniform(
-                    texture, props.x, props.y, 1, 1, 1, 1, 1
-                )
-            end
-        end
-    end
+    VLS.registerMechanicsOverlay(PARTS, GUIDES)
 end
 
 registerKI5WaterTankOverlays()
-
-if not VLS.ki5CampersGuideHookApplied then
-    VLS.ki5CampersGuideHookApplied = true
-    local originalRenderCarOverlay = ISVehicleMechanics.renderCarOverlay
-    function ISVehicleMechanics:renderCarOverlay()
-        drawKI5WaterTankGuides(self)
-        originalRenderCarOverlay(self)
-    end
-end
-
-if not VLS.ki5CampersOverlayEventApplied then
-    VLS.ki5CampersOverlayEventApplied = true
-    Events.OnGameStart.Add(registerKI5WaterTankOverlays)
-end

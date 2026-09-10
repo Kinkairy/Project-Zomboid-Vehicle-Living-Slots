@@ -32,23 +32,40 @@ local GUIDES = {
     [VLS.LARGE_VAN_WATER_TANK_PART_ID] = "vls_water_tank_guide",
 }
 
-local function registerPart(partId, spec)
+local registeredParts = VLS.mechanicsOverlayParts or {}
+local registeredGuides = VLS.mechanicsOverlayGuides or {}
+VLS.mechanicsOverlayParts = registeredParts
+VLS.mechanicsOverlayGuides = registeredGuides
+
+local function applyMechanicsOverlayPart(partId, spec)
     local part = ISCarMechanicsOverlay.PartList[partId] or {}
     part.img = spec.img
     part.vehicles = part.vehicles or {}
-    for prefix, coords in pairs(spec.vehicles) do
+    for prefix, coords in pairs(spec.vehicles or {}) do
         part.vehicles[prefix] = coords
     end
     ISCarMechanicsOverlay.PartList[partId] = part
 end
 
-local function registerVLSMechanicsOverlay()
-    for partId, spec in pairs(PARTS) do
-        registerPart(partId, spec)
+function VLS.registerMechanicsOverlay(parts, guides)
+    for partId, spec in pairs(parts or {}) do
+        registeredParts[partId] = spec
+        applyMechanicsOverlayPart(partId, spec)
+        if guides and guides[partId] then
+            registeredGuides[partId] = {
+                image = guides[partId], vehicles = spec.vehicles or {},
+            }
+        end
     end
 end
 
-registerVLSMechanicsOverlay()
+local function registerVLSMechanicsOverlay()
+    for partId, spec in pairs(registeredParts) do
+        applyMechanicsOverlayPart(partId, spec)
+    end
+end
+
+VLS.registerMechanicsOverlay(PARTS, GUIDES)
 
 local function getOverlayProperties(vehicle)
     local overlayName = vehicle:getScriptName()
@@ -59,13 +76,15 @@ local function getOverlayProperties(vehicle)
 end
 
 local function drawVLSMechanicsGuides(panel)
+    if not panel.vehicle or not VLS.isSupportedVehicle(panel.vehicle) then return end
     local props = getOverlayProperties(panel.vehicle)
     if not props then return end
-    for partId, imageName in pairs(GUIDES) do
-        if panel.vehicle:getPartById(partId) then
+    for partId, guide in pairs(registeredGuides) do
+        if guide.vehicles[props.imgPrefix]
+                and panel.vehicle:getPartById(partId) then
             local texture = getTexture(
                 "media/ui/vehicles/mechanic overlay/" ..
-                props.imgPrefix .. imageName .. ".png"
+                props.imgPrefix .. guide.image .. ".png"
             )
             if texture then
                 panel:drawTextureScaledUniform(

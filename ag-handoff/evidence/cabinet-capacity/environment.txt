@@ -1,0 +1,3 @@
+lua_package=lua-libs-5.4.4-4.el9.x86_64
+lua_link=	liblua-5.4.so (libc6,x86-64) => /lib64/liblua-5.4.so
+candidate_dir=not-published-private-temp-path

@@ -20,6 +20,7 @@ VLSTelevisionInstallVehiclePart =
     ISInstallVehiclePart:derive("VLSTelevisionInstallVehiclePart")
 
 function VLSTelevisionInstallVehiclePart:complete()
+    if not VLS.isInstallationEnabled(self.part, self.item) then return false end
     if self.item == nil then return false end
     if not self.vehicle then
         print("no such vehicle id=", self.vehicle)
@@ -144,6 +145,7 @@ if not VLS.installGuardApplied then
 
     local vanillaIsValid = ISInstallVehiclePart.isValid
     function ISInstallVehiclePart:isValid()
+        if not VLS.isInstallationEnabled(self.part, self.item) then return false end
         -- Only the furniture and battery slots have VLS-specific item rules.
         -- The large-van water tank deliberately uses the original gas-tank
         -- itemType/mechanic-type matcher, so the vanilla action must remain
@@ -153,6 +155,14 @@ if not VLS.installGuardApplied then
             return false
         end
         return vanillaIsValid(self)
+    end
+
+    -- The original completion removes the input before the part callback.
+    -- Recheck here so a queued action cannot consume anything after disabling.
+    local vanillaComplete = ISInstallVehiclePart.complete
+    function ISInstallVehiclePart:complete()
+        if not VLS.isInstallationEnabled(self.part, self.item) then return false end
+        return vanillaComplete(self)
     end
 
     local vanillaInstallNew = ISInstallVehiclePart.new
