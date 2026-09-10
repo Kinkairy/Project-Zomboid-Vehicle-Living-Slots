@@ -1,0 +1,13 @@
+PACKAGING VERIFICATION ONLY. No game, controller or multiplayer test in this run.
+PASS 8/8 baseline Git blob identities match previously retrieved repository objects.
+PASS Lua parse VLS_VehicleMechanicsIcons.lua
+PASS Lua parse VLS_Client.lua
+PASS Lua parse VLS_ApplianceServer.lua
+PASS Lua parse VLS_Config.lua
+PASS Lua parse VLS_InstallGuard.lua
+PASS JSON parse Translate/CN/IG_UI.json
+PASS JSON parse Translate/CH/IG_UI.json
+PASS JSON parse Translate/EN/IG_UI.json
+PASS git apply --check and git apply on temporary exact-baseline source.
+PASS 8/8 patched outputs byte-identical to the previously supplied complete candidate files.
+The prior 32/32 behavior-test log is archived separately; those 32 cases were NOT re-executed in this packaging run.

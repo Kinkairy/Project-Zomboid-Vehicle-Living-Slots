@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "base_commit": "b436d6cb687804d156e15e178773e18df5733e55",
+  "status": "candidate",
+  "files": [
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_VehicleMechanicsIcons.lua",
+      "base_blob_sha": "2979462d808bf144a4804ca49dbae95d6a7c4bc5",
+      "fixed_blob_sha": "fa4a6038fe0e7647a2f1ca7c96076cad297fa202",
+      "before_sha256": "6bcaddf34d2b4585dbdc3f095c8d2d1be1966160ef2c316296ba097de0053193",
+      "after_sha256": "993ac436794dcf8b00445ec0a26e8570be2b9bbb8169460772c9653534aa4ba1",
+      "bytes": 11639
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_Client.lua",
+      "base_blob_sha": "d292af19d9a2856ccf380619125036a08fadf87b",
+      "fixed_blob_sha": "9c5c7292885777678a4f16d4e1a8be8ed97b87ea",
+      "before_sha256": "49dfddd135d465752ea4dec5ad9673e05e456df0c73214ef43c421ea0ff37100",
+      "after_sha256": "0a62f6fddd9e9207ae1bf8e16cfb30d92253037293a78d0783884fab0952abe8",
+      "bytes": 71252
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua",
+      "base_blob_sha": "94f22e535245ceb088bfb17b993e4158f8ac5088",
+      "fixed_blob_sha": "07161ac1c59bf05d49e8a7e609dfdb27fa0b9b07",
+      "before_sha256": "1e84b318d97d658813796d8456f5505f25350742f33e192e85a48e892a03b651",
+      "after_sha256": "a4c7411fc85f2e8904383edab3ff1c01b657ed70d1316a1f39b98b1fd94c811e",
+      "bytes": 26829
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua",
+      "base_blob_sha": "4aa1c5e1c4eb686238964889353a8a82a17b3d52",
+      "fixed_blob_sha": "89c1666ac45bb880be73d2e0cb26771123465ae1",
+      "before_sha256": "3e23be16e38fe023e6dcdac6b2d41b0454902e8c725f23b71f2f13ae7c4394f6",
+      "after_sha256": "84d9946b0c22f2b05059ce94c05681d967ee48737dcc4ad1e5e3eb903fd8c3c4",
+      "bytes": 74803
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_InstallGuard.lua",
+      "base_blob_sha": "06ab3a169de92685c7fe8d8fce54cc40f09e4674",
+      "fixed_blob_sha": "211129124a5a8de1dae088fe27612f2d126b3950",
+      "before_sha256": "fccf938c932e73eecb0eace8ccdca26300a95a3d53370fd274fd895518375d9d",
+      "after_sha256": "f7b2460a06a8e4221759fcace49f16c86fb52fb147baa78031ddb4b847567b78",
+      "bytes": 8528
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CN/IG_UI.json",
+      "base_blob_sha": "066c8027c657ebe6d006a6e6c9c4c5997c0cd7f4",
+      "fixed_blob_sha": "c2c705a816385bd1bfe284f4a0aa676c39252171",
+      "before_sha256": "a455b0d481784a5879932d95c26f9841888bc7794b7f7fb1d1b0672f7c8082a2",
+      "after_sha256": "faf5747d79a445e4f3a798efaba897dfcb9388547d00eb3036cd07d05e3ed987",
+      "bytes": 2580
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CH/IG_UI.json",
+      "base_blob_sha": "9dd776975ec0f5537b2fae5c18ef75b6466f8393",
+      "fixed_blob_sha": "348abd9cd1c41444180ff957da3ad2ad5d310af5",
+      "before_sha256": "0aeb7d152573173d1720ff84b8cc85df97c8c6c6d5cd72e96ed1dc0688f4362f",
+      "after_sha256": "a28db08921e0d7c3998fb607528e714b9543551324b0329d0b494a1d3710ace1",
+      "bytes": 2580
+    },
+    {
+      "path": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/EN/IG_UI.json",
+      "base_blob_sha": "6cb33ac6be21ea25a26a6852a3120615e263420d",
+      "fixed_blob_sha": "e6d82dc56a9fbed744d98b09341f68621333ebbd",
+      "before_sha256": "7867640ef8822864c3fe5e90a5e16613f1e027ceae7b08c6bb2bd6fe0876b61c",
+      "after_sha256": "ac83a3f33f4910c5756f979aae47b14a9fa3788f75ef7665a547739f46299331",
+      "bytes": 2682
+    }
+  ],
+  "patch_sha256": "bf55d40cefa4fe0db0ba73f0d8d5076db357b6f5a58c4a0c130c345e44cd59c5"
+}

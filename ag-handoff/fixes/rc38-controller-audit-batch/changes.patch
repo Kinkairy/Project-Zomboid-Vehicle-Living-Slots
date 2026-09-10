@@ -1,0 +1,896 @@
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_VehicleMechanicsIcons.lua
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_VehicleMechanicsIcons.lua
+@@ -90,8 +90,8 @@
+     for _, item in ipairs(vanillaCandidates) do alreadyAdded[item] = true end
+ 
+     if not itemMenu then
+-        itemMenu = ISContextMenu:getNew(mechanics.context)
+-        mechanics.context:addSubMenu(option, itemMenu)
++        itemMenu = ISContextMenu:getNew(installMenu)
++        installMenu:addSubMenu(option, itemMenu)
+         alreadyAdded = {}
+     end
+ 
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_Client.lua
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/client/VLS_Client.lua
+@@ -369,6 +369,7 @@
+         }
+     else
+         pendingBedRest[playerObj:getPlayerNum()] = {
++            player = playerObj,
+             vehicle = vehicle,
+             ticks = 600,
+         }
+@@ -422,16 +423,19 @@
+         local vehicle = playerObj and playerObj:getVehicle() or nil
+         local playerData = playerObj and getPlayerData(playerNum) or nil
+         local sleepModal = playerData and playerData.vehicleSleepModal
+-
+-        if not playerObj or not vehicle or pending.vehicle ~= vehicle
+-                or not VLS.isUsingBedSeat(playerObj, vehicle)
++        if not playerObj or pending.player ~= playerObj or playerObj:isDead()
++                or (vehicle and pending.vehicle ~= vehicle)
++                or (pending.entered and not vehicle)
+                 or playerObj:isAsleep() or pendingBedSleep[playerNum]
+                 or sleepModal then
+             pendingBedRest[playerNum] = nil
+-        elseif isBedEntryComplete(playerObj, vehicle) then
++        elseif vehicle and isBedEntryComplete(playerObj, pending.vehicle) then
+             pendingBedRest[playerNum] = nil
+             ISTimedActionQueue.add(ISVLSVehicleRestAction:new(playerObj))
+         else
++            -- Walking to the door / entering / changing seats are asynchronous.
++            -- A player still outside the car is not an immediate cancellation.
++            if vehicle then pending.entered = true end
+             pending.ticks = pending.ticks - 1
+             if pending.ticks <= 0 then pendingBedRest[playerNum] = nil end
+         end
+@@ -473,6 +477,19 @@
+ end
+ 
+ local function sendApplianceCommand(playerObj, command, args)
++    if command == "toggleMicrowave" or command == "stopMicrowave"
++            or command == "setMicrowaveParams" then
++        -- Callers with a long-lived window supply its ORIGINAL item ID.
++        -- Short-lived loot/transfer controls resolve the current item here.
++        if args.item == nil then
++            local vehicle = playerObj and playerObj:getVehicle()
++            local part = vehicle and vehicle:getId() == args.vehicle
++                and vehicle:getPartById(args.part)
++            local item = part and part:getInventoryItem()
++            if not item then return end
++            args.item = item:getID()
++        end
++    end
+     if isClient() then
+         sendClientCommand(playerObj, VLS.MOD_ID, command, args)
+     elseif VLS.Server and VLS.Server[command] then
+@@ -486,6 +503,7 @@
+         part = part,
+         playerObj = playerObj,
+         isVLSMicrowaveProxy = true,
++        itemId = part:getInventoryItem():getID(),
+     }
+     proxy.power = {
+         isPowered = function()
+@@ -532,14 +550,15 @@
+     end
+ 
+     function proxy:sync()
+-        local data = self:getData()
+-        data.vlsMicrowaveTimer = self:getTimer()
+-        data.vlsMicrowaveTemperature = self:getMaxTemperature()
++        local item = self.part:getInventoryItem()
++        if not item or item:getID() ~= self.itemId
++                or self.playerObj:getVehicle() ~= self.vehicle then return end
+         sendApplianceCommand(self.playerObj, "setMicrowaveParams", {
+             vehicle = self.vehicle:getId(),
+             part = self.part:getId(),
+-            timer = data.vlsMicrowaveTimer,
+-            temperature = data.vlsMicrowaveTemperature,
++            item = self.itemId,
++            timer = self:getTimer(),
++            temperature = self:getMaxTemperature(),
+         })
+     end
+ 
+@@ -554,6 +573,7 @@
+     return playerObj and vehicle and part
+         and playerObj:getVehicle() == vehicle
+         and VLS.getInstalledPart(vehicle, part:getId()) == part
++        and item and item:getID() == proxy.itemId
+         and VLS.getEquipmentCapability(item) == "cooking"
+ end
+ 
+@@ -611,6 +631,7 @@
+     if button.internal ~= "OK" then return end
+ 
+     local proxy = ui.oven
++    if not isVLSMicrowaveWindowValid(ui, proxy) then ui:close(); return end
+     if not proxy:Activated() and not proxy:getContainer():isPowered() then
+         HaloTextHelper.addBadText(ui.character, getText("ContextMenu_VLSNoAuxPower"))
+         return
+@@ -620,6 +641,7 @@
+     sendApplianceCommand(ui.character, "toggleMicrowave", {
+         vehicle = proxy.vehicle:getId(),
+         part = proxy.part:getId(),
++        item = proxy.itemId,
+         timer = ui.timerKnob:getValue() * 60,
+         temperature = ui.tempKnob:getValue(),
+     })
+@@ -760,6 +782,39 @@
+ ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
+ ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
+ 
++local fluidRequestSequence = 0
++local FLUID_REQUEST_TIMEOUT_MS = 15000
++
++local function finishVLSFluidRequest(ui, status)
++    ui.vlsVehicleRequest = nil
++    ui.panelLeft:setPanelLocked(false)
++    ui.panelRight:setPanelLocked(false)
++    -- Let vanilla re-evaluate available amounts; do not force-enable TRANSFER.
++    ui.disableTransfer = false
++    ui.disableSwap = false
++    ui:validatePanel()
++    if status and status ~= "ok" then
++        HaloTextHelper.addBadText(ui.player, getText(status == "timeout"
++            and "IGUI_VLSFluidRequestTimeout" or "IGUI_VLSFluidRequestFailed"))
++    end
++end
++
++local function onVLSFluidTransferResult(args)
++    if type(args) ~= "table" or type(args.requestId) ~= "string" then return end
++    for playerNum = 0, 3 do
++        local state = ISFluidTransferUI.players[playerNum]
++        local ui = state and state.instance
++        local pending = ui and ui.vlsVehicleRequest
++        if pending and pending.id == args.requestId
++                and pending.vehicle == args.vehicle then
++            finishVLSFluidRequest(ui, args.status)
++            return
++        end
++    end
++end
++
++VLS.onFluidTransferResult = onVLSFluidTransferResult
++
+ local function onVLSFluidTransferClick(ui, button)
+     if button.internal ~= "TRANSFER" then
+         return vanillaFluidOnButton(ui, button)
+@@ -780,24 +835,21 @@
+         ui.panelLeft.container, ui.panelRight.container, ui.info.transferring)
+     if not args then return end
+ 
+-    local amounts = {}
+-    for _, panel in ipairs({ ui.panelLeft, ui.panelRight }) do
+-        local endpoint = panel.container
+-        if endpoint and endpoint.vlsVehicleFluidEndpoint then
+-            amounts[endpoint.vlsFluidPartId] =
+-                endpoint:getFluidContainer():getAmount()
+-        end
+-    end
+-    ui.vlsVehicleRequest = { amounts = amounts }
+-    -- Installed vehicle endpoints are not vanilla serializable fluid owners.
+-    -- Only this boundary uses the shared authoritative server adapter.  Do
+-    -- not manufacture a second action merely to draw a progress bar.
+-    sendApplianceCommand(ui.player, "transferWater", args)
++    if ui.vlsVehicleRequest then return end
++    fluidRequestSequence = fluidRequestSequence + 1
++    args.requestId = tostring(getTimestampMs()) .. ":"
++        .. tostring(ui.player:getPlayerNum()) .. ":" .. tostring(fluidRequestSequence)
++    ui.vlsVehicleRequest = { id = args.requestId, vehicle = args.vehicle,
++        started = getTimestampMs() }
+     ui.slider:setCurrentValue(0)
+     ui.disableTransfer = true
+     ui.disableSwap = true
++    ui.btnTransfer:setEnable(false)
++    ui.btnSwap:setEnable(false)
+     ui.panelLeft:setPanelLocked(true)
+     ui.panelRight:setPanelLocked(true)
++    -- Lock BEFORE dispatch: single-player can reply synchronously.
++    sendApplianceCommand(ui.player, "transferWater", args)
+ end
+ 
+ local function refreshVLSFluidPanelEndpoint(ui, panel)
+@@ -819,25 +871,12 @@
+     vanillaFluidUpdate(ui)
+     local request = ui.vlsVehicleRequest
+     if not request then return end
+-
+-    local changed = false
+-    for _, panel in ipairs({ ui.panelLeft, ui.panelRight }) do
+-        local endpoint = panel.container
+-        local previous = endpoint and endpoint.vlsVehicleFluidEndpoint
+-            and request.amounts[endpoint.vlsFluidPartId] or nil
+-        if previous ~= nil and math.abs(
+-                endpoint:getFluidContainer():getAmount() - previous) > 0.00001 then
+-            changed = true
+-            break
+-        end
+-    end
+-    if changed then
+-        ui.vlsVehicleRequest = nil
++    local elapsed = getTimestampMs() - request.started
++    if elapsed < 0 or elapsed >= FLUID_REQUEST_TIMEOUT_MS then
++        -- No automatic replay: a timed-out transfer may already have executed.
++        finishVLSFluidRequest(ui, "timeout")
+         return
+     end
+-
+-    -- Prevent duplicate submissions until an authoritative installed-endpoint
+-    -- amount is synchronized. Closing the vanilla panel remains available.
+     ui.disableTransfer = true
+     ui.disableSwap = true
+     ui.btnTransfer:setEnable(false)
+@@ -1010,56 +1049,100 @@
+ end
+ 
+ local locallyCooledFood = {}
++local coolingSnapshots = {}
++local coolingRequests = {}
++
++local function coolingKey(vehicleId, partId)
++    return tostring(vehicleId) .. ":" .. tostring(partId)
++end
++
++local function onVLSAuditServerCommand(module, command, args)
++    if module ~= VLS.MOD_ID or type(args) ~= "table" then return end
++    if command == "fluidTransferResult" then
++        onVLSFluidTransferResult(args)
++    elseif command == "coolingSnapshot" and type(args.entries) == "table"
++            and type(args.sequence) == "number" and type(args.epoch) == "number"
++            and type(args.hours) == "number" and args.part then
++        local key = coolingKey(args.vehicle, args.part)
++        local old = coolingSnapshots[key]
++        if old and (args.epoch < old.epoch or (args.epoch == old.epoch
++                and args.sequence < old.sequence)) then return end
++        if not old or old.epoch ~= args.epoch or old.sequence ~= args.sequence then
++            old = { epoch = args.epoch, sequence = args.sequence,
++                hours = args.hours, entries = {} }
++            coolingSnapshots[key] = old
++        end
++        old.received = getTimestampMs()
++        for _, entry in ipairs(args.entries) do
++            if type(entry.id) == "number" and type(entry.age) == "number"
++                    and type(entry.freezing) == "number" and type(entry.heat) == "number" then
++                old.entries[entry.id] = entry
++            end
++        end
++    end
++end
++
++if not VLS.auditServerReplyHook then
++    VLS.auditServerReplyHook = true
++    Events.OnServerCommand.Add(onVLSAuditServerCommand)
++end
++
++local function requestCoolingSnapshot(playerObj, vehicle, partId)
++    if not isClient() then return end
++    local key = coolingKey(vehicle:getId(), partId)
++    local now = getTimestampMs()
++    local sample = coolingSnapshots[key]
++    if sample and now - sample.received >= 0
++            and now - sample.received < 5000 then return end
++    local prior = coolingRequests[key]
++    if prior and now >= prior and now - prior < 2000 then return end
++    coolingRequests[key] = now
++    sendApplianceCommand(playerObj, "requestCoolingSnapshot", {
++        vehicle = vehicle:getId(), part = partId })
++end
+ 
+ local function protectCooledFood(item, currentHours, vehicleId, containerId,
+         freezer, seen)
+     if not instanceof(item, "Food") then return end
+-
+     local itemId = item:getID()
+     seen[itemId] = true
++    -- Single-player uses the server simulation in this same process.
++    if not isClient() then return end
++    local snapshot = coolingSnapshots[coolingKey(vehicleId, containerId)]
++    local now = getTimestampMs()
++    if not snapshot or now < snapshot.received or now - snapshot.received > 15000 then
++        locallyCooledFood[itemId] = nil
++        return
++    end
++    local authoritative = snapshot.entries[itemId]
++    if not authoritative then return end
+     local state = locallyCooledFood[itemId]
+-    if not state or state.vehicleId ~= vehicleId
+-            or state.containerId ~= containerId
+-            or currentHours < state.lastHours then
+-        state = {
+-            age = item:getAge(),
+-            freezing = item:getFreezingTime(),
+-            heat = item:getHeat(),
+-            lastHours = currentHours,
+-            vehicleId = vehicleId,
+-            containerId = containerId,
+-        }
++    if not state or state.vehicleId ~= vehicleId or state.containerId ~= containerId
++            or state.epoch ~= snapshot.epoch or state.sequence ~= snapshot.sequence then
++        -- Accept a NEW server snapshot in BOTH directions. Numeric min/max is
++        -- not a test for authority. Prediction never becomes the next baseline.
++        state = { age = authoritative.age, freezing = authoritative.freezing,
++            heat = authoritative.heat, lastHours = snapshot.hours,
++            vehicleId = vehicleId, containerId = containerId,
++            epoch = snapshot.epoch, sequence = snapshot.sequence }
+         locallyCooledFood[itemId] = state
+     end
+-
+-    local elapsedHours = math.max(0, currentHours - state.lastHours)
+-    -- Accept only a lower authoritative age. B42's local unpowered-vehicle
+-    -- update may raise the visible age between server synchronizations.
+-    state.age = math.min(state.age, item:getAge())
++    local elapsed = math.min(1 / 60, math.max(0, currentHours - state.lastHours))
++    local freezing = state.freezing
+     if freezer and item:canBeFrozen() then
+-        -- Accept a newer authoritative server value, but never the lower value
+-        -- produced locally by B42's unpowered-vehicle thaw check.
+-        state.freezing = math.max(state.freezing, item:getFreezingTime())
+-        state.freezing = math.min(100,
+-            state.freezing + elapsedHours / 4 * 100)
+-    elseif state.freezing > 0 then
+-        state.freezing = math.max(0,
+-            state.freezing - elapsedHours / 3 * 100)
+-    end
+-    state.lastHours = currentHours
+-
+-    -- B42's Food.updateAge sees every vehicle ItemContainer as unpowered and
+-    -- otherwise immediately undoes the server-owned refrigeration state while
+-    -- the inventory is visible.  Restore only these two VLS containers; the
+-    -- server remains authoritative for age, freezing and battery consumption.
+-    local ageFactor = state.freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
+-    state.age = state.age + elapsedHours * VLS.getFoodRotSpeed()
+-        / 24 * ageFactor
+-    item:setAge(state.age)
++        freezing = math.min(100, freezing + elapsed / 4 * 100)
++    elseif freezing > 0 then
++        freezing = math.max(0, freezing - elapsed / 3 * 100)
++    end
++    -- Preserve the existing fully-frozen ageFactor=0 balance in this bugfix.
++    local ageFactor = freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
++    item:setAge(state.age + elapsed * VLS.getFoodRotSpeed() / 24 * ageFactor)
+     VLS.preservePoweredFoodHeat(item, state, freezer and 0.1 or 0.2)
+-    item:setFreezingTime(state.freezing)
++    item:setFreezingTime(freezing)
+     item:setLastAged(currentHours)
+ end
++
++
+ 
+ -- The vanilla page can retain its selected container while hidden/collapsed.
+ -- Keep this gate identical to ISInventoryPage's visible-container contract.
+@@ -1128,6 +1211,15 @@
+             universalPart:getInventoryItem()) == "cooling"
+             and VLS.hasAuxBatteryPower(vehicle, VLS.getFridgeDrainPerMinute())
+         local containerId, vehicleId = part:getId(), vehicle:getId()
++        if cooling then
++            for playerNum = 0, 3 do
++                local playerObj = getSpecificPlayer(playerNum)
++                if playerObj and playerObj:getVehicle() == vehicle then
++                    requestCoolingSnapshot(playerObj, vehicle, containerId)
++                    break
++                end
++            end
++        end
+         local itemIds = {}
+         local namesChanged = false
+         VLS.walkApplianceContainer(container, function(item)
+@@ -1159,10 +1251,19 @@
+     end
+     if not foundVisibleVLSContainer then
+         table.wipe(locallyCooledFood)
++        table.wipe(coolingSnapshots)
++        table.wipe(coolingRequests)
+         return
+     end
+     for itemId in pairs(locallyCooledFood) do
+         if not seen[itemId] then locallyCooledFood[itemId] = nil end
++    end
++    local now = getTimestampMs()
++    for key, sample in pairs(coolingSnapshots) do
++        if now < sample.received or now - sample.received > 15000 then
++            coolingSnapshots[key] = nil
++            coolingRequests[key] = nil
++        end
+     end
+     return nextCheckTick
+ end
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua
+@@ -64,14 +64,56 @@
+     if part and VLS.getEquipmentCapability(part:getInventoryItem()) ~= "cooking" then
+         part = nil
+     end
+-    if not part then return nil, nil end
++    local item = part and part:getInventoryItem()
++    if not item or tonumber(args.item) ~= item:getID() then return nil, nil end
+     return vehicle, part
+ end
+ 
++local function finiteNumber(value, fallback)
++    local number = tonumber(value)
++    if not number or number ~= number or number == math.huge
++            or number == -math.huge then return fallback end
++    return number
++end
++
++local function settleMicrowave(vehicle, part, currentHours)
++    local data = part:getModData()
++    local item = part:getInventoryItem()
++    if not data.vlsMicrowaveActive or not item then return false end
++    local previous = data.vlsMicrowaveLastHours
++    if not previous or data.vlsMicrowaveClockItemId ~= item:getID()
++            or previous > currentHours then
++        -- Old saves have no clock. Establish a baseline, never charge a guessed minute.
++        data.vlsMicrowaveLastHours = currentHours
++        data.vlsMicrowaveClockItemId = item:getID()
++        return true
++    end
++    local remaining = math.max(0, data.vlsMicrowaveRemaining or 0)
++    local elapsedSeconds = math.min(remaining, math.max(0, currentHours - previous) * 3600)
++    data.vlsMicrowaveLastHours = currentHours
++    local drainPerMinute = VLS.getMicrowaveDrainPerMinute()
++    local charge = VLS.getAuxBatteryCharge(vehicle)
++    local poweredSeconds = elapsedSeconds
++    if drainPerMinute > 0 then
++        poweredSeconds = math.min(poweredSeconds, math.max(0, charge) / drainPerMinute * 60)
++    end
++    if poweredSeconds > 0 and drainPerMinute > 0 then
++        VLS.consumeAuxBattery(vehicle, math.min(charge, poweredSeconds / 60 * drainPerMinute))
++    end
++    data.vlsMicrowaveRemaining = math.max(0, remaining - poweredSeconds)
++    if data.vlsMicrowaveRemaining <= 0.000001
++            or poweredSeconds + 0.000001 < elapsedSeconds then
++        data.vlsMicrowaveActive = false
++        data.vlsMicrowaveRemaining = 0
++        data.vlsMicrowaveLastHours = nil
++    end
++    return elapsedSeconds > 0 or remaining == 0
++end
++
+ local function clampMicrowaveSettings(args)
+-    local timer = math.max(0, math.min(3600, tonumber(args.timer) or 0))
++    local timer = math.max(0, math.min(3600, finiteNumber(args.timer, 0)))
+     local temperature = math.max(50, math.min(130,
+-        tonumber(args.temperature) or tonumber(args.maxTemperature) or 90))
++        finiteNumber(args.temperature, finiteNumber(args.maxTemperature, 90))))
+     return timer, temperature
+ end
+ 
+@@ -80,12 +122,19 @@
+     if not part then return false end
+ 
+     local timer, temperature = clampMicrowaveSettings(args)
++    settleMicrowave(vehicle, part, getGameTime():getWorldAgeHours())
+     local data = part:getModData()
+     data.vlsMicrowaveTimer = timer
+     data.vlsMicrowaveTemperature = temperature
+     if data.vlsMicrowaveActive then
+         data.vlsMicrowaveRemaining = math.min(data.vlsMicrowaveRemaining or timer, timer)
+-    end
++        if data.vlsMicrowaveRemaining <= 0 then
++            data.vlsMicrowaveActive = false
++            data.vlsMicrowaveLastHours = nil
++        end
++    end
++    VLS.refreshApplianceEnvironment(vehicle, part)
++    VLS.Server.trackVehicle(vehicle)
+     vehicle:transmitPartModData(part)
+     return true
+ end
+@@ -93,18 +142,23 @@
+ function VLS.Server.toggleMicrowave(player, args)
+     local vehicle, part = getMicrowavePart(player, args)
+     if not part then return false end
++    local wasActive = part:getModData().vlsMicrowaveActive == true
+ 
+     local timer, temperature = clampMicrowaveSettings(args)
++    settleMicrowave(vehicle, part, getGameTime():getWorldAgeHours())
+     local data = part:getModData()
+     data.vlsMicrowaveTimer = timer
+     data.vlsMicrowaveTemperature = temperature
+ 
+-    if data.vlsMicrowaveActive then
++    if wasActive then
+         data.vlsMicrowaveActive = false
+         data.vlsMicrowaveRemaining = 0
++        data.vlsMicrowaveLastHours = nil
+     elseif timer > 0 and VLS.hasAuxBatteryPower(vehicle, VLS.getMicrowaveDrainPerMinute()) then
+         data.vlsMicrowaveActive = true
+         data.vlsMicrowaveRemaining = timer
++        data.vlsMicrowaveLastHours = getGameTime():getWorldAgeHours()
++        data.vlsMicrowaveClockItemId = part:getInventoryItem():getID()
+         if vehicle.setNeedPartsUpdate then vehicle:setNeedPartsUpdate(true) end
+     end
+ 
+@@ -118,12 +172,15 @@
+     local vehicle, part = getMicrowavePart(player, args)
+     if not part then return false end
+     local data = part:getModData()
+-    if data.vlsMicrowaveActive or (data.vlsMicrowaveRemaining or 0) ~= 0 then
++    local changed = settleMicrowave(vehicle, part, getGameTime():getWorldAgeHours())
++    if changed or data.vlsMicrowaveActive or (data.vlsMicrowaveRemaining or 0) ~= 0 then
+         data.vlsMicrowaveActive = false
+         data.vlsMicrowaveRemaining = 0
+-        VLS.refreshApplianceEnvironment(vehicle)
++        data.vlsMicrowaveLastHours = nil
++        VLS.refreshApplianceEnvironment(vehicle, part)
+         vehicle:transmitPartModData(part)
+     end
++    VLS.Server.trackVehicle(vehicle)
+     return true
+ end
+ 
+@@ -143,49 +200,57 @@
+ 
+ local canAcceptNormalizedWater = VLS.canAcceptNormalizedWater
+ 
+-local function commitPurificationPower(vehicle, amount)
++-- Stage the clean target first. No real source is drained and no real target
++-- is changed until the exact accepted volume and available power are known.
++local function stageCleanWater(target, amount)
++    if amount <= 0 or not canAcceptNormalizedWater(target, amount) then return nil, 0 end
++    local staged = target:copy()
++    local normalized = makeNormalizedWater(amount)
++    local before = staged:getAmount()
++    FluidContainer.Transfer(normalized, staged, amount)
++    local added = math.max(0, staged:getAmount() - before)
++    FluidContainer.DisposeContainer(normalized)
++    if added <= 0 then FluidContainer.DisposeContainer(staged); return nil, 0 end
++    return staged, added
++end
++
++local function reservePurificationPower(vehicle, amount)
+     local cost = VLS.getWaterPurificationCost(amount)
+-    if cost <= 0 then return true end
++    if cost <= 0 then return {} end
+     local part = VLS.getAuxBatteryPart(vehicle)
+     local item = part and part:getInventoryItem()
+-    if not item then return false end
++    if not item then return nil end
+     local charge = item:getCurrentUsesFloat()
+-    if charge + 0.000001 < cost then return false end
++    if charge < cost then return nil end
+     item:setUsedDelta(math.max(0, charge - cost))
+-    vehicle:transmitPartUsedDelta(part)
+-    return true
+-end
+-
+-local function addCapturedCleanWater(vehicle, captured, target)
+-    local moved = captured:getAmount()
+-    if moved <= 0 or not canAcceptNormalizedWater(target, moved) then return 0 end
+-
+-    local normalized = makeNormalizedWater(moved)
+-    local before = target:getAmount()
+-    FluidContainer.Transfer(normalized, target, moved)
+-    local added = math.max(0, target:getAmount() - before)
+-    FluidContainer.DisposeContainer(normalized)
+-    if added <= 0 then return 0 end
+-    if not commitPurificationPower(vehicle, added) then return 0 end
+-    return added
++    return { part = part, item = item, cost = cost }
++end
++
++local function finishPurificationPower(vehicle, reservation, accepted)
++    if not reservation.item then return end
++    local used = VLS.getWaterPurificationCost(accepted)
++    local unused = math.max(0, reservation.cost - used)
++    if unused > 0 then
++        reservation.item:setUsedDelta(math.min(1,
++            reservation.item:getCurrentUsesFloat() + unused))
++    end
++    vehicle:transmitPartUsedDelta(reservation.part)
+ end
+ 
+ local function transferNormalizedWater(vehicle, source, target, requestedAmount)
+     if not VLS.isPureWaterFluid(source) then return 0 end
+-    local amount = math.max(0, math.min(tonumber(requestedAmount) or 0,
++    local amount = math.max(0, math.min(finiteNumber(requestedAmount, 0),
+         source:getAmount(), target:getCapacity() - target:getAmount(),
+         VLS.getWaterPurificationCapacity(vehicle)))
+-    if amount <= 0 or not canAcceptNormalizedWater(target, amount) then return 0 end
+-
+-    local captured = FluidContainer.CreateContainer()
+-    captured:setCapacity(amount)
+-    if not FluidContainer.CanTransfer(source, captured) then
+-        FluidContainer.DisposeContainer(captured)
+-        return 0
+-    end
+-    FluidContainer.Transfer(source, captured, amount)
+-    local added = addCapturedCleanWater(vehicle, captured, target)
+-    FluidContainer.DisposeContainer(captured)
++    local staged, added = stageCleanWater(target, amount)
++    if not staged then return 0 end
++    local power = reservePurificationPower(vehicle, added)
++    if not power then FluidContainer.DisposeContainer(staged); return 0 end
++    -- Pure fresh/tainted water only; adjustAmount retains the source fluid type.
++    source:adjustAmount(math.max(0, source:getAmount() - added))
++    target:copyFluidsFrom(staged)
++    FluidContainer.DisposeContainer(staged)
++    finishPurificationPower(vehicle, power, added)
+     return added
+ end
+ 
+@@ -227,7 +292,7 @@
+     if not sourceItem or not targetItem or sourceItem == targetItem
+             or not source or not target or not source:canPlayerEmpty() then return 0 end
+ 
+-    local amount = math.max(0, tonumber(args.amount) or 0)
++    local amount = math.max(0, finiteNumber(args.amount, 0))
+     if amount <= 0 then return 0 end
+     local moved
+     if VLS.isWaterTankPart(targetPart) then
+@@ -249,8 +314,45 @@
+ -- Installed vehicle endpoints cannot be serialized as vanilla fluid owners.
+ -- Keep their transfer in this one authoritative adapter; carried-container
+ -- transfers remain wholly owned by the vanilla timed-action path.
++local completedFluidRequests = setmetatable({}, { __mode = "k" })
++
++local function replyFluidTransfer(player, result)
++    if isServer() then
++        sendServerCommand(player, VLS.MOD_ID, "fluidTransferResult", result)
++    elseif VLS.onFluidTransferResult then
++        VLS.onFluidTransferResult(result)
++    end
++end
++
+ function VLS.Server.transferWater(player, args)
+-    return VLS.Server.transferWaterStep(player, args) > 0
++    if not player or type(args) ~= "table" then return false end
++    local requestId = args.requestId
++    if type(requestId) ~= "string" or #requestId > 128 then return false end
++    local now = getTimestampMs()
++    local history = completedFluidRequests[player] or {}
++    completedFluidRequests[player] = history
++    for index = #history, 1, -1 do
++        if now < history[index].time or now - history[index].time > 60000 then
++            table.remove(history, index)
++        end
++    end
++    for _, record in ipairs(history) do
++        if record.result.requestId == requestId then
++            replyFluidTransfer(player, record.result)
++            return record.result.status == "ok"
++        end
++    end
++    local ok, moved = pcall(VLS.Server.transferWaterStep, player, args)
++    if not ok then
++        print("[VehicleLivingSlots] Fluid transfer error: " .. tostring(moved))
++        moved = 0
++    end
++    local result = { requestId = requestId, vehicle = args.vehicle,
++        moved = moved or 0, status = ok and (moved or 0) > 0 and "ok" or "rejected" }
++    history[#history + 1] = { result = result, time = now }
++    if #history > 32 then table.remove(history, 1) end
++    replyFluidTransfer(player, result)
++    return result.status == "ok"
+ end
+ 
+ local function getOutsideWaterTankVehicle(player, args)
+@@ -298,11 +400,25 @@
+         VLS.getWaterTankFillAmount(vehicle, tank, source)))
+     if amount <= 0 then return 0 end
+ 
++    local staged, planned = stageCleanWater(target, amount)
++    if not staged then return 0 end
++    local power = reservePurificationPower(vehicle, planned)
++    if not power then FluidContainer.DisposeContainer(staged); return 0 end
+     local captured = FluidContainer.CreateContainer()
+-    captured:setCapacity(amount)
+-    source:transferFluidTo(captured, amount)
+-    local moved = addCapturedCleanWater(vehicle, captured, target)
++    captured:setCapacity(planned)
++    source:transferFluidTo(captured, planned)
++    local moved = math.min(planned, math.max(0, captured:getAmount()))
++    if moved < planned then
++        -- A tap can supply less than requested. Commit only that actual volume.
++        staged:copyFluidsFrom(target)
++        local normalized = makeNormalizedWater(moved)
++        FluidContainer.Transfer(normalized, staged, moved)
++        FluidContainer.DisposeContainer(normalized)
++    end
++    if moved > 0 then target:copyFluidsFrom(staged) end
++    FluidContainer.DisposeContainer(staged)
+     FluidContainer.DisposeContainer(captured)
++    finishPurificationPower(vehicle, power, moved)
+     if moved <= 0 then return 0 end
+ 
+     if source.sync then source:sync() end
+@@ -392,6 +508,66 @@
+     end
+ end
+ 
++local coolingSnapshotEpoch = getTimestampMs()
++local coolingSnapshotSequence = 0
++local coolingSnapshotRequests = setmetatable({}, { __mode = "k" })
++
++local function publishCoolingSnapshot(vehicle, part, recipient)
++    if not isServer() or not part or not part:getItemContainer() then return end
++    local recipients = {}
++    if recipient then
++        recipients[1] = recipient
++    else
++        local players = getOnlinePlayers()
++        for i = 0, players:size() - 1 do
++            local player = players:get(i)
++            if player:getVehicle() == vehicle then recipients[#recipients + 1] = player end
++        end
++    end
++    if #recipients == 0 then return end
++    local entries = {}
++    VLS.walkApplianceContainer(part:getItemContainer(), function(item)
++        if instanceof(item, "Food") then
++            entries[#entries + 1] = { id = item:getID(), age = item:getAge(),
++                freezing = item:getFreezingTime(), heat = item:getHeat() }
++        end
++    end)
++    coolingSnapshotSequence = coolingSnapshotSequence + 1
++    local hours = getGameTime():getWorldAgeHours()
++    -- Each command stays small; all chunks share one revision.
++    for first = 1, math.max(1, #entries), 48 do
++        local chunk = {}
++        for i = first, math.min(first + 47, #entries) do chunk[#chunk + 1] = entries[i] end
++        local args = { vehicle = vehicle:getId(), part = part:getId(),
++            epoch = coolingSnapshotEpoch, sequence = coolingSnapshotSequence,
++            hours = hours, entries = chunk }
++        for _, player in ipairs(recipients) do
++            sendServerCommand(player, VLS.MOD_ID, "coolingSnapshot", args)
++        end
++    end
++end
++
++function VLS.Server.requestCoolingSnapshot(player, args)
++    local vehicle = getPlayerVehicle(player, args)
++    if not vehicle or not args.part then return false end
++    local part = vehicle:getPartById(args.part)
++    local universal = part
++    if part and VLS.isFreezerPart(part) then
++        universal = vehicle:getPartById(VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()])
++    end
++    if not universal or not VLS.isUniversalPart(universal)
++            or VLS.getEquipmentCapability(universal:getInventoryItem()) ~= "cooling"
++            or not VLS.hasAuxBatteryPower(vehicle, VLS.getFridgeDrainPerMinute()) then return false end
++    local now = getTimestampMs()
++    local requests = coolingSnapshotRequests[player] or {}
++    coolingSnapshotRequests[player] = requests
++    local last = requests[args.part]
++    if last and now >= last and now - last < 1000 then return false end
++    requests[args.part] = now
++    publishCoolingSnapshot(vehicle, part, player)
++    return true
++end
++
+ local function processCooledContainer(container, currentHours, vehicleId,
+         containerId, freezer, seen)
+     if not container then return end
+@@ -413,19 +589,7 @@
+         local changed = false
+ 
+         if capability == "cooking" and data.vlsMicrowaveActive then
+-            local drain = VLS.getMicrowaveDrainPerMinute() * elapsedMinutes
+-            if VLS.consumeAuxBattery(vehicle, drain) then
+-                data.vlsMicrowaveRemaining = math.max(0,
+-                    (data.vlsMicrowaveRemaining or 0) - elapsedMinutes * 60)
+-                changed = true
+-                if data.vlsMicrowaveRemaining <= 0 then
+-                    data.vlsMicrowaveActive = false
+-                end
+-            else
+-                data.vlsMicrowaveActive = false
+-                data.vlsMicrowaveRemaining = 0
+-                changed = true
+-            end
++            changed = settleMicrowave(vehicle, part, currentHours)
+         elseif capability == "cooling" then
+             local drain = VLS.getFridgeDrainPerMinute() * elapsedMinutes
+             if VLS.consumeAuxBattery(vehicle, drain) then
+@@ -436,6 +600,8 @@
+                         and freezerPart:getItemContainer(), currentHours,
+                     vehicle:getId(), freezerPart and freezerPart:getId()
+                         or VLS.FREEZER_PART_BY_UNIVERSAL[partId], true, seen)
++                publishCoolingSnapshot(vehicle, part)
++                if freezerPart then publishCoolingSnapshot(vehicle, freezerPart) end
+             end
+         elseif capability == "television" then
+             local deviceData = VLS.getTelevisionDeviceData(part)
+@@ -473,6 +639,10 @@
+ 
+ function VLS.Server.updateAppliance(vehicle, part, elapsedMinutes, forceRefresh, slotsSynced)
+     if not VLS.isUniversalPart(part) then return end
++    if VLS.getEquipmentCapability(part:getInventoryItem()) == "cooking"
++            and settleMicrowave(vehicle, part, getGameTime():getWorldAgeHours()) then
++        vehicle:transmitPartModData(part)
++    end
+     VLS.Server.trackVehicle(vehicle)
+     VLS.refreshApplianceEnvironment(vehicle, part, forceRefresh, slotsSynced)
+ end
+@@ -483,12 +653,13 @@
+     stopMicrowave = VLS.Server.stopMicrowave,
+     transferWater = VLS.Server.transferWater,
+     fillWaterTank = VLS.Server.fillWaterTank,
++    requestCoolingSnapshot = VLS.Server.requestCoolingSnapshot,
+ }
+ 
+ local function onClientCommand(module, command, player, args)
+     if module ~= VLS.MOD_ID then return end
+     local handler = commands[command]
+-    if handler then handler(player, args or {}) end
++    if handler and (args == nil or type(args) == "table") then handler(player, args or {}) end
+ end
+ 
+ if not VLS.serverHooksApplied then
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua
+@@ -850,6 +850,8 @@
+         data.vlsMicrowaveActive = false
+         data.vlsMicrowaveTimer = 0
+         data.vlsMicrowaveRemaining = 0
++        data.vlsMicrowaveLastHours = nil
++        data.vlsMicrowaveClockItemId = nil
+         data.vlsMicrowaveTemperature = 90
+         container:setCustomTemperature(1.0)
+         container:setAgeFactor(1.0)
+@@ -1599,6 +1601,10 @@
+     if not vehicle or not part or not playerObj or not part:getArea() then
+         return false
+     end
++    -- Check the floor before BOTH native and expanded horizontal-area tests.
++    if math.floor(playerObj:getZ()) ~= math.floor(vehicle:getZ()) then
++        return false
++    end
+     local areaId = part:getArea()
+     if vehicle:isInArea(areaId, playerObj) then return true end
+ 
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_InstallGuard.lua
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_InstallGuard.lua
+@@ -129,10 +129,14 @@
+         self.character:addMechanicsItem(
+             item:getID() .. self.vehicle:getMechanicalID() .. "0",
+             self.part, getGameTime():getCalender():getTimeInMillis())
+-    elseif ZombRand(failure) < 100 then
++    elseif ZombRand(100) < failure then
+         self.part:setCondition(self.part:getCondition() - ZombRand(5, 10))
+         self.vehicle:transmitPartCondition(self.part)
+         playServerSound("PZ_MetalSnap", self.character:getCurrentSquare())
++        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
++            { success = false })
++        addXp(self.character, Perks.Mechanics, 1)
++    else
+         self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
+             { success = false })
+         addXp(self.character, Perks.Mechanics, 1)
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CN/IG_UI.json
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CN/IG_UI.json
+@@ -41,5 +41,7 @@
+     "IGUI_VehiclePartVLSRoofHeadlight1": "车顶射灯",
+     "IGUI_VehiclePartVLSRoofHeadlight2": "车顶射灯",
+     "IGUI_VehiclePartVLSRoofHeadlight3": "车顶射灯",
+-    "IGUI_VehiclePartVLSRoofHeadlight4": "车顶射灯"
++    "IGUI_VehiclePartVLSRoofHeadlight4": "车顶射灯",
++    "IGUI_VLSFluidRequestTimeout": "转水请求超时，请先确认水量后再操作。",
++    "IGUI_VLSFluidRequestFailed": "转水未完成，请检查水源、容器和电量。"
+ }
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CH/IG_UI.json
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/CH/IG_UI.json
+@@ -41,5 +41,7 @@
+     "IGUI_VehiclePartVLSRoofHeadlight1": "車頂射燈",
+     "IGUI_VehiclePartVLSRoofHeadlight2": "車頂射燈",
+     "IGUI_VehiclePartVLSRoofHeadlight3": "車頂射燈",
+-    "IGUI_VehiclePartVLSRoofHeadlight4": "車頂射燈"
++    "IGUI_VehiclePartVLSRoofHeadlight4": "車頂射燈",
++    "IGUI_VLSFluidRequestTimeout": "轉水請求逾時，請先確認水量後再操作。",
++    "IGUI_VLSFluidRequestFailed": "轉水未完成，請檢查水源、容器和電量。"
+ }
+--- a/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/EN/IG_UI.json
++++ b/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/EN/IG_UI.json
+@@ -41,5 +41,7 @@
+     "IGUI_VehiclePartVLSRoofHeadlight1": "Roof spotlight",
+     "IGUI_VehiclePartVLSRoofHeadlight2": "Roof spotlight",
+     "IGUI_VehiclePartVLSRoofHeadlight3": "Roof spotlight",
+-    "IGUI_VehiclePartVLSRoofHeadlight4": "Roof spotlight"
++    "IGUI_VehiclePartVLSRoofHeadlight4": "Roof spotlight",
++    "IGUI_VLSFluidRequestTimeout": "Transfer request timed out. Check the amounts before trying again.",
++    "IGUI_VLSFluidRequestFailed": "Transfer was not completed. Check the source, containers and battery."
+ }
