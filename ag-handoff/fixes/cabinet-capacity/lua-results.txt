@@ -1,0 +1,16 @@
+OFFLINE ONLY; interpreter=Lua 5.4; mocked Java objects; no game, no network, no live save
+[VehicleLivingSlotsKI5Campers] Adapter version RC3.8
+[VehicleLivingSlots] Server version RC3.8
+PASS 01_current_init_two_counters_one_microwave_preserves_objects
+PASS 02_repeated_init_no_extra_capacity_writes
+PASS 03_current_access_restores_injected_reset
+PASS 04_outside_or_missing_character_does_not_write
+PASS 05_wrong_vehicle_init_and_access_do_not_write
+PASS 06_same_id_stale_part_identity_rejected
+PASS 07_non_universal_part_rejected
+PASS 08_KI5_profiles_remain_50_10_20
+PASS 09_existing_update_remains_functional
+PASS 10_capacity_repair_does_not_reset_appliance_state
+PASS 11_missing_inputs_safe
+PASS 12_client_local_init_does_not_change_independent_server_copy
+RESULT 12/12 current-candidate offline checks passed; no game, network, save loading or real transfer was executed
