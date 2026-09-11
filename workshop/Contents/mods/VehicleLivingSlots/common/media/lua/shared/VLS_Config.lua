@@ -67,7 +67,6 @@ VLS.MICROWAVE_POWER_CONSUMPTION = 0.4
 VLS.WATER_PURIFICATION_POWER_CONSUMPTION = 0.4
 VLS.TELEVISION_POWER_CONSUMPTION = 0.4
 VLS.Create = VLS.Create or {}
-VLS.Init = VLS.Init or {}
 VLS.PartComplete = VLS.PartComplete or {}
 VLS.Update = VLS.Update or {}
 VLS.UninstallTest = VLS.UninstallTest or {}
@@ -799,25 +798,6 @@ function VLS.ensureUniversalContainerProfile(part)
         profile and profile.capacity and profile or nil,
         VLS.UNIVERSAL_PART_ID)
     return profile, changed
-end
-
--- Restore the installed equipment profile for this living-slot part while
--- preserving the vehicle-wide damage baseline initialization.  This must be
--- a per-part callback: VLS.Damage.Init caches by vehicle and may return after
--- the first living slot has initialized.
-function VLS.Init.UniversalSlot(vehicle, part)
-    if not vehicle or not part
-            or part:getVehicle() ~= vehicle
-            or vehicle:getPartById(part:getId()) ~= part
-            or not VLS.isUniversalPart(part) then
-        return
-    end
-
-    if VLS.Damage and VLS.Damage.Init then
-        VLS.Damage.Init(vehicle)
-    end
-
-    VLS.ensureUniversalContainerProfile(part)
 end
 
 function VLS.syncUniversalSlot(part)
@@ -1848,14 +1828,7 @@ VLS.ContainerAccess = VLS.ContainerAccess or {}
 
 function VLS.ContainerAccess.UniversalSlot(vehicle, part, character)
     if not part or not VLS.isStorageEquipment(part:getInventoryItem()) then return false end
-    if not character or character:getVehicle() ~= vehicle then return false end
-    if not vehicle or part:getVehicle() ~= vehicle
-            or vehicle:getPartById(part:getId()) ~= part
-            or not VLS.isUniversalPart(part) then
-        return false
-    end
-    VLS.ensureUniversalContainerProfile(part)
-    return true
+    return character ~= nil and character:getVehicle() == vehicle
 end
 
 function VLS.ContainerAccess.WeaponLocker(vehicle, part, character)

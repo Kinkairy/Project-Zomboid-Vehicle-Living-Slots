@@ -83,3 +83,4 @@ option VehicleLivingSlots.EnableRoofRack = {
     page = VehicleLivingSlots,
     translation = VehicleLivingSlots_EnableRoofRack,
 }
+

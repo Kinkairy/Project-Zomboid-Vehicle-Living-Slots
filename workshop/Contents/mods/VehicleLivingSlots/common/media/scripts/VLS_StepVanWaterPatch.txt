@@ -254,7 +254,7 @@ part SeatBed
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -292,7 +292,7 @@ part VLSLargeVanSlot2
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -330,7 +330,7 @@ part VLSLargeVanSlot3
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -903,7 +903,7 @@ part SeatBed
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -941,7 +941,7 @@ part VLSLargeVanSlot2
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -979,7 +979,7 @@ part VLSLargeVanSlot3
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -1063,7 +1063,7 @@ part VLSLargeVanSlot4
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
@@ -1101,7 +1101,7 @@ part VLSLargeVanSlot5
                 soundMap = ContainerPut VehicleTrunkTransferItem,
                 soundMap = ContainerTake VehicleTrunkTransferItem,
             }
-            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Damage.Init, update = VLS.Update.UniversalSlot, }
             table install
             {
                 items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }

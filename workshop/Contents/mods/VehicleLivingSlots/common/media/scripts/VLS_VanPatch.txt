@@ -203,7 +203,7 @@ part SeatBed
             lua
             {
                 create = VLS.Create.UniversalSlot,
-                init = VLS.Init.UniversalSlot,
+                init = VLS.Damage.Init,
                 update = VLS.Update.UniversalSlot,
             }
             table install
@@ -485,7 +485,7 @@ part SeatBed
             lua
             {
                 create = VLS.Create.UniversalSlot,
-                init = VLS.Init.UniversalSlot,
+                init = VLS.Damage.Init,
                 update = VLS.Update.UniversalSlot,
             }
             table install
