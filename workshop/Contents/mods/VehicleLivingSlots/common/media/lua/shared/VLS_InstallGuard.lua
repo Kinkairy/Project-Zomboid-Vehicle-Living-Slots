@@ -129,10 +129,14 @@ function VLSTelevisionUninstallVehiclePart:complete()
         self.character:addMechanicsItem(
             item:getID() .. self.vehicle:getMechanicalID() .. "0",
             self.part, getGameTime():getCalender():getTimeInMillis())
-    elseif ZombRand(failure) < 100 then
+    elseif ZombRand(100) < failure then
         self.part:setCondition(self.part:getCondition() - ZombRand(5, 10))
         self.vehicle:transmitPartCondition(self.part)
         playServerSound("PZ_MetalSnap", self.character:getCurrentSquare())
+        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
+            { success = false })
+        addXp(self.character, Perks.Mechanics, 1)
+    else
         self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
             { success = false })
         addXp(self.character, Perks.Mechanics, 1)

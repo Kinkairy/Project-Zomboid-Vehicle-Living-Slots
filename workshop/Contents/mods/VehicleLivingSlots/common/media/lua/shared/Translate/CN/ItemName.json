@@ -1,3 +1,5 @@
 {
-    "Base.VLSFixedRoofRack": "行李架"
+  "Base.VLSFixedRoofRack": "行李架",
+  "Base.VLSWindowArmor": "车窗护甲",
+  "Base.VLSBumperArmor": "管材保险杠"
 }

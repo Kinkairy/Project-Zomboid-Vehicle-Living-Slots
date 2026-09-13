@@ -1,0 +1,5 @@
+module Base
+{
+ item VLSWindowArmor { ItemType=base:normal, DisplayCategory=VehicleMaintenance, DisplayName=VLS Window Armor, Icon=MetalBar, Weight=3, ConditionMax=100, }
+ item VLSBumperArmor { ItemType=base:normal, DisplayCategory=VehicleMaintenance, DisplayName=VLS Pipe Bumper, Icon=MetalBar, Weight=5, ConditionMax=100, }
+}

@@ -21,6 +21,7 @@ require "RadioCom/ISRadioAction"
 require "TimedActions/ISDeviceBatteryAction"
 
 print("[VehicleLivingSlots] Client version " .. VLS.VERSION)
+print("[VehicleLivingSlots] Countertop context menu fix 1 loaded")
 
 local BED_ICON = getTexture("media/ui/vehicles/vls_vehicle_bed.png")
 local SLEEP_ICON = getTexture("media/ui/vehicles/vehicle_sleep.png")
@@ -188,6 +189,64 @@ local function makeVLSHandcraftLogicProxy(realLogic)
     return proxy
 end
 
+-- A menu query happens before OnNewCraft. Java getUniqueRecipeItems searches
+-- world furniture internally, so supplement only its missing AnySurfaceCraft
+-- results using the same native validity checks and the installed VLS surface.
+local function getVLSContextRecipes(selectedItem, playerObj, recipeList, containers)
+    local surface = VLS.getVehicleGenericCraftSurface(playerObj)
+    if not surface or not selectedItem or not recipeList then return recipeList end
+
+    local recipes = CraftRecipeManager.queryRecipes("AnySurfaceCraft")
+    local logic = HandcraftLogic.new(playerObj, nil, nil)
+    logic:setIsoObject(logic:findCraftSurface(playerObj, 2) or surface)
+    logic:setContainers(containers)
+    local result = nil
+    for i = 0, recipes:size() - 1 do
+        local recipe = recipes:get(i)
+        if recipe:isAnySurfaceCraft()
+                and not recipeList:contains(recipe)
+                and (not result or not result:contains(recipe))
+                and CraftRecipeManager.isValidRecipeForCharacter(
+                    recipe, playerObj, nil, containers)
+                and CraftRecipeManager.getValidInputScriptForItem(
+                    recipe, selectedItem, playerObj)
+                and recipe:OnTestItem(selectedItem, playerObj) then
+            logic:setRecipeFromContextClick(recipe, selectedItem)
+            if logic:canPerformCurrentRecipe() then
+                if not result then
+                    result = ArrayList.new()
+                    result:addAll(recipeList)
+                end
+                result:add(recipe)
+            end
+        end
+    end
+    return result or recipeList
+end
+
+-- Both context-menu presentation and execution create HandcraftLogic. Bind the
+-- surface at creation for tooltips; only the execution path needs a proxy for
+-- the original function's explicit findCraftSurface call. Restore even on error.
+local function withVLSHandcraftLogic(callback, useProxy, ...)
+    local realClass = HandcraftLogic
+    HandcraftLogic = setmetatable({
+        new = function(character, craftBench, isoObject)
+            local logic = realClass.new(character, craftBench, isoObject)
+            if not craftBench and not isoObject then
+                local surface = VLS.getVehicleGenericCraftSurface(character)
+                if surface then
+                    logic:setIsoObject(logic:findCraftSurface(character, 2) or surface)
+                end
+            end
+            return useProxy and makeVLSHandcraftLogicProxy(logic) or logic
+        end,
+    }, { __index = realClass })
+    local results = { pcall(callback, ...) }
+    HandcraftLogic = realClass
+    if not results[1] then error(results[2], 0) end
+    return unpack(results, 2)
+end
+
 local function installGenericCraftSurfaceClientHooks()
     if VLS.installGenericCraftSurfaceActionHooks then
         VLS.installGenericCraftSurfaceActionHooks()
@@ -269,25 +328,32 @@ local function installGenericCraftSurfaceClientHooks()
                     all, eatPercentage)
             end
 
-            local realHandcraftLogicClass = HandcraftLogic
-            HandcraftLogic = {
-                new = function(character, craftBench, isoObject)
-                    local realLogic = realHandcraftLogicClass.new(
-                        character, craftBench, isoObject)
-                    return makeVLSHandcraftLogicProxy(realLogic)
-                end,
-            }
-
-            local results = { pcall(previousOnNewCraft,
-                selectedItem, recipe, playerNum, all, eatPercentage) }
-            HandcraftLogic = realHandcraftLogicClass
-
-            if not results[1] then error(results[2], 0) end
-            return unpack(results, 2)
+            return withVLSHandcraftLogic(previousOnNewCraft, true,
+                selectedItem, recipe, playerNum, all, eatPercentage)
         end
 
         ISInventoryPaneContextMenu.OnNewCraft =
             CraftSurfaceHooks.onNewCraftWrapper
+    end
+
+    if ISInventoryPaneContextMenu
+            and ISInventoryPaneContextMenu.addNewCraftingDynamicalContextMenu
+            and ISInventoryPaneContextMenu.addNewCraftingDynamicalContextMenu
+                ~= CraftSurfaceHooks.contextRecipesWrapper then
+        local previous = ISInventoryPaneContextMenu.addNewCraftingDynamicalContextMenu
+        CraftSurfaceHooks.contextRecipesWrapper = function(selectedItem, context,
+                recipeList, playerNum, containerList)
+            local playerObj = getSpecificPlayer(playerNum)
+            if not VLS.getVehicleGenericCraftSurface(playerObj) then
+                return previous(selectedItem, context, recipeList, playerNum, containerList)
+            end
+            local containers = ISInventoryPaneContextMenu.getContainers(playerObj)
+            local recipes = getVLSContextRecipes(selectedItem, playerObj, recipeList, containers)
+            return withVLSHandcraftLogic(previous, false,
+                selectedItem, context, recipes, playerNum, containerList)
+        end
+        ISInventoryPaneContextMenu.addNewCraftingDynamicalContextMenu =
+            CraftSurfaceHooks.contextRecipesWrapper
     end
 end
 
@@ -369,6 +435,7 @@ local function enterBed(playerObj, vehicle, sleepAfterEntry)
         }
     else
         pendingBedRest[playerObj:getPlayerNum()] = {
+            player = playerObj,
             vehicle = vehicle,
             ticks = 600,
         }
@@ -422,16 +489,19 @@ local function processPendingBedRest()
         local vehicle = playerObj and playerObj:getVehicle() or nil
         local playerData = playerObj and getPlayerData(playerNum) or nil
         local sleepModal = playerData and playerData.vehicleSleepModal
-
-        if not playerObj or not vehicle or pending.vehicle ~= vehicle
-                or not VLS.isUsingBedSeat(playerObj, vehicle)
+        if not playerObj or pending.player ~= playerObj or playerObj:isDead()
+                or (vehicle and pending.vehicle ~= vehicle)
+                or (pending.entered and not vehicle)
                 or playerObj:isAsleep() or pendingBedSleep[playerNum]
                 or sleepModal then
             pendingBedRest[playerNum] = nil
-        elseif isBedEntryComplete(playerObj, vehicle) then
+        elseif vehicle and isBedEntryComplete(playerObj, pending.vehicle) then
             pendingBedRest[playerNum] = nil
             ISTimedActionQueue.add(ISVLSVehicleRestAction:new(playerObj))
         else
+            -- Walking to the door / entering / changing seats are asynchronous.
+            -- A player still outside the car is not an immediate cancellation.
+            if vehicle then pending.entered = true end
             pending.ticks = pending.ticks - 1
             if pending.ticks <= 0 then pendingBedRest[playerNum] = nil end
         end
@@ -486,6 +556,7 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
         part = part,
         playerObj = playerObj,
         isVLSMicrowaveProxy = true,
+        itemId = part:getInventoryItem():getID(),
     }
     proxy.power = {
         isPowered = function()
@@ -532,18 +603,54 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
     end
 
     function proxy:sync()
-        local data = self:getData()
-        data.vlsMicrowaveTimer = self:getTimer()
-        data.vlsMicrowaveTemperature = self:getMaxTemperature()
+        local item = self.part:getInventoryItem()
+        if not item or item:getID() ~= self.itemId
+                or self.playerObj:getVehicle() ~= self.vehicle then return end
         sendApplianceCommand(self.playerObj, "setMicrowaveParams", {
             vehicle = self.vehicle:getId(),
             part = self.part:getId(),
-            timer = data.vlsMicrowaveTimer,
-            temperature = data.vlsMicrowaveTemperature,
+            item = self.itemId,
+            timer = self:getTimer(),
+            temperature = self:getMaxTemperature(),
         })
     end
 
     return proxy
+end
+
+-- ISMicrowaveUI.initialise stores its Close BUTTON in ui.close. Do not call
+-- ui:close(), which tries to call that button table instead of a method.
+local function closeVLSMicrowaveWindow(ui)
+    if not ui then return end
+    ui:setVisible(false)
+    ui:removeFromUIManager()
+    local playerNum = ui.character and ui.character:getPlayerNum() or ui.playerNum
+    if playerNum ~= nil and ISMicrowaveUI.instance
+            and ISMicrowaveUI.instance[playerNum + 1] == ui then
+        ISMicrowaveUI.instance[playerNum + 1] = nil
+    end
+    local pad = playerNum ~= nil and JoypadState.players[playerNum + 1]
+    if pad and pad.focus == ui then setJoypadFocus(playerNum, ui.prevFocus) end
+end
+
+-- VLS_MICROWAVE_PAD_BASELINE_FIX1: honour the A/B shortcuts before focused knobs.
+-- The generic parent consumes A on the focused knob (or another button).
+-- Dispatch the intended button once; forceClick keeps its enabled/visible checks.
+local function onVLSMicrowaveJoypadDown(ui, button, joypadData)
+    if button == Joypad.AButton then
+        -- Re-evaluate power before invoking the SAME callback as the mouse.
+        -- Never force-enable the button and never dispatch through the knob.
+        if ui.updateButtons then ui:updateButtons() end
+        print("[VLS 6ceb908-fix1] microwave A received; enabled="
+            .. tostring(ui.ok and ui.ok.enable))
+        if ui.ok then ui.ok:forceClick() end
+        return
+    end
+    if button == Joypad.BButton then
+        if ui.close then ui.close:forceClick() end
+        return
+    end
+    return ISPanelJoypad.onJoypadDown(ui, button, joypadData)
 end
 
 local function isVLSMicrowaveWindowValid(ui, proxy)
@@ -554,6 +661,7 @@ local function isVLSMicrowaveWindowValid(ui, proxy)
     return playerObj and vehicle and part
         and playerObj:getVehicle() == vehicle
         and VLS.getInstalledPart(vehicle, part:getId()) == part
+        and item and item:getID() == proxy.itemId
         and VLS.getEquipmentCapability(item) == "cooking"
 end
 
@@ -571,7 +679,7 @@ local function installMicrowaveWindowClientHook()
         end
 
         if not isVLSMicrowaveWindowValid(self, proxy) then
-            self:close()
+            closeVLSMicrowaveWindow(self)
             return
         end
 
@@ -600,27 +708,28 @@ installMicrowaveWindowClientHook()
 
 local function onVLSMicrowaveClick(ui, button)
     if button.internal == "CLOSE" then
-        local result = vanillaMicrowaveOnClick(ui, button)
-        local playerNum = ui.character and ui.character:getPlayerNum()
-        if playerNum and ISMicrowaveUI.instance
-                and ISMicrowaveUI.instance[playerNum + 1] == ui then
-            ISMicrowaveUI.instance[playerNum + 1] = nil
-        end
-        return result
+        closeVLSMicrowaveWindow(ui)
+        return
     end
     if button.internal ~= "OK" then return end
 
     local proxy = ui.oven
+    if not isVLSMicrowaveWindowValid(ui, proxy) then closeVLSMicrowaveWindow(ui); return end
     if not proxy:Activated() and not proxy:getContainer():isPowered() then
         HaloTextHelper.addBadText(ui.character, getText("ContextMenu_VLSNoAuxPower"))
         return
     end
 
     ui.character:getEmitter():playSound("ToggleStove")
+    local requestedTimer = math.max(60, ui.timerKnob:getValue() * 60)
+    proxy.pendingTimer = requestedTimer
     sendApplianceCommand(ui.character, "toggleMicrowave", {
         vehicle = proxy.vehicle:getId(),
         part = proxy.part:getId(),
-        timer = ui.timerKnob:getValue() * 60,
+        item = proxy.itemId,
+        -- A start with a zero timer otherwise looks like a dead On button.
+        active = not proxy:Activated(),
+        timer = requestedTimer,
         temperature = ui.tempKnob:getValue(),
     })
 end
@@ -646,7 +755,10 @@ local function openMicrowaveSettings(playerObj, vehicle, part)
     ui:initialise()
     ui.onClick = onVLSMicrowaveClick
     ui.ok.onclick = onVLSMicrowaveClick
+    ui.close.onclick = onVLSMicrowaveClick
+    ui.onJoypadDown = onVLSMicrowaveJoypadDown
     ui:addToUIManager()
+    print("[VLS 6ceb908-fix1] microwave window uses direct A/B dispatch")
 
     if JoypadState.players[playerNum + 1] then
         ui.prevFocus = JoypadState.players[playerNum + 1].focus
@@ -734,6 +846,7 @@ function VLSMicrowaveToggleHandler:perform()
         sendApplianceCommand(self.playerObj, "stopMicrowave", {
             vehicle = vehicle:getId(),
             part = part:getId(),
+            item = part:getInventoryItem():getID(),
         })
         return
     end
@@ -744,6 +857,8 @@ function VLSMicrowaveToggleHandler:perform()
     sendApplianceCommand(self.playerObj, "toggleMicrowave", {
         vehicle = vehicle:getId(),
         part = part:getId(),
+        item = part:getInventoryItem():getID(),
+        active = true,
         timer = math.max(60, data.vlsMicrowaveTimer or 0),
         temperature = data.vlsMicrowaveTemperature or 90,
     })
@@ -759,6 +874,42 @@ end
 -- every client Lua load so reconnect/reload cannot leave stale classes.
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
+
+local fluidRequestSequence = 0
+local FLUID_REQUEST_TIMEOUT_MS = 15000
+
+local function finishVLSFluidRequest(ui, status)
+    ui.vlsVehicleRequest = nil
+    ui.panelLeft:setPanelLocked(false)
+    ui.panelRight:setPanelLocked(false)
+    -- Let vanilla re-evaluate available amounts; do not force-enable TRANSFER.
+    ui.disableTransfer = false
+    ui.disableSwap = false
+    ui:validatePanel()
+    if status and status ~= "ok" then
+        HaloTextHelper.addBadText(ui.player, getText(status == "timeout"
+            and "IGUI_VLSFluidRequestTimeout" or "IGUI_VLSFluidRequestFailed"))
+    end
+end
+
+local function onVLSFluidTransferResult(args)
+    if type(args) ~= "table" or type(args.requestId) ~= "string" then return end
+    for playerNum = 0, 3 do
+        local state = ISFluidTransferUI.players[playerNum]
+        local ui = state and state.instance
+        local pending = ui and ui.vlsVehicleRequest
+        if pending and pending.id == args.requestId
+                and pending.vehicle == args.vehicle then
+            if args.status ~= "ok" then
+                print("[VLS 6ceb908-fix1] water rejected: " .. tostring(args.reason or args.status))
+            end
+            finishVLSFluidRequest(ui, args.status)
+            return
+        end
+    end
+end
+
+VLS.onFluidTransferResult = onVLSFluidTransferResult
 
 local function onVLSFluidTransferClick(ui, button)
     if button.internal ~= "TRANSFER" then
@@ -780,24 +931,21 @@ local function onVLSFluidTransferClick(ui, button)
         ui.panelLeft.container, ui.panelRight.container, ui.info.transferring)
     if not args then return end
 
-    local amounts = {}
-    for _, panel in ipairs({ ui.panelLeft, ui.panelRight }) do
-        local endpoint = panel.container
-        if endpoint and endpoint.vlsVehicleFluidEndpoint then
-            amounts[endpoint.vlsFluidPartId] =
-                endpoint:getFluidContainer():getAmount()
-        end
-    end
-    ui.vlsVehicleRequest = { amounts = amounts }
-    -- Installed vehicle endpoints are not vanilla serializable fluid owners.
-    -- Only this boundary uses the shared authoritative server adapter.  Do
-    -- not manufacture a second action merely to draw a progress bar.
-    sendApplianceCommand(ui.player, "transferWater", args)
+    if ui.vlsVehicleRequest then return end
+    fluidRequestSequence = fluidRequestSequence + 1
+    args.requestId = tostring(getTimestampMs()) .. ":"
+        .. tostring(ui.player:getPlayerNum()) .. ":" .. tostring(fluidRequestSequence)
+    ui.vlsVehicleRequest = { id = args.requestId, vehicle = args.vehicle,
+        started = getTimestampMs() }
     ui.slider:setCurrentValue(0)
     ui.disableTransfer = true
     ui.disableSwap = true
+    ui.btnTransfer:setEnable(false)
+    ui.btnSwap:setEnable(false)
     ui.panelLeft:setPanelLocked(true)
     ui.panelRight:setPanelLocked(true)
+    -- Lock BEFORE dispatch: single-player can reply synchronously.
+    sendApplianceCommand(ui.player, "transferWater", args)
 end
 
 local function refreshVLSFluidPanelEndpoint(ui, panel)
@@ -819,25 +967,12 @@ local function updateVLSFluidTransfer(ui)
     vanillaFluidUpdate(ui)
     local request = ui.vlsVehicleRequest
     if not request then return end
-
-    local changed = false
-    for _, panel in ipairs({ ui.panelLeft, ui.panelRight }) do
-        local endpoint = panel.container
-        local previous = endpoint and endpoint.vlsVehicleFluidEndpoint
-            and request.amounts[endpoint.vlsFluidPartId] or nil
-        if previous ~= nil and math.abs(
-                endpoint:getFluidContainer():getAmount() - previous) > 0.00001 then
-            changed = true
-            break
-        end
-    end
-    if changed then
-        ui.vlsVehicleRequest = nil
+    local elapsed = getTimestampMs() - request.started
+    if elapsed < 0 or elapsed >= FLUID_REQUEST_TIMEOUT_MS then
+        -- No automatic replay: a timed-out transfer may already have executed.
+        finishVLSFluidRequest(ui, "timeout")
         return
     end
-
-    -- Prevent duplicate submissions until an authoritative installed-endpoint
-    -- amount is synchronized. Closing the vanilla panel remains available.
     ui.disableTransfer = true
     ui.disableSwap = true
     ui.btnTransfer:setEnable(false)
@@ -928,6 +1063,8 @@ local function onVLSFluidDropBoxMouseDown(dropBox, x, y)
     end
 
     local playerNum = ui.player:getPlayerNum()
+    local pad = JoypadState.players[playerNum + 1]
+    local oldFocus = pad and pad.focus or nil
     local context
     if #validItems > 0 then
         local originalGetValidItems = dropBox.getValidItems
@@ -959,6 +1096,12 @@ local function onVLSFluidDropBoxMouseDown(dropBox, x, y)
     if panel.isLeft then
         local leftX = ui:getAbsoluteX() - context:getWidth()
         context:setSlideGoalX(leftX + 20, leftX)
+    end
+    context:bringToTop()
+    if pad and #context.options > 0 then
+        context.origin = oldFocus or ui
+        context.mouseOver = 1
+        setJoypadFocus(playerNum, context)
     end
 end
 
@@ -994,6 +1137,7 @@ local function openVehicleFluidTransfer(playerObj, vehicle, fluidItem, part)
     ui:instantiate()
     ui.vlsVehicleFluidEndpoints = {}
     refreshVLSFluidEndpointCatalog(ui)
+    ui.onButton = onVLSFluidTransferClick
     ui.btnTransfer.onclick = onVLSFluidTransferClick
     ui.update = updateVLSFluidTransfer
     configureVLSFluidPanel(ui, ui.panelLeft)
@@ -1010,56 +1154,100 @@ local function openVehicleFluidTransfer(playerObj, vehicle, fluidItem, part)
 end
 
 local locallyCooledFood = {}
+local coolingSnapshots = {}
+local coolingRequests = {}
+
+local function coolingKey(vehicleId, partId)
+    return tostring(vehicleId) .. ":" .. tostring(partId)
+end
+
+local function onVLSAuditServerCommand(module, command, args)
+    if module ~= VLS.MOD_ID or type(args) ~= "table" then return end
+    if command == "fluidTransferResult" then
+        onVLSFluidTransferResult(args)
+    elseif command == "coolingSnapshot" and type(args.entries) == "table"
+            and type(args.sequence) == "number" and type(args.epoch) == "number"
+            and type(args.hours) == "number" and args.part then
+        local key = coolingKey(args.vehicle, args.part)
+        local old = coolingSnapshots[key]
+        if old and (args.epoch < old.epoch or (args.epoch == old.epoch
+                and args.sequence < old.sequence)) then return end
+        if not old or old.epoch ~= args.epoch or old.sequence ~= args.sequence then
+            old = { epoch = args.epoch, sequence = args.sequence,
+                hours = args.hours, entries = {} }
+            coolingSnapshots[key] = old
+        end
+        old.received = getTimestampMs()
+        for _, entry in ipairs(args.entries) do
+            if type(entry.id) == "number" and type(entry.age) == "number"
+                    and type(entry.freezing) == "number" and type(entry.heat) == "number" then
+                old.entries[entry.id] = entry
+            end
+        end
+    end
+end
+
+if not VLS.auditServerReplyHook then
+    VLS.auditServerReplyHook = true
+    Events.OnServerCommand.Add(onVLSAuditServerCommand)
+end
+
+local function requestCoolingSnapshot(playerObj, vehicle, partId)
+    if not isClient() then return end
+    local key = coolingKey(vehicle:getId(), partId)
+    local now = getTimestampMs()
+    local sample = coolingSnapshots[key]
+    if sample and now - sample.received >= 0
+            and now - sample.received < 5000 then return end
+    local prior = coolingRequests[key]
+    if prior and now >= prior and now - prior < 2000 then return end
+    coolingRequests[key] = now
+    sendApplianceCommand(playerObj, "requestCoolingSnapshot", {
+        vehicle = vehicle:getId(), part = partId })
+end
 
 local function protectCooledFood(item, currentHours, vehicleId, containerId,
         freezer, seen)
     if not instanceof(item, "Food") then return end
-
     local itemId = item:getID()
     seen[itemId] = true
+    -- Single-player uses the server simulation in this same process.
+    if not isClient() then return end
+    local snapshot = coolingSnapshots[coolingKey(vehicleId, containerId)]
+    local now = getTimestampMs()
+    if not snapshot or now < snapshot.received or now - snapshot.received > 15000 then
+        locallyCooledFood[itemId] = nil
+        return
+    end
+    local authoritative = snapshot.entries[itemId]
+    if not authoritative then return end
     local state = locallyCooledFood[itemId]
-    if not state or state.vehicleId ~= vehicleId
-            or state.containerId ~= containerId
-            or currentHours < state.lastHours then
-        state = {
-            age = item:getAge(),
-            freezing = item:getFreezingTime(),
-            heat = item:getHeat(),
-            lastHours = currentHours,
-            vehicleId = vehicleId,
-            containerId = containerId,
-        }
+    if not state or state.vehicleId ~= vehicleId or state.containerId ~= containerId
+            or state.epoch ~= snapshot.epoch or state.sequence ~= snapshot.sequence then
+        -- Accept a NEW server snapshot in BOTH directions. Numeric min/max is
+        -- not a test for authority. Prediction never becomes the next baseline.
+        state = { age = authoritative.age, freezing = authoritative.freezing,
+            heat = authoritative.heat, lastHours = snapshot.hours,
+            vehicleId = vehicleId, containerId = containerId,
+            epoch = snapshot.epoch, sequence = snapshot.sequence }
         locallyCooledFood[itemId] = state
     end
-
-    local elapsedHours = math.max(0, currentHours - state.lastHours)
-    -- Accept only a lower authoritative age. B42's local unpowered-vehicle
-    -- update may raise the visible age between server synchronizations.
-    state.age = math.min(state.age, item:getAge())
+    local elapsed = math.min(1 / 60, math.max(0, currentHours - state.lastHours))
+    local freezing = state.freezing
     if freezer and item:canBeFrozen() then
-        -- Accept a newer authoritative server value, but never the lower value
-        -- produced locally by B42's unpowered-vehicle thaw check.
-        state.freezing = math.max(state.freezing, item:getFreezingTime())
-        state.freezing = math.min(100,
-            state.freezing + elapsedHours / 4 * 100)
-    elseif state.freezing > 0 then
-        state.freezing = math.max(0,
-            state.freezing - elapsedHours / 3 * 100)
+        freezing = math.min(100, freezing + elapsed / 4 * 100)
+    elseif freezing > 0 then
+        freezing = math.max(0, freezing - elapsed / 3 * 100)
     end
-    state.lastHours = currentHours
-
-    -- B42's Food.updateAge sees every vehicle ItemContainer as unpowered and
-    -- otherwise immediately undoes the server-owned refrigeration state while
-    -- the inventory is visible.  Restore only these two VLS containers; the
-    -- server remains authoritative for age, freezing and battery consumption.
-    local ageFactor = state.freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
-    state.age = state.age + elapsedHours * VLS.getFoodRotSpeed()
-        / 24 * ageFactor
-    item:setAge(state.age)
+    -- Preserve the existing fully-frozen ageFactor=0 balance in this bugfix.
+    local ageFactor = freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
+    item:setAge(state.age + elapsed * VLS.getFoodRotSpeed() / 24 * ageFactor)
     VLS.preservePoweredFoodHeat(item, state, freezer and 0.1 or 0.2)
-    item:setFreezingTime(state.freezing)
+    item:setFreezingTime(freezing)
     item:setLastAged(currentHours)
 end
+
+
 
 -- The vanilla page can retain its selected container while hidden/collapsed.
 -- Keep this gate identical to ISInventoryPage's visible-container contract.
@@ -1128,6 +1316,15 @@ local function processVisibleAppliances(refreshedPage)
             universalPart:getInventoryItem()) == "cooling"
             and VLS.hasAuxBatteryPower(vehicle, VLS.getFridgeDrainPerMinute())
         local containerId, vehicleId = part:getId(), vehicle:getId()
+        if cooling then
+            for playerNum = 0, 3 do
+                local playerObj = getSpecificPlayer(playerNum)
+                if playerObj and playerObj:getVehicle() == vehicle then
+                    requestCoolingSnapshot(playerObj, vehicle, containerId)
+                    break
+                end
+            end
+        end
         local itemIds = {}
         local namesChanged = false
         VLS.walkApplianceContainer(container, function(item)
@@ -1159,10 +1356,19 @@ local function processVisibleAppliances(refreshedPage)
     end
     if not foundVisibleVLSContainer then
         table.wipe(locallyCooledFood)
+        table.wipe(coolingSnapshots)
+        table.wipe(coolingRequests)
         return
     end
     for itemId in pairs(locallyCooledFood) do
         if not seen[itemId] then locallyCooledFood[itemId] = nil end
+    end
+    local now = getTimestampMs()
+    for key, sample in pairs(coolingSnapshots) do
+        if now < sample.received or now - sample.received > 15000 then
+            coolingSnapshots[key] = nil
+            coolingRequests[key] = nil
+        end
     end
     return nextCheckTick
 end
@@ -1509,6 +1715,7 @@ if not VLS.microwaveTransferHookApplied then
                     sendApplianceCommand(self.character, "stopMicrowave", {
                         vehicle = part:getVehicle():getId(),
                         part = part:getId(),
+                        item = part:getInventoryItem():getID(),
                     })
                 end
                 changed[container] = container:getType()
@@ -1683,3 +1890,5 @@ RuntimeHookRefresh.onCreatePlayer = installVLSRuntimeHooks
 Events.OnGameStart.Add(RuntimeHookRefresh.onGameStart)
 Events.OnCreatePlayer.Add(RuntimeHookRefresh.onCreatePlayer)
 installVLSRuntimeHooks()
+
+print("[VLS 6ceb908-fix1] client loaded; current commands only")

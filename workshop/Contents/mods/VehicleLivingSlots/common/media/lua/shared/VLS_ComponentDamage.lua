@@ -195,4 +195,7 @@ function D.Update(vehicle)
     end
 end
 
+-- Native vehicle callbacks resolve this candidate namespace at script load.
+require "VLS_BodyArmor"
+
 return D

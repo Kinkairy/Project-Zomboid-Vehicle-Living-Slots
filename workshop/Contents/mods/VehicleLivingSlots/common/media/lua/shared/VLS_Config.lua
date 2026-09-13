@@ -5,7 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "RC3.8"
+VLS.VERSION = "3.8.1"
+VLS.BUILD_ID = "6ceb908-fix1"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
@@ -67,6 +68,7 @@ VLS.MICROWAVE_POWER_CONSUMPTION = 0.4
 VLS.WATER_PURIFICATION_POWER_CONSUMPTION = 0.4
 VLS.TELEVISION_POWER_CONSUMPTION = 0.4
 VLS.Create = VLS.Create or {}
+VLS.Init = VLS.Init or {}
 VLS.PartComplete = VLS.PartComplete or {}
 VLS.Update = VLS.Update or {}
 VLS.UninstallTest = VLS.UninstallTest or {}
@@ -800,6 +802,25 @@ function VLS.ensureUniversalContainerProfile(part)
     return profile, changed
 end
 
+-- Restore the installed equipment profile for this living-slot part while
+-- preserving the vehicle-wide damage baseline initialization.  This must be
+-- a per-part callback: VLS.Damage.Init caches by vehicle and may return after
+-- the first living slot has initialized.
+function VLS.Init.UniversalSlot(vehicle, part)
+    if not vehicle or not part
+            or part:getVehicle() ~= vehicle
+            or vehicle:getPartById(part:getId()) ~= part
+            or not VLS.isUniversalPart(part) then
+        return
+    end
+
+    if VLS.Damage and VLS.Damage.Init then
+        VLS.Damage.Init(vehicle)
+    end
+
+    VLS.ensureUniversalContainerProfile(part)
+end
+
 function VLS.syncUniversalSlot(part)
     if not VLS.isUniversalPart(part) then return false end
     local container = part:getItemContainer()
@@ -830,6 +851,8 @@ function VLS.syncUniversalSlot(part)
         data.vlsMicrowaveActive = false
         data.vlsMicrowaveTimer = 0
         data.vlsMicrowaveRemaining = 0
+        data.vlsMicrowaveLastHours = nil
+        data.vlsMicrowaveClockItemId = nil
         data.vlsMicrowaveTemperature = 90
         container:setCustomTemperature(1.0)
         container:setAgeFactor(1.0)
@@ -1579,6 +1602,14 @@ function VLS.isPlayerAtWaterTankInlet(vehicle, part, playerObj)
     if not vehicle or not part or not playerObj or not part:getArea() then
         return false
     end
+    -- Compare loaded grid floors, not the vehicle's floating physics height:
+    -- suspension/bounce can put the vehicle origin slightly below ground level.
+    local playerSquare = playerObj:getSquare()
+    local vehicleSquare = vehicle:getSquare()
+    if not playerSquare or not vehicleSquare
+            or playerSquare:getZ() ~= vehicleSquare:getZ() then
+        return false
+    end
     local areaId = part:getArea()
     if vehicle:isInArea(areaId, playerObj) then return true end
 
@@ -1828,7 +1859,14 @@ VLS.ContainerAccess = VLS.ContainerAccess or {}
 
 function VLS.ContainerAccess.UniversalSlot(vehicle, part, character)
     if not part or not VLS.isStorageEquipment(part:getInventoryItem()) then return false end
-    return character ~= nil and character:getVehicle() == vehicle
+    if not character or character:getVehicle() ~= vehicle then return false end
+    if not vehicle or part:getVehicle() ~= vehicle
+            or vehicle:getPartById(part:getId()) ~= part
+            or not VLS.isUniversalPart(part) then
+        return false
+    end
+    VLS.ensureUniversalContainerProfile(part)
+    return true
 end
 
 function VLS.ContainerAccess.WeaponLocker(vehicle, part, character)

@@ -1,0 +1,460 @@
+module Base
+{
+ template vehicle VLSBodyArmorStepVan
+ {
+  part VLSArmorWindshield
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanWindshield, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanWindshieldDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanWindshieldDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontLeft
+  {
+   category=door, area=SeatFrontLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanWindowFrontLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanWindowFrontLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanWindowFrontLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontRight
+  {
+   category=door, area=SeatFrontRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanWindowFrontRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanWindowFrontRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanWindowFrontRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindshieldRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanWindshieldRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanWindshieldRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanWindshieldRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperFront
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanBumperFront, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanBumperFrontDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanBumperFrontDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyStepVanBumperRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyStepVanBumperRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyStepVanBumperRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+ }
+ template vehicle VLSBodyArmorVan
+ {
+  part VLSArmorWindshield
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanWindshield, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanWindshieldDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanWindshieldDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontLeft
+  {
+   category=door, area=SeatFrontLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanWindowFrontLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanWindowFrontLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanWindowFrontLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontRight
+  {
+   category=door, area=SeatFrontRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanWindowFrontRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanWindowFrontRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanWindowFrontRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindshieldRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanWindshieldRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanWindshieldRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanWindshieldRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperFront
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanBumperFront, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanBumperFrontDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanBumperFrontDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanBumperRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanBumperRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanBumperRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+ }
+ template vehicle VLSBodyArmorVanSeats
+ {
+  part VLSArmorWindshield
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindshield, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindshieldDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindshieldDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontLeft
+  {
+   category=door, area=SeatFrontLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindowFrontLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindowFrontLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindowFrontLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontRight
+  {
+   category=door, area=SeatFrontRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindowFrontRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindowFrontRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindowFrontRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowMiddleLeft
+  {
+   category=door, area=SeatMiddleLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindowMiddleLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindowMiddleLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindowMiddleLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowMiddleRight
+  {
+   category=door, area=SeatMiddleRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindowMiddleRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindowMiddleRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindowMiddleRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindshieldRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsWindshieldRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsWindshieldRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsWindshieldRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperFront
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsBumperFront, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsBumperFrontDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsBumperFrontDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyVanSeatsBumperRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyVanSeatsBumperRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyVanSeatsBumperRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+ }
+ template vehicle VLSBodyArmorSUV
+ {
+  part VLSArmorWindshield
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindshield, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindshieldDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindshieldDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontLeft
+  {
+   category=door, area=SeatFrontLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindowFrontLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindowFrontLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindowFrontLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontRight
+  {
+   category=door, area=SeatFrontRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindowFrontRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindowFrontRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindowFrontRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowRearLeft
+  {
+   category=door, area=SeatRearLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindowRearLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindowRearLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindowRearLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowRearRight
+  {
+   category=door, area=SeatRearRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindowRearRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindowRearRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindowRearRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindshieldRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVWindshieldRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVWindshieldRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVWindshieldRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperFront
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVBumperFront, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVBumperFrontDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVBumperFrontDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodySUVBumperRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodySUVBumperRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodySUVBumperRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+ }
+ template vehicle VLSBodyArmorPickUpVan
+ {
+  part VLSArmorWindshield
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanWindshield, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanWindshieldDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanWindshieldDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontLeft
+  {
+   category=door, area=SeatFrontLeft, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanWindowFrontLeft, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanWindowFrontLeftDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanWindowFrontLeftDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindowFrontRight
+  {
+   category=door, area=SeatFrontRight, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanWindowFrontRight, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanWindowFrontRightDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanWindowFrontRightDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSArmorWindshieldRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSWindowArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanWindshieldRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanWindshieldRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanWindshieldRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperFront
+  {
+   category=bodywork, area=Engine, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanBumperFront, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanBumperFrontDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanBumperFrontDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+  part VLSBumperRear
+  {
+   category=bodywork, area=TruckBed, itemType=Base.VLSBumperArmor, specificItem=false,
+   mechanicRequireKey=false, setAllModelsVisible=false, repairMechanic=false, durability=1,
+   model Armor { file=VLSBodyPickUpVanBumperRear, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage1 { file=VLSBodyPickUpVanBumperRearDamage1, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   model ArmorDamage2 { file=VLSBodyPickUpVanBumperRearDamage2, offset=0 0 0, rotate=0 0 0, scale=1.0, }
+   lua { create=VLSBodyArmor.Create, init=VLSBodyArmor.Init, update=VLSBodyArmor.Update, }
+   table install {
+    items { 1 { tags=base:wrench, count=1, keep=true, equip=primary, } }
+    time=350, skills=MetalWelding:5;Mechanics:1, test=VLSRoofCargo.InstallTest, complete=VLSBodyArmor.InstallComplete,
+   }
+  }
+ }
+}

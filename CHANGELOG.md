@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8.1
+
+3.8.1：新增车窗护甲与前后防撞杠，修复破损外观、储物容量和设备交互问题。 / Added window armor and bumper guards; fixed damage visuals, storage capacity and appliance interactions.
+
 ## 3.8.0
 
 - Publishes the current RC3.8 Workshop payload for the base and KI5 adapter Mods.

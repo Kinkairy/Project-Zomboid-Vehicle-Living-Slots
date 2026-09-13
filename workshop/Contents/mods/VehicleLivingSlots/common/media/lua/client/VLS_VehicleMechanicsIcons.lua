@@ -90,8 +90,8 @@ local function attachCanonicalCandidates(mechanics, part, installMenu, typeToIte
     for _, item in ipairs(vanillaCandidates) do alreadyAdded[item] = true end
 
     if not itemMenu then
-        itemMenu = ISContextMenu:getNew(mechanics.context)
-        mechanics.context:addSubMenu(option, itemMenu)
+        itemMenu = ISContextMenu:getNew(installMenu)
+        installMenu:addSubMenu(option, itemMenu)
         alreadyAdded = {}
     end
 
@@ -210,19 +210,39 @@ local function displayRow(row, part)
     view.item.name=name
     return view
 end
-local function refreshRows(panel)
-    for _,list in ipairs({panel.listbox,panel.bodyworklist}) do
-        if list and list.items then
-            for i=#list.items,1,-1 do
-                local row=list.items[i]
-                local part=row.item and row.item.part
-                if part and VLS.usesNormalizedPartCondition(part) then
-                    if hidden(part) then list:removeItemByIndex(i)
-                    else row.item.name=VLS.getMechanicsPartName(part) end
-                end
-            end
+-- The renderer uses row.itemindex; input uses list.items[list.selected].
+-- Reindex after filtering and retain the selected ROW, never its stale number.
+local function refreshListRows(panel, list, savedField)
+    if not list or not list.items then return end
+    local selected = list.items[list.selected or -1]
+    local hovered = list.items[list.mouseoverselected or -1]
+    local saved = list.items[panel[savedField] or -1]
+    for i = #list.items, 1, -1 do
+        local row = list.items[i]
+        local part = row.item and row.item.part
+        if part and VLS.usesNormalizedPartCondition(part) then
+            if hidden(part) then list:removeItemByIndex(i)
+            else row.item.name = VLS.getMechanicsPartName(part) end
         end
     end
+    local selectionIndex, hoverIndex, savedIndex = -1, -1, -1
+    for i, row in ipairs(list.items) do
+        row.itemindex, row.index = i, i
+        if row == selected then selectionIndex = i end
+        if row == hovered then hoverIndex = i end
+        if row == saved then savedIndex = i end
+    end
+    list.count = #list.items
+    if selected then list.selected = selectionIndex
+    elseif (list.selected or -1) > #list.items then list.selected = -1 end
+    if hovered then list.mouseoverselected = hoverIndex end
+    if saved then panel[savedField] = savedIndex
+    elseif (panel[savedField] or -1) > #list.items then panel[savedField] = -1 end
+end
+
+local function refreshRows(panel)
+    refreshListRows(panel, panel.listbox, "leftListSelection")
+    refreshListRows(panel, panel.bodyworklist, "rightListSelection")
 end
 
 if not VLS.mechanicsIconHookApplied then
@@ -290,3 +310,5 @@ if not VLS.mechanicsDisplayHookApplied then
     end
     print("[VLS mechanics] native renderer with shared presentation adapter v1")
 end
+
+print("[VLS strict-r3] mechanics loaded")

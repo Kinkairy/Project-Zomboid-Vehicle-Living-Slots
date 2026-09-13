@@ -56,18 +56,18 @@ VLSRoofInstallAction=ISInstallVehiclePart:derive("VLSRoofInstallAction")
 function VLSRoofInstallAction:isValid()
     local item=self.item and self.character:getInventory():getItemById(self.item:getID())
     -- Native mechanics owns optional cargo approach, including no-walk cheat mode.
-    local fixed=self.part and self.part:getId()==R.fixedId
+    local fixed=R.fabricationSpec(self.part)~=nil
     if not item or not R.validateInstall(self.character,self.part,item,fixed) then return false end
-    if self.part:getId()==R.fixedId then return true end
+    if R.fabricationSpec(self.part) then return true end
     return ISInstallVehiclePart.isValid(self)
 end
 function VLSRoofInstallAction:start()
     ISInstallVehiclePart.start(self)
-    if self.part:getId()==R.fixedId then startWelding(self) end
+    if R.fabricationSpec(self.part) then startWelding(self) end
 end
 function VLSRoofInstallAction:update()
     ISInstallVehiclePart.update(self)
-    if self.part:getId()==R.fixedId then updateWelding(self) end
+    if R.fabricationSpec(self.part) then updateWelding(self) end
 end
 function VLSRoofInstallAction:stop()
     stopWelding(self)
@@ -79,7 +79,7 @@ function VLSRoofInstallAction:perform()
 end
 function VLSRoofInstallAction:complete()
     if isClient() or not self:isValid() then return false end
-    if self.part:getId()==R.fixedId then
+    if R.fabricationSpec(self.part) then
         self.item:setJobDelta(0)
         return R.installFixed(self.character,self.part)
     end
@@ -148,12 +148,14 @@ function VLSRoofDismantleAction:complete()
     local torch=self.character:getPrimaryHandItem()
     for i=1,10 do torch:Use(false,false,true) end
     local xp=5
-    for _,entry in ipairs({{"MetalBar",10,15},{"SmallSheetMetal",4,15},{"Screws",4,25}}) do
+    for _,entry in ipairs(R.fabricationSpec(self.part).salvage) do
         for i=1,entry[2] do
             if self:checkAddItem(entry[1],entry[3]) then xp=xp+1 end
         end
     end
     addXp(self.character,Perks.MetalWelding,xp)
+    local spec=R.fabricationSpec(self.part)
+    if spec.onDestroyed then spec.onDestroyed(self.vehicle,self.part) end
     return true
 end
 function VLSRoofDismantleAction:new(character,part)
@@ -166,18 +168,18 @@ end
 if not R.actionsRegistered then
     R.actionsRegistered=true
     function ISInstallVehiclePart:new(character,part,item,maxTimeInit)
-        local actionClass=R.isPart(part) and VLSRoofInstallAction or self
+        local actionClass=R.isActionPart(part) and VLSRoofInstallAction or self
         local action=nativeInstallNew(actionClass,character,part,item,maxTimeInit)
-        if R.isPart(part) and part:getId()==R.fixedId then
-            action.jobType=getText("IGUI_VLSRoofWeldInstall")
+        if R.isActionPart(part) and R.fabricationSpec(part) then
+            action.jobType=part:getId()==R.fixedId and getText("IGUI_VLSRoofWeldInstall") or getText("IGUI_Install")
         end
         return action
     end
     -- NetTimedAction serializes constructor parameters by matching action field names.
     function ISUninstallVehiclePart:new(character,part,workTime)
-        local actionClass=R.isPart(part) and VLSRoofUninstallAction or self
+        local actionClass=R.isActionPart(part) and VLSRoofUninstallAction or self
         local action=nativeUninstallNew(actionClass,character,part,workTime)
-        if R.isPart(part) then
+        if R.isActionPart(part) then
             local item=part:getInventoryItem()
             action.expectedItemId=item and item:getID() or -1
         end

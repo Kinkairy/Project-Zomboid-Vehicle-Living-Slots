@@ -4,6 +4,14 @@ VLSRoofCargo = VLSRoofCargo or {}
 local R = VLSRoofCargo
 R.fixedId = "VLSFixedRoofRack"
 R.fixedType = "Base.VLSFixedRoofRack"
+-- Registered permanent fittings share the rack's material transaction and actions.
+R.fabricatedParts = R.fabricatedParts or {}
+function R.fabricationSpec(part)
+    if not part then return nil end
+    if part:getId()==R.fixedId then return R.rackRecipe end
+    local spec=R.fabricatedParts[part:getId()]
+    return spec and spec.accepts(part) and spec or nil
+end
 R.vehicleScripts = {["Base.StepVan"]=true, ["Base.StepVanAirportCatering"]=true, ["Base.StepVanMail"]=true, ["Base.StepVan_Blacksmith"]=true, ["Base.StepVan_Butchers"]=true, ["Base.StepVan_Cereal"]=true, ["Base.StepVan_Citr8"]=true, ["Base.StepVan_CompleteRepairShop"]=true, ["Base.StepVan_Florist"]=true, ["Base.StepVan_Genuine_Beer"]=true, ["Base.StepVan_Glass"]=true, ["Base.StepVan_Heralds"]=true, ["Base.StepVan_HuangsLaundry"]=true, ["Base.StepVan_Jorgensen"]=true, ["Base.StepVan_LouisvilleMotorShop"]=true, ["Base.StepVan_LouisvilleSWAT"]=true, ["Base.StepVan_MarineBites"]=true, ["Base.StepVan_Masonry"]=true, ["Base.StepVan_Mechanic"]=true, ["Base.StepVan_MobileLibrary"]=true, ["Base.StepVan_Plonkies"]=true, ["Base.StepVan_Propane"]=true, ["Base.StepVan_RandisPlants"]=true, ["Base.StepVan_Scarlet"]=true, ["Base.StepVan_SmartKut"]=true, ["Base.StepVan_SouthEasternHosp"]=true, ["Base.StepVan_SouthEasternPaint"]=true, ["Base.StepVan_USL"]=true, ["Base.StepVan_Zippee"]=true, ["Base.Van"]=true, ["Base.VanBeckmans"]=true, ["Base.VanBrewsterHarbin"]=true, ["Base.VanBuilder"]=true, ["Base.VanCarpenter"]=true, ["Base.VanCoastToCoast"]=true, ["Base.VanDeerValley"]=true, ["Base.VanFossoil"]=true, ["Base.VanGardenGods"]=true, ["Base.VanGardener"]=true, ["Base.VanGreenes"]=true, ["Base.VanJohnMcCoy"]=true, ["Base.VanJonesFabrication"]=true, ["Base.VanKerrHomes"]=true, ["Base.VanKnobCreekGas"]=true, ["Base.VanKnoxCom"]=true, ["Base.VanKorshunovs"]=true, ["Base.VanLouisvilleLandscaping"]=true, ["Base.VanMail"]=true, ["Base.VanMccoy"]=true, ["Base.VanMechanic"]=true, ["Base.VanMeltingPointMetal"]=true, ["Base.VanMetalheads"]=true, ["Base.VanMetalworker"]=true, ["Base.VanMicheles"]=true, ["Base.VanMobileMechanics"]=true, ["Base.VanMooreMechanics"]=true, ["Base.VanOldMill"]=true, ["Base.VanOvoFarm"]=true, ["Base.VanPennSHam"]=true, ["Base.VanPlattAuto"]=true, ["Base.VanPluggedInElectrics"]=true, ["Base.VanRiversideFabrication"]=true, ["Base.VanRosewoodworking"]=true, ["Base.VanSchwabSheetMetal"]=true, ["Base.VanSeats"]=true, ["Base.VanSeatsAirportShuttle"]=true, ["Base.VanSeats_Creature"]=true, ["Base.VanSeats_LadyDelighter"]=true, ["Base.VanSeats_Mural"]=true, ["Base.VanSeats_Prison"]=true, ["Base.VanSeats_Space"]=true, ["Base.VanSeats_Trippy"]=true, ["Base.VanSeats_Valkyrie"]=true, ["Base.VanSpiffo"]=true, ["Base.VanTreyBaines"]=true, ["Base.VanUncloggers"]=true, ["Base.VanUtility"]=true, ["Base.VanWPCarpentry"]=true, ["Base.Van_Blacksmith"]=true, ["Base.Van_BugWipers"]=true, ["Base.Van_Charlemange_Beer"]=true, ["Base.Van_CraftSupplies"]=true, ["Base.Van_Glass"]=true, ["Base.Van_HeritageTailors"]=true, ["Base.Van_KnoxDisti"]=true, ["Base.Van_Leather"]=true, ["Base.Van_LectroMax"]=true, ["Base.Van_Locksmith"]=true, ["Base.Van_Masonry"]=true, ["Base.Van_MassGenFac"]=true, ["Base.Van_Perfick_Potato"]=true, ["Base.Van_Transit"]=true, ["Base.Van_VoltMojo"]=true, ["Base.SUV"]=true, ["Base.PickUpVan"]=true, ["Base.PickUpVanBrickingIt"]=true, ["Base.PickUpVanBuilder"]=true, ["Base.PickUpVanCallowayLandscaping"]=true, ["Base.PickUpVanHeltonMetalWorking"]=true, ["Base.PickUpVanKimbleKonstruction"]=true, ["Base.PickUpVanMarchRidgeConstruction"]=true, ["Base.PickUpVanMccoy"]=true, ["Base.PickUpVanMetalworker"]=true, ["Base.PickUpVanWeldingbyCamille"]=true, ["Base.PickUpVanYingsWood"]=true, ["Base.PickUpVan_Camo"]=true}
 R.rackCapacities = {["Base.StepVan"]=300, ["Base.StepVanAirportCatering"]=300, ["Base.StepVanMail"]=300, ["Base.StepVan_Blacksmith"]=300, ["Base.StepVan_Butchers"]=300, ["Base.StepVan_Cereal"]=300, ["Base.StepVan_Citr8"]=300, ["Base.StepVan_CompleteRepairShop"]=300, ["Base.StepVan_Florist"]=300, ["Base.StepVan_Genuine_Beer"]=300, ["Base.StepVan_Glass"]=300, ["Base.StepVan_Heralds"]=300, ["Base.StepVan_HuangsLaundry"]=300, ["Base.StepVan_Jorgensen"]=300, ["Base.StepVan_LouisvilleMotorShop"]=300, ["Base.StepVan_LouisvilleSWAT"]=300, ["Base.StepVan_MarineBites"]=300, ["Base.StepVan_Masonry"]=300, ["Base.StepVan_Mechanic"]=300, ["Base.StepVan_MobileLibrary"]=300, ["Base.StepVan_Plonkies"]=300, ["Base.StepVan_Propane"]=300, ["Base.StepVan_RandisPlants"]=300, ["Base.StepVan_Scarlet"]=300, ["Base.StepVan_SmartKut"]=300, ["Base.StepVan_SouthEasternHosp"]=300, ["Base.StepVan_SouthEasternPaint"]=300, ["Base.StepVan_USL"]=300, ["Base.StepVan_Zippee"]=300, ["Base.Van"]=200, ["Base.VanBeckmans"]=200, ["Base.VanBrewsterHarbin"]=200, ["Base.VanBuilder"]=200, ["Base.VanCarpenter"]=200, ["Base.VanCoastToCoast"]=200, ["Base.VanDeerValley"]=200, ["Base.VanFossoil"]=200, ["Base.VanGardenGods"]=200, ["Base.VanGardener"]=200, ["Base.VanGreenes"]=200, ["Base.VanJohnMcCoy"]=200, ["Base.VanJonesFabrication"]=200, ["Base.VanKerrHomes"]=200, ["Base.VanKnobCreekGas"]=200, ["Base.VanKnoxCom"]=200, ["Base.VanKorshunovs"]=200, ["Base.VanLouisvilleLandscaping"]=200, ["Base.VanMail"]=200, ["Base.VanMccoy"]=200, ["Base.VanMechanic"]=200, ["Base.VanMeltingPointMetal"]=200, ["Base.VanMetalheads"]=200, ["Base.VanMetalworker"]=200, ["Base.VanMicheles"]=200, ["Base.VanMobileMechanics"]=200, ["Base.VanMooreMechanics"]=200, ["Base.VanOldMill"]=200, ["Base.VanOvoFarm"]=200, ["Base.VanPennSHam"]=200, ["Base.VanPlattAuto"]=200, ["Base.VanPluggedInElectrics"]=200, ["Base.VanRiversideFabrication"]=200, ["Base.VanRosewoodworking"]=200, ["Base.VanSchwabSheetMetal"]=200, ["Base.VanSeats"]=200, ["Base.VanSeatsAirportShuttle"]=200, ["Base.VanSeats_Creature"]=200, ["Base.VanSeats_LadyDelighter"]=200, ["Base.VanSeats_Mural"]=200, ["Base.VanSeats_Prison"]=200, ["Base.VanSeats_Space"]=200, ["Base.VanSeats_Trippy"]=200, ["Base.VanSeats_Valkyrie"]=200, ["Base.VanSpiffo"]=200, ["Base.VanTreyBaines"]=200, ["Base.VanUncloggers"]=200, ["Base.VanUtility"]=200, ["Base.VanWPCarpentry"]=200, ["Base.Van_Blacksmith"]=200, ["Base.Van_BugWipers"]=200, ["Base.Van_Charlemange_Beer"]=200, ["Base.Van_CraftSupplies"]=200, ["Base.Van_Glass"]=200, ["Base.Van_HeritageTailors"]=200, ["Base.Van_KnoxDisti"]=200, ["Base.Van_Leather"]=200, ["Base.Van_LectroMax"]=200, ["Base.Van_Locksmith"]=200, ["Base.Van_Masonry"]=200, ["Base.Van_MassGenFac"]=200, ["Base.Van_Perfick_Potato"]=200, ["Base.Van_Transit"]=200, ["Base.Van_VoltMojo"]=200, ["Base.SUV"]=150, ["Base.PickUpVan"]=150, ["Base.PickUpVanBrickingIt"]=150, ["Base.PickUpVanBuilder"]=150, ["Base.PickUpVanCallowayLandscaping"]=150, ["Base.PickUpVanHeltonMetalWorking"]=150, ["Base.PickUpVanKimbleKonstruction"]=150, ["Base.PickUpVanMarchRidgeConstruction"]=150, ["Base.PickUpVanMccoy"]=150, ["Base.PickUpVanMetalworker"]=150, ["Base.PickUpVanWeldingbyCamille"]=150, ["Base.PickUpVanYingsWood"]=150, ["Base.PickUpVan_Camo"]=150}
 if VLS then
@@ -47,6 +55,8 @@ end
 R.materials = { ["Base.MetalBar"]=10, ["Base.SmallSheetMetal"]=4,
     ["Base.Screws"]=4, ["Base.Tarp"]=1 }
 R.uses = { ["Base.BlowTorch"]=10, ["Base.WeldingRods"]=4 }
+R.rackRecipe={itemType=R.fixedType,materials=R.materials,uses=R.uses,
+    salvage={{"MetalBar",10,15},{"SmallSheetMetal",4,15},{"Screws",4,25}}}
 
 function R.isPart(part)
     if not part then return false end
@@ -55,6 +65,9 @@ function R.isPart(part)
         and R.vehicleScripts[vehicle:getScript():getFullName()]==true
         and (part:getId()==R.fixedId or R.allowed[part:getId()]~=nil
             or R.legacy[part:getId()]==true)
+end
+function R.isActionPart(part)
+    return R.isPart(part) or (part and part:getId()~=R.fixedId and R.fabricationSpec(part)~=nil)
 end
 VLS.installationOptionProviders.roofCargo = function(part)
     if R.isPart(part) then return "EnableRoofRack" end
@@ -92,15 +105,16 @@ function R.inventoryEntries(chr)
     visit(chr:getInventory())
     return result
 end
-function R.materialStatus(chr)
+function R.materialStatus(chr,spec)
+    spec=spec or R.rackRecipe
     local status={counts={},mask=false,wrench=false}
     for _,entry in ipairs(R.inventoryEntries(chr)) do
         local item=entry.item
         local ft=item:getFullType()
         if item:hasTag(ItemTag.WELDING_MASK) then status.mask=true end
         if item:hasTag(ItemTag.WRENCH) then status.wrench=true end
-        if R.materials[ft] then status.counts[ft]=(status.counts[ft] or 0)+1 end
-        if R.uses[ft] and instanceof(item,"DrainableComboItem") then
+        if spec.materials[ft] then status.counts[ft]=(status.counts[ft] or 0)+1 end
+        if spec.uses[ft] and instanceof(item,"DrainableComboItem") then
             local step=item:getUseDelta()
             local count=step>0 and math.floor((item:getCurrentUsesFloat()+0.000001)/step) or 0
             status.counts[ft]=(status.counts[ft] or 0)+count
@@ -110,13 +124,14 @@ function R.materialStatus(chr)
 end
 -- Action-local material plan, recomputed on the authoritative server at commit.
 -- Only visit inventory containers; never include floor/vehicle/neighbour items.
-function R.plan(chr)
+function R.plan(chr,spec)
+    spec=spec or R.rackRecipe
     if not chr or chr:isDead() then return nil,"character" end
     if chr:getPerkLevel(Perks.MetalWelding)<5
             or chr:getPerkLevel(Perks.Mechanics)<1 then return nil,"skills" end
     local need,uses={},{}
-    for k,v in pairs(R.materials) do need[k]=v end
-    for k,v in pairs(R.uses) do uses[k]=v end
+    for k,v in pairs(spec.materials) do need[k]=v end
+    for k,v in pairs(spec.uses) do uses[k]=v end
     local plan={remove={},drain={}}
     local mask,wrench=false,false
     for _,entry in ipairs(R.inventoryEntries(chr)) do
@@ -157,10 +172,12 @@ function R.legacyEmpty(vehicle)
 end
 function R.validateInstall(chr,part,item,position)
     if not VLS.isInstallationEnabled(part) then return false end
-    if not R.isPart(part) or part:getInventoryItem() then return false end
+    if not R.isActionPart(part) or part:getInventoryItem() then return false end
     if position and not R.atVehicle(chr,part) then return false end
-    if part:getId()==R.fixedId then
-        return R.legacyEmpty(part:getVehicle()) and R.empty(part) and R.plan(chr)~=nil
+    local spec=R.fabricationSpec(part)
+    if spec then
+        return (part:getId()~=R.fixedId or R.legacyEmpty(part:getVehicle()))
+            and R.empty(part) and R.plan(chr,spec)~=nil
     end
     if not R.lampOrderReady(part) then return false end
     local types=R.allowed[part:getId()]
@@ -188,16 +205,18 @@ end
 function R.NeverInstall() return false end
 function R.InstallTest(vehicle,part,chr)
     if not VLS.isInstallationEnabled(part) then return false end
-    if not R.isPart(part) or part:getInventoryItem() then return false end
-    if part:getId()==R.fixedId then
-        return R.legacyEmpty(vehicle) and R.empty(part) and R.plan(chr)~=nil
+    if not R.isActionPart(part) or part:getInventoryItem() then return false end
+    local spec=R.fabricationSpec(part)
+    if spec then
+        return (part:getId()~=R.fixedId or R.legacyEmpty(vehicle))
+            and R.empty(part) and R.plan(chr,spec)~=nil
     end
     if not R.allowed[part:getId()] or not R.fixed(vehicle) or not R.lampOrderReady(part) then return false end
     if isServer() then return part:getVehicle()==vehicle and R.serverCargoToolsReady(chr,part) end
     return Vehicles.InstallTest.Default(vehicle,part,chr)
 end
 function R.UninstallTest(vehicle,part,chr)
-    if not R.isPart(part) or part:getId()==R.fixedId or not R.empty(part) then return false end
+    if not R.isActionPart(part) or R.fabricationSpec(part) or not R.empty(part) then return false end
     if not part:getInventoryItem() or part:getVehicle()~=vehicle then return false end
     if isServer() then return R.serverCargoToolsReady(chr,part) end
     return Vehicles.UninstallTest.Default(vehicle,part,chr)
@@ -214,15 +233,19 @@ function R.dismantleTools(chr)
     return torch,mask
 end
 function R.canDismantle(chr,part,position)
-    if not R.isPart(part) or part:getId()~=R.fixedId or not R.fixed(part:getVehicle())
+    local spec=R.fabricationSpec(part)
+    if not R.isActionPart(part) or not spec or not part:getInventoryItem()
+            or part:getInventoryItem():getFullType()~=spec.itemType
             or not R.empty(part) then return false end
     if position and not R.atVehicle(chr,part) then return false end
     local vehicle=part:getVehicle()
-    for id in pairs(R.allowed) do
-        local cargo=vehicle:getPartById(id)
-        if cargo and (cargo:getInventoryItem() or not R.empty(cargo)) then return false end
+    if part:getId()==R.fixedId then
+        for id in pairs(R.allowed) do
+            local cargo=vehicle:getPartById(id)
+            if cargo and (cargo:getInventoryItem() or not R.empty(cargo)) then return false end
+        end
+        if not R.legacyEmpty(vehicle) then return false end
     end
-    if not R.legacyEmpty(vehicle) then return false end
     local torch,mask=R.dismantleTools(chr)
     return torch~=nil and torch:getCurrentUses()>=10 and mask~=nil
 end
@@ -296,11 +319,14 @@ function R.InstallComplete(vehicle,part)
 end
 function R.installFixed(chr,part)
     if isClient() or not R.validateInstall(chr,part,nil,true) then return false end
-    local plan=R.plan(chr)
-    if not plan then return false end
-    local fixed=instanceItem(R.fixedType)
+    local spec=R.fabricationSpec(part)
+    local plan=R.plan(chr,spec)
+    if not spec or not plan then return false end
+    local fixed=instanceItem(spec.itemType)
     if not fixed then return false end
-    fixed:setMaxCapacity(R.rackCapacities[part:getVehicle():getScript():getFullName()])
+    if part:getId()==R.fixedId then
+        fixed:setMaxCapacity(R.rackCapacities[part:getVehicle():getScript():getFullName()])
+    end
     local removed,drained={},{}
     local primary,secondary=chr:getPrimaryHandItem(),chr:getSecondaryHandItem()
     local function remove(entry)
@@ -342,7 +368,8 @@ function R.installFixed(chr,part)
         addXp(chr,Perks.MetalWelding,25)
     end)
     if not sent then print("[VLS roof] committed; inventory/part notification failed") end
-    print("[VLS roof] fixed rack installed")
+    if spec.onInstalled then spec.onInstalled(part:getVehicle(),part) end
+    print("[VLS welding] installed "..part:getId())
     return true
 end
 
