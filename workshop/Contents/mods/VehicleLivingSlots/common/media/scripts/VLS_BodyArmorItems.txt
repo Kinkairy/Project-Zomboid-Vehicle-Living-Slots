@@ -2,4 +2,20 @@ module Base
 {
  item VLSWindowArmor { ItemType=base:normal, DisplayCategory=VehicleMaintenance, DisplayName=VLS Window Armor, Icon=MetalBar, Weight=3, ConditionMax=100, }
  item VLSBumperArmor { ItemType=base:normal, DisplayCategory=VehicleMaintenance, DisplayName=VLS Pipe Bumper, Icon=MetalBar, Weight=5, ConditionMax=100, }
+
+ fixing VLSBumperArmorWelding
+ {
+  Require = Base.VLSBumperArmor,
+  GlobalItem = Base.BlowTorch=1,
+  ConditionModifier = 0.60,
+  Fixer = Base.SmallSheetMetal=2; MetalWelding=3;Mechanics=2,
+ }
+
+ fixing VLSWindowArmorWelding
+ {
+  Require = Base.VLSWindowArmor,
+  GlobalItem = Base.BlowTorch=1,
+  ConditionModifier = 0.35,
+  Fixer = Base.SmallSheetMetal; MetalWelding=3;Mechanics=2,
+ }
 }
