@@ -52,27 +52,49 @@ local function dismantle(chr,part)
     ISInventoryPaneContextMenu.wearItem(mask,chr:getPlayerNum())
     ISTimedActionQueue.add(VLSRoofDismantleAction:new(chr,part))
 end
+-- Match vanilla ISVehicleMechanics:doMenuTooltip presentation.  Keep the
+-- custom dismantle semantics, but render the hover panel with the same
+-- ISToolTip header, red/green requirement markers and stock requirement text.
 local function dismantleTooltip(chr,part)
-    local tip,line=requirementTooltip()
+    local tooltip=ISToolTip:new()
+    tooltip:initialise()
+    tooltip:setVisible(false)
+    tooltip.description=getText("Tooltip_craft_Needs").." : <LINE>"
+
     local torch,mask=R.dismantleTools(chr)
-    line(getItemName("Base.BlowTorch").." "..(torch and torch:getCurrentUses() or 0).."/10",torch~=nil and torch:getCurrentUses()>=10)
-    line(getItemName("Base.WeldingMask").." "..(mask and 1 or 0).."/1",mask~=nil)
-    if not R.empty(part) then line(getText("ContextMenu_ContainerNotEmpty"),false) end
+    local torchUses=torch and torch:getCurrentUses() or 0
+    local torchOK=torch~=nil and torchUses>=10
+    tooltip.description=tooltip.description.." "
+        ..(torchOK and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs)
+        ..getItemDisplayName("Base.BlowTorch").." "..torchUses.."/10 <LINE>"
+    tooltip.description=tooltip.description.." "
+        ..(mask and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs)
+        ..getItemDisplayName("Base.WeldingMask").." "..(mask and 1 or 0).."/1 <LINE>"
+
+    if not R.empty(part) then
+        tooltip.description=tooltip.description.." "..ISVehicleMechanics.bhs.." "
+            ..getText("Tooltip_vehicle_needempty",VLS.getMechanicsPartName(part)).." <LINE> "
+    end
+
     if part:getId()==R.fixedId then
+        local vehicle=part:getVehicle()
         for id in pairs(R.allowed) do
-            local cargo=part:getVehicle():getPartById(id)
-            if cargo and cargo:getInventoryItem() then
-                line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+            local cargo=vehicle:getPartById(id)
+            if cargo and (cargo:getInventoryItem() or not R.empty(cargo)) then
+                tooltip.description=tooltip.description.." "..ISVehicleMechanics.bhs.." "
+                    ..getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)).." <LINE>"
             end
         end
         for id in pairs(R.legacy) do
-            local cargo=part:getVehicle():getPartById(id)
+            local cargo=vehicle:getPartById(id)
             if cargo and cargo:getInventoryItem() then
-                line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+                tooltip.description=tooltip.description.." "..ISVehicleMechanics.bhs.." "
+                    ..getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)).." <LINE>"
             end
         end
     end
-    return tip
+
+    return tooltip
 end
 local function showNativeContext(mechanics)
     local context=mechanics and mechanics.context
@@ -119,10 +141,8 @@ if not R.menuRegistered then
             if item:getCondition()>=item:getConditionMax() then
                 self.context:removeOptionByName(getText("ContextMenu_Repair"))
             end
-            -- Use the stock vehicle-menu label and ordering for the permanent
-            -- fitting's dismantle action. Condition never gates this option.
             self.context:removeOptionByName(getText("IGUI_Uninstall"))
-            local option=self.context:addOption(getText("IGUI_Uninstall"),self.chr,dismantle,part)
+            local option=self.context:addOption(getText("ContextMenu_Disassemble"),self.chr,dismantle,part)
             option.notAvailable=not R.canDismantle(self.chr,part,false)
             option.toolTip=dismantleTooltip(self.chr,part)
             showNativeContext(self)
