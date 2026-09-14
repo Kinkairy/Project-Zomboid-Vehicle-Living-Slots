@@ -1,11 +1,18 @@
 require "VLS_InstallGuard"
 require "VLS_RoofCargo"
+require "VLS_BodyArmor"
 require "TimedActions/ISFixVehiclePartAction"
 require "Vehicles/TimedActions/ISRemoveBurntVehicle"
 local R=VLSRoofCargo
 local nativeInstallNew=ISInstallVehiclePart.new
 local nativeUninstallNew=ISUninstallVehiclePart.new
 local nativeFixNew=ISFixVehiclePartAction.new
+local nativeIsActionPart=R.isActionPart
+
+-- Any fabricated VLS part that actually exists on the vehicle is actionable.
+function R.isActionPart(part)
+    return (part and R.fabricationSpec(part)~=nil) or nativeIsActionPart(part)
+end
 
 local function torchIn(character)
     for _,entry in ipairs(R.inventoryEntries(character)) do
@@ -13,8 +20,8 @@ local function torchIn(character)
         if item:getFullType()=="Base.BlowTorch" and item:getCurrentUses()>0 then return item end
     end
 end
--- Native UI transfers all repair inputs to the player inventory before queueing.
--- Revalidate at completion: FixingManager.fixItem itself does not reject shortages.
+-- Native repair UI moves the selected inputs to carried inventory first.
+-- Revalidate at completion because FixingManager itself does not reject shortages.
 local function repairInputsReady(action)
     local fixing,fixer=action.fixing,action.fixer
     if not fixing or not fixer then return false end
@@ -55,7 +62,6 @@ end
 VLSRoofInstallAction=ISInstallVehiclePart:derive("VLSRoofInstallAction")
 function VLSRoofInstallAction:isValid()
     local item=self.item and self.character:getInventory():getItemById(self.item:getID())
-    -- Native mechanics owns optional cargo approach, including no-walk cheat mode.
     local fixed=R.fabricationSpec(self.part)~=nil
     if not item or not R.validateInstall(self.character,self.part,item,fixed) then return false end
     if R.fabricationSpec(self.part) then return true end
@@ -98,10 +104,15 @@ function VLSRoofUninstallAction:complete()
     return ISUninstallVehiclePart.complete(self)
 end
 
+-- Keep the stock FixingManager/ISFixVehiclePartAction calculations and menu.
+-- This derived action only gives permanent welded VLS parts the rack welding
+-- animation, positional validation and post-repair visual refresh.
 VLSRoofFixAction=ISFixVehiclePartAction:derive("VLSRoofFixAction")
 function VLSRoofFixAction:isValid()
-    return R.isPart(self.vehiclePart) and self.vehiclePart:getInventoryItem()==self.item
-        and self.item:getFullType()==R.fixedType
+    local spec=R.fabricationSpec(self.vehiclePart)
+    return spec and self.vehiclePart:getInventoryItem()==self.item
+        and self.item:getFullType()==spec.itemType
+        and self.item:getCondition()<self.item:getConditionMax()
         and R.atVehicle(self.character,self.vehiclePart)
         and repairInputsReady(self)
         and ISFixVehiclePartAction.isValid(self)
@@ -124,15 +135,20 @@ function VLSRoofFixAction:perform()
 end
 function VLSRoofFixAction:complete()
     if isClient() or not self:isValid() then return false end
-    return ISFixVehiclePartAction.complete(self)
+    local spec=R.fabricationSpec(self.vehiclePart)
+    local result=ISFixVehiclePartAction.complete(self)
+    if result and spec and spec.onRepaired then
+        spec.onRepaired(self.vehiclePart:getVehicle(),self.vehiclePart)
+    end
+    return result
 end
 
--- Reuse the original cutting action and salvage rolls, never its completion:
--- that completion deletes the entire vehicle and yields whole-car materials.
+-- Reuse the stock burnt-vehicle cutting timed action shell, never its stock
+-- completion (which would delete the whole vehicle).
 VLSRoofDismantleAction=ISRemoveBurntVehicle:derive("VLSRoofDismantleAction")
 function VLSRoofDismantleAction:isValid()
-    local rack=self.part and self.part:getInventoryItem()
-    return rack and rack:getID()==self.expectedItemId
+    local installed=self.part and self.part:getInventoryItem()
+    return installed and installed:getID()==self.expectedItemId
         and R.canDismantle(self.character,self.part,true)
         and ISRemoveBurntVehicle.isValid(self)
 end
@@ -142,19 +158,19 @@ function VLSRoofDismantleAction:update()
 end
 function VLSRoofDismantleAction:complete()
     if isClient() or not self:isValid() then return false end
-    -- No yield: remove the exact empty rack once, then native fuel and salvage.
+    local spec=R.fabricationSpec(self.part)
+    if not spec then return false end
     self.part:setInventoryItem(nil)
     self.vehicle:transmitPartItem(self.part)
     local torch=self.character:getPrimaryHandItem()
     for i=1,10 do torch:Use(false,false,true) end
     local xp=5
-    for _,entry in ipairs(R.fabricationSpec(self.part).salvage) do
+    for _,entry in ipairs(spec.salvage) do
         for i=1,entry[2] do
             if self:checkAddItem(entry[1],entry[3]) then xp=xp+1 end
         end
     end
     addXp(self.character,Perks.MetalWelding,xp)
-    local spec=R.fabricationSpec(self.part)
     if spec.onDestroyed then spec.onDestroyed(self.vehicle,self.part) end
     return true
 end
@@ -175,7 +191,6 @@ if not R.actionsRegistered then
         end
         return action
     end
-    -- NetTimedAction serializes constructor parameters by matching action field names.
     function ISUninstallVehiclePart:new(character,part,workTime)
         local actionClass=R.isActionPart(part) and VLSRoofUninstallAction or self
         local action=nativeUninstallNew(actionClass,character,part,workTime)
@@ -186,7 +201,7 @@ if not R.actionsRegistered then
         return action
     end
     function ISFixVehiclePartAction:new(character,vehiclePart,fixingNum,fixerNum)
-        local actionClass=R.isPart(vehiclePart) and vehiclePart:getId()==R.fixedId and VLSRoofFixAction or self
+        local actionClass=R.fabricationSpec(vehiclePart) and VLSRoofFixAction or self
         return nativeFixNew(actionClass,character,vehiclePart,fixingNum,fixerNum)
     end
 end
