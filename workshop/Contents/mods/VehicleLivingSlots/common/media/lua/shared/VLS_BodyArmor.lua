@@ -25,10 +25,16 @@ local function stateFor(vehicle)
     return state
 end
 function A.IsPart(part) return part and A.parts[part:getId()] ~= nil end
--- Native checkDamage thresholds; native model visibility owns replication (flag0x40).
+local function enableMaintenance(armorPart)
+    local scriptPart=armorPart and armorPart.getScriptPart and armorPart:getScriptPart() or nil
+    if scriptPart and scriptPart.setRepairMechanic then scriptPart:setRepairMechanic(true) end
+end
+-- Keep the installed item at zero condition like native vehicle body parts,
+-- but hide all armor models until the part is repaired again.
 function A.DamageStage(armorPart)
     if not armorPart:getInventoryItem() then return nil end
     local current=armorPart:getInventoryItem():getCondition()
+    if current<=0 then return nil end
     return current<40 and 2 or current<60 and 1 or 0
 end
 function A.SyncDamageVisual(armorPart)
@@ -60,21 +66,28 @@ local function rebase(vehicle, armorPart)
     stateFor(vehicle).parts[armorPart] = { armor = itemId(armorPart:getInventoryItem()), source = itemId(source and source:getInventoryItem()), condition = condition(source) }
 end
 function A.Register(vehicle, armorPart)
-    if isHost() and vehicle and armorPart and armorPart:getInventoryItem() then registered[vehicle] = true end
+    if vehicle and armorPart and armorPart:getInventoryItem() then registered[vehicle] = true end
 end
 function A.Create(vehicle, armorPart)
+    enableMaintenance(armorPart)
     A.SyncDamageVisual(armorPart)
     A.Register(vehicle, armorPart)
     if isHost() and armorPart:getInventoryItem() then rebase(vehicle, armorPart) end
 end
 function A.Init(vehicle, armorPart)
+    enableMaintenance(armorPart)
     A.SyncDamageVisual(armorPart)
     A.Register(vehicle, armorPart)
     if isHost() and armorPart:getInventoryItem() then rebase(vehicle, armorPart) end
 end
-function A.Update(vehicle, armorPart, elapsedMinutes) A.Register(vehicle, armorPart); A.SyncDamageVisual(armorPart) end
+function A.Update(vehicle, armorPart, elapsedMinutes)
+    enableMaintenance(armorPart)
+    A.Register(vehicle, armorPart)
+    A.SyncDamageVisual(armorPart)
+end
 function A.InstallComplete(vehicle, armorPart)
     local result = Vehicles.InstallComplete.Default(vehicle, armorPart)
+    enableMaintenance(armorPart)
     A.SyncDamageVisual(armorPart)
     A.Register(vehicle, armorPart)
     if isHost() and armorPart:getInventoryItem() then rebase(vehicle, armorPart) end
@@ -88,6 +101,17 @@ function A.UninstallComplete(vehicle, armorPart, item)
     if vehicle and not hasInstalledArmor(vehicle) then registered[vehicle] = nil end
     return result
 end
+function A.Destroyed(vehicle, armorPart)
+    A.SyncDamageVisual(armorPart)
+    local state=states[vehicle]
+    if state then state.parts[armorPart]=nil end
+    if vehicle and not hasInstalledArmor(vehicle) then registered[vehicle]=nil end
+end
+function A.Repaired(vehicle, armorPart)
+    enableMaintenance(armorPart)
+    A.SyncDamageVisual(armorPart)
+    A.Register(vehicle, armorPart)
+end
 local function settle(vehicle, armorPart)
     local source = sourceFor(vehicle, armorPart)
     local armorItem = armorPart:getInventoryItem()
@@ -99,6 +123,7 @@ local function settle(vehicle, armorPart)
         local restored = math.min(before - current, available)
         source:setCondition(current + restored)
         armorPart:damage(restored)
+        A.SyncDamageVisual(armorPart)
         if source.getWindow and source:getWindow() then vehicle:transmitPartWindow(source) end
         vehicle:transmitPartCondition(source)
         vehicle:transmitPartItem(source)
@@ -110,17 +135,19 @@ local function settle(vehicle, armorPart)
     rebase(vehicle, armorPart)
 end
 local function onTick()
-    if not isHost() then return end
     tick = tick + 1
     if tick % 6 ~= 0 then return end
     for vehicle in pairs(registered) do
         if not vehicle:getSquare() or not hasInstalledArmor(vehicle) then
             registered[vehicle] = nil
         else
-            if VLS.Damage and VLS.Damage.Update then VLS.Damage.Update(vehicle) end
+            if isHost() and VLS.Damage and VLS.Damage.Update then VLS.Damage.Update(vehicle) end
             for armorId in pairs(A.parts) do
                 local armorPart = vehicle:getPartById(armorId)
-                if armorPart and armorPart:getInventoryItem() then settle(vehicle, armorPart); A.SyncDamageVisual(armorPart) end
+                if armorPart and armorPart:getInventoryItem() then
+                    if isHost() then settle(vehicle, armorPart) end
+                    A.SyncDamageVisual(armorPart)
+                end
             end
         end
     end
@@ -130,7 +157,7 @@ if Events and Events.OnTick and not A.tickHooked then Events.OnTick.Add(onTick);
 local R=VLSRoofCargo
 local function supported(part)
     local vehicle=part and part:getVehicle()
-    return vehicle and vehicle:getScript() and R.vehicleScripts[vehicle:getScript():getFullName()]==true
+    return vehicle and vehicle:getScript() and A.IsPart(part)
 end
 for id in pairs(A.parts) do
     local bumper=string.find(id,"Bumper",1,true)~=nil
@@ -143,7 +170,8 @@ for id in pairs(A.parts) do
         salvage=bumper and {{"MetalBar",6,15},{"SmallSheetMetal",2,15},{"Screws",4,25}}
             or {{"MetalBar",2,15},{"SmallSheetMetal",1,15},{"Screws",2,25}},
         onInstalled=A.InstallComplete,
-        onDestroyed=A.UninstallComplete,
+        onDestroyed=A.Destroyed,
+        onRepaired=A.Repaired,
     }
 end
 return A
