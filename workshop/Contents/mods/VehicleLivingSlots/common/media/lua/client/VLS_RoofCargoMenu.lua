@@ -26,9 +26,8 @@ local function recipeTooltip(chr,part)
     for _,ft in ipairs({"Base.MetalBar","Base.SmallSheetMetal","Base.Screws","Base.Tarp","Base.BlowTorch","Base.WeldingRods"}) do
         local required=spec.materials[ft] or spec.uses[ft]
         if required then
-        local count=status.counts[ft] or 0
-        line(getItemName(ft).." "..count.."/"..required,
-            count>=required)
+            local count=status.counts[ft] or 0
+            line(getItemName(ft).." "..count.."/"..required,count>=required)
         end
     end
     line(getItemName("Base.WeldingMask").." "..(status.mask and 1 or 0).."/1",status.mask)
@@ -36,12 +35,12 @@ local function recipeTooltip(chr,part)
     line(getText("IGUI_perks_MetalWelding").." "..chr:getPerkLevel(Perks.MetalWelding).."/5",chr:getPerkLevel(Perks.MetalWelding)>=5)
     line(getText("IGUI_perks_Mechanics").." "..chr:getPerkLevel(Perks.Mechanics).."/1",chr:getPerkLevel(Perks.Mechanics)>=1)
     if part:getId()==R.fixedId then
-    for id,fullType in pairs({VLSLowRoofRack="Base.MetalBar",VLSRoofMattress="Base.Mattress"}) do
-        local legacy=part:getVehicle():getPartById(id)
-        if legacy and legacy:getInventoryItem() then
-            line(getText("Tooltip_vehicle_requireUnistalled",getItemName(fullType)),false)
+        for id,fullType in pairs({VLSLowRoofRack="Base.MetalBar",VLSRoofMattress="Base.Mattress"}) do
+            local legacy=part:getVehicle():getPartById(id)
+            if legacy and legacy:getInventoryItem() then
+                line(getText("Tooltip_vehicle_requireUnistalled",getItemName(fullType)),false)
+            end
         end
-    end
     end
     return tip
 end
@@ -60,31 +59,44 @@ local function dismantleTooltip(chr,part)
     line(getItemName("Base.WeldingMask").." "..(mask and 1 or 0).."/1",mask~=nil)
     if not R.empty(part) then line(getText("ContextMenu_ContainerNotEmpty"),false) end
     if part:getId()==R.fixedId then
-    for id in pairs(R.allowed) do
-        local cargo=part:getVehicle():getPartById(id)
-        if cargo and cargo:getInventoryItem() then
-            line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+        for id in pairs(R.allowed) do
+            local cargo=part:getVehicle():getPartById(id)
+            if cargo and cargo:getInventoryItem() then
+                line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+            end
         end
-    end
-    for id in pairs(R.legacy) do
-        local cargo=part:getVehicle():getPartById(id)
-        if cargo and cargo:getInventoryItem() then
-            line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+        for id in pairs(R.legacy) do
+            local cargo=part:getVehicle():getPartById(id)
+            if cargo and cargo:getInventoryItem() then
+                line(getText("Tooltip_vehicle_requireUnistalled",VLS.getMechanicsPartName(cargo)),false)
+            end
         end
-    end
     end
     return tip
+end
+local function showNativeContext(mechanics)
+    local context=mechanics and mechanics.context
+    if not context then return end
+    context:setVisible(true)
+    local joypad=JoypadState.players[mechanics.playerNum+1]
+    if joypad then
+        context.mouseOver=1
+        context.origin=mechanics
+        joypad.focus=context
+        updateJoypadFocus(joypad)
+    end
 end
 if not R.menuRegistered then
     R.menuRegistered=true
     local nativeOnFix=ISInventoryPaneContextMenu.onFix
     function ISInventoryPaneContextMenu.onFix(item,player,fixingNum,fixerNum,part)
-        if R.isPart(part) and part:getId()==R.fixedId then
+        if R.fabricationSpec(part) then
             local chr=getSpecificPlayer(player)
             if chr:getVehicle() then return end
-            local fixing=FixingManager.getFixes(item):get(fixingNum)
-            local fixer=fixing:getFixers():get(fixerNum)
-            if not fixing:getRequiredItems(chr,fixer,item) then return end
+            local fixes=FixingManager.getFixes(item)
+            local fixing=fixes and fixes:get(fixingNum) or nil
+            local fixer=fixing and fixing:getFixers():get(fixerNum) or nil
+            if not fixing or not fixer or not fixing:getRequiredItems(chr,fixer,item) then return end
             ISTimedActionQueue.add(ISPathFindAction:pathToVehicleArea(chr,part:getVehicle(),part:getArea()))
         end
         return nativeOnFix(item,player,fixingNum,fixerNum,part)
@@ -97,16 +109,29 @@ if not R.menuRegistered then
         if not R.isActionPart(part) or not self.context then return end
         if R.legacy[part:getId()] then
             self.context:removeOptionByName(getText("IGUI_Install"))
-        elseif R.fabricationSpec(part) and part:getInventoryItem() then
+            return
+        end
+        local spec=R.fabricationSpec(part)
+        if spec and part:getInventoryItem() then
+            -- Preserve the stock Repair submenu exactly when the part is damaged.
+            -- A 100% vanilla part is not repairable, so remove Repair at full condition.
+            local item=part:getInventoryItem()
+            if item:getCondition()>=item:getConditionMax() then
+                self.context:removeOptionByName(getText("ContextMenu_Repair"))
+            end
+            -- Use the stock vehicle-menu label and ordering for the permanent
+            -- fitting's dismantle action. Condition never gates this option.
             self.context:removeOptionByName(getText("IGUI_Uninstall"))
-            local option=self.context:addOption(getText("ContextMenu_Disassemble"),self.chr,dismantle,part)
+            local option=self.context:addOption(getText("IGUI_Uninstall"),self.chr,dismantle,part)
             option.notAvailable=not R.canDismantle(self.chr,part,false)
             option.toolTip=dismantleTooltip(self.chr,part)
-        elseif R.fabricationSpec(part) and not part:getInventoryItem() then
+            showNativeContext(self)
+        elseif spec and not part:getInventoryItem() then
             self.context:removeOptionByName(getText("IGUI_Install"))
             local option=self.context:addOption(getText("IGUI_Install"),self.chr,install,part)
             option.notAvailable=not R.InstallTest(part:getVehicle(),part,self.chr)
             option.toolTip=recipeTooltip(self.chr,part)
+            showNativeContext(self)
         end
     end
 end
