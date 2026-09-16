@@ -1,7 +1,7 @@
 name: VLS source audit
 on:
   push:
-    branches: [main, maintenance/vls-3.8.3-20260917]
+    branches: [main, maintenance/vls-3.8.3-20260917, maintenance/vls383-capacity1-ready-20260917]
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,6 +25,7 @@ jobs:
           mkdir -p audit-output
           find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
           python3 tools/validate_release_383.py
+          python3 tools/build_roof_capacity_translations.py --check
           python3 tools/build_propane_ui_translations.py --check
           python3 tools/build_wash_ui_translations.py --check
           python3 tools/build_ki5_ui_translations.py
@@ -32,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights; do
+          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights test_roof_capacity; do
             lua5.1 tools/$t.lua . | tee audit-output/$t.txt
           done
           lua5.1 tools/test_vls_wash.lua . .native-fixtures | tee audit-output/test_vls_wash.txt
