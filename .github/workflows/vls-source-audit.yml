@@ -30,8 +30,15 @@ jobs:
               results.append({'path': str(p), 'ok': r.returncode == 0, 'stderr': r.stderr})
           pathlib.Path('audit-output/lua-syntax.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
           print('Lua files:', len(results), 'Failures:', sum(not r['ok'] for r in results))
+          assert results and all(r['ok'] for r in results), 'Lua syntax audit failed'
           PY
+      - name: Run mocked KI5 regressions against actual source
+        shell: bash
+        run: |
+          set -o pipefail
+          lua5.1 tools/test_vls_regressions.lua . | tee audit-output/regressions.txt
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: vls-source-audit
           path: audit-output/
