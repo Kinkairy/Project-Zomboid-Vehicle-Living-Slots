@@ -127,7 +127,7 @@ function VLSRefillBlowTorchFromVehicleAction:new(character, vehicle, part,
     o.stopOnWalk = true
     o.stopOnRun = true
     o.maxTime = 50
-    o.jobType = getText("Recipe_RefillBlowTorch")
+    o.jobType = getText("IGUI_VLSKI5RefillBlowTorch")
     return o
 end
 
@@ -149,7 +149,7 @@ local function addVehiclePropaneRefillOption(playerNum, context, items)
     if not torch then return end
     local vehicle, _, part = findNearbyPropaneSource(playerObj)
     if not part then return end
-    context:addOption(getText("Recipe_RefillBlowTorch"), playerObj,
+    context:addOption(getText("IGUI_VLSKI5RefillBlowTorch"), playerObj,
         queueVehicleRefill, vehicle, part, torch)
 end
 
