@@ -1,0 +1,97 @@
+name: Finalize VLS 3.8.2 metadata and labels
+on:
+  push:
+    branches: [maintenance/release-3.8.2-20260916]
+    paths: [.github/workflows/oneoff-release-382-20260916.yml]
+permissions:
+  contents: write
+concurrency:
+  group: vls-release-metadata
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Update version and localized wording without gameplay changes
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+          expected='133859287c7865d7e2429dbff5e0853b0ef5a9a8'
+          def git(*args): return subprocess.check_output(['git',*args]).decode().strip()
+          assert git('rev-parse','HEAD')==expected, 'Public main moved; re-review required'
+          root=Path('workshop/Contents')
+          before={p.as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
+          assert len(before)==192, 'Unexpected runtime file count'
+          def replace_once(path, old, new):
+              text=Path(path).read_bytes().decode('utf-8')
+              assert text.count(old)==1, 'Missing/ambiguous anchor: '+str(path)
+              Path(path).write_bytes(text.replace(old,new,1).encode('utf-8'))
+          infos=[]
+          for mod in ('VehicleLivingSlots','VehicleLivingSlotsKI5Campers'):
+              for rel in ('mod.info','42.20/mod.info'):
+                  p=root/'mods'/mod/rel
+                  replace_once(p,'modversion=3.8.1','modversion=3.8.2')
+                  infos.append(p.as_posix())
+          cfg=root/'mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua'
+          replace_once(cfg,'VLS.VERSION = "3.8.1"','VLS.VERSION = "3.8.2"')
+          replace_once(cfg,'VLS.BUILD_ID = "6ceb908-fix1"','VLS.BUILD_ID = "release-3.8.2-20260916"')
+          catalog_path=Path('translations/ki5-campers-ui.json')
+          catalog=json.loads(catalog_path.read_text(encoding='utf-8'))
+          key='IGUI_VLSKI5RefillBlowTorch'
+          assert catalog['entries'][key]=={'EN':'Refill blowtorch (vehicle propane tank)','CN':'给喷枪充气（车载瓦斯罐）','CH':'為噴槍充氣（車載瓦斯罐）'}
+          labels={'EN':'Refill blowtorch','CN':'为喷枪充气','CH':'為噴槍充氣'}
+          catalog['entries'][key]=labels
+          catalog_path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          subprocess.run(['python3','tools/build_ki5_ui_translations.py','--write'],check=True)
+          locales=[]
+          for lang,label in labels.items():
+              p=root/('mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/'+lang+'/IG_UI.json')
+              old=json.loads(before[p.as_posix()]);new=json.loads(p.read_bytes())
+              assert set(old)==set(new) and new[key]==label
+              assert {k:v for k,v in old.items() if k!=key}=={k:v for k,v in new.items() if k!=key}
+              locales.append(p.as_posix())
+          readme=Path('README.md').read_text(encoding='utf-8')
+          assert readme.count('3.8.1')==3
+          Path('README.md').write_text(readme.replace('3.8.1','3.8.2'),encoding='utf-8')
+          notes='3.8.2\n\n简体中文：修复无法安装发电机和小箱子的问题；修复 KI5 房车为喷枪充气选项显示为语言键值的问题。\n繁體中文：修復無法安裝發電機和小箱子的問題；修復 KI5 房車為噴槍充氣選項顯示為語言鍵值的問題。\nEnglish: Fixed issues preventing generators and small chests from being installed. Fixed the KI5 camper blowtorch refill option displaying an untranslated key.\n'
+          Path('workshop/CHANGELOG_3.8.2.txt').write_text(notes,encoding='utf-8')
+          changelog=Path('CHANGELOG.md').read_text(encoding='utf-8')
+          assert changelog.startswith('# Changelog\n\n') and '## 3.8.2' not in changelog
+          entry='## 3.8.2\n\n- 修复无法安装发电机和小箱子的问题。 / Fixed issues preventing generators and small chests from being installed.\n- 修复 KI5 房车喷枪充气菜单显示语言键值；提供简中、繁中和英文文字。 / Fixed the untranslated KI5 camper blowtorch refill label in Simplified Chinese, Traditional Chinese and English.\n- 保留已合入的护甲、保险杠维修与拆解实现；本次不修改碰撞和维修结算。 / Preserves the existing armor/bumper maintenance implementation without changing collision or repair calculations in this metadata update.\n\n'
+          Path('CHANGELOG.md').write_text('# Changelog\n\n'+entry+changelog[len('# Changelog\n\n'):],encoding='utf-8')
+          after={p.as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
+          assert set(after)==set(before)
+          allowed=set(infos+locales+[cfg.as_posix()])
+          assert {p for p in before if before[p]!=after[p]}==allowed
+          for p in infos: assert after[p].replace(b'modversion=3.8.2',b'modversion=3.8.1')==before[p]
+          assert after[cfg.as_posix()].replace(b'VLS.VERSION = "3.8.2"',b'VLS.VERSION = "3.8.1"').replace(b'VLS.BUILD_ID = "release-3.8.2-20260916"',b'VLS.BUILD_ID = "6ceb908-fix1"')==before[cfg.as_posix()]
+          for p in before:
+              if p not in allowed: assert before[p]==after[p]
+          expected_paths=allowed|{'README.md','CHANGELOG.md','translations/ki5-campers-ui.json','workshop/CHANGELOG_3.8.2.txt'}
+          tracked=set(git('diff','--name-only').splitlines())
+          untracked=set(git('ls-files','--others','--exclude-standard').splitlines())
+          assert tracked|untracked==expected_paths, 'Unexpected change scope'
+          subprocess.run(['git','diff','--check'],check=True)
+          git('config','user.name','PZ source maintenance');git('config','user.email','maintenance@users.noreply.github.com')
+          subprocess.run(['git','add','--',*sorted(expected_paths)],check=True)
+          subprocess.run(['git','commit','-m','release: set VLS and KI5 adapter to 3.8.2 with concise refill labels'],check=True)
+          sha=git('rev-parse','HEAD')
+          assert git('ls-remote','origin','refs/heads/main').split()[0]==expected, 'Concurrent public change'
+          subprocess.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+          tree=git('rev-parse','HEAD:workshop/Contents')
+          print('PUBLIC_RELEASE_COMMIT='+sha)
+          print('CONTENTS_TREE='+tree)
+          print('RUNTIME_FILES=192')
+          print('VERSION=3.8.2; CH_LABEL='+labels['CH'])
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as f:
+              f.write('Public 3.8.2 source: `'+sha+'`\n\nContents tree: `'+tree+'`\n\n8 runtime metadata/translation files changed, 184 runtime files unchanged. No gameplay logic change, no server deployment, no Workshop upload.\n')
+          PY
