@@ -3,7 +3,8 @@ local VLS = require "VLS_Config"
 if VLS.ki5CampersAdapterApplied then return VLS end
 VLS.ki5CampersAdapterApplied = true
 
-print("[VehicleLivingSlotsKI5Campers] Adapter version 3.8.1")
+VLS.KI5_VERSION = "3.8.2"
+print("[VehicleLivingSlotsKI5Campers] Adapter version " .. VLS.KI5_VERSION)
 
 local SLOT_IDS = {
     "VLSKI5CamperSlot1", "VLSKI5CamperSlot2", "VLSKI5CamperSlot3",
