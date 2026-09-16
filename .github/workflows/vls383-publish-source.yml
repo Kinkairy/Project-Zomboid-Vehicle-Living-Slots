@@ -1,0 +1,78 @@
+name: VLS 3.8.3 source validation
+on:
+  push:
+    branches: [maintenance/vls383-publish-20260917]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: inputs
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 764380753d1e2871fc3fb02d824e72930a2fac69
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          repository: Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua
+          ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
+          path: vanilla
+          persist-credentials: false
+      - name: Apply exact tested changes in an isolated checkout
+        run: |
+          mkdir evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, lzma, hashlib, subprocess, json
+          packed=base64.b64decode(''.join((Path('inputs/maintenance-inputs/383')/('part%d.b64'%i)).read_text() for i in range(4)), validate=True)
+          assert hashlib.sha256(packed).hexdigest()=='292e870815b3279e411f843ca9b737cac61c0315c111bc05d871e5cd8ae9a91b'
+          patch=lzma.decompress(packed)
+          subprocess.run(['git','-C','candidate','apply','--index','--exclude=.github/workflows/vls-source-audit.yml','-'],input=patch,check=True)
+          root=Path('candidate/workshop/Contents/mods')
+          manifest={'schema':1,'version':'3.8.3','build':'release-3.8.3-20260917','base_commit':'764380753d1e2871fc3fb02d824e72930a2fac69','workshop_item':'3791192579','files':{p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob('*')) if p.is_file()}}
+          assert len(manifest['files'])==197
+          Path('candidate/release-3.8.3.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          subprocess.run(['git','-C','candidate','add','release-3.8.3.json'],check=True)
+          tree=subprocess.check_output(['git','-C','candidate','write-tree'],text=True).strip()
+          runtime=subprocess.check_output(['git','-C','candidate','rev-parse',tree+':workshop/Contents'],text=True).strip()
+          assert runtime=='922cc967fc03b1d9ef23407270ca3755acad519c',runtime
+          Path('evidence/runtime-tree.txt').write_text(runtime+'\n')
+          print('VERIFIED_RUNTIME_TREE='+runtime)
+          PY
+      - name: Lua 5.1 and exact release checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+          cd candidate
+          find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
+          python3 tools/validate_release_383.py | tee ../evidence/manifest.txt
+          python3 tools/build_propane_ui_translations.py --check
+          python3 tools/build_wash_ui_translations.py --check
+          python3 tools/build_ki5_ui_translations.py
+          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights; do
+            lua5.1 tools/$t.lua . | tee ../evidence/$t.txt
+          done
+          lua5.1 tools/test_vls_wash.lua . ../vanilla | tee ../evidence/test_vls_wash.txt
+          git diff --cached --check
+      - name: Commit the validated source only
+        run: |
+          cd candidate
+          git config user.name 'VLS source maintenance'
+          git config user.email 'maintenance@users.noreply.github.com'
+          git commit -m 'release(vls): 3.8.3 cargo protection, roof lighting, propane refill and tank washing' -m 'Keep vehicle-sized fabrication. Reuse authoritative native wash effects and KI5 refill calculations. Preserve installed cargo and whole-lamp behavior. 197 runtime files; Lua 5.1 mocked regression and manifest gates. No live deployment or Workshop upload.'
+          git push origin HEAD:refs/heads/maintenance/vls-3.8.3-20260917
+          git rev-parse HEAD > ../evidence/source-commit.txt
+          git archive --format=zip HEAD > ../evidence/source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vls383-validated-source
+          path: evidence/
+          retention-days: 7
+          if-no-files-found: error
