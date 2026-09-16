@@ -163,6 +163,7 @@ for id in pairs(A.parts) do
     local bumper=string.find(id,"Bumper",1,true)~=nil
     R.fabricatedParts[id]={
         accepts=supported,
+        scaleWithVehicle=true,
         itemType=bumper and "Base.VLSBumperArmor" or "Base.VLSWindowArmor",
         materials=bumper and {["Base.MetalBar"]=6,["Base.SmallSheetMetal"]=2,["Base.Screws"]=4}
             or {["Base.MetalBar"]=2,["Base.SmallSheetMetal"]=1,["Base.Screws"]=2},

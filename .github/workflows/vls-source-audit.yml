@@ -1,7 +1,7 @@
 name: VLS source audit
 on:
   push:
-    branches: [maintenance/vls-audit-deploy-20260916]
+    branches: [main, maintenance/vls-audit-deploy-20260916]
   workflow_dispatch:
 permissions:
   contents: read
@@ -37,6 +37,11 @@ jobs:
         run: |
           set -o pipefail
           lua5.1 tools/test_vls_regressions.lua . | tee audit-output/regressions.txt
+      - name: Run material tiers, menu, debit and salvage regressions
+        shell: bash
+        run: |
+          set -o pipefail
+          lua5.1 tools/test_vls_material_tiers.lua . | tee audit-output/material-tiers.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:

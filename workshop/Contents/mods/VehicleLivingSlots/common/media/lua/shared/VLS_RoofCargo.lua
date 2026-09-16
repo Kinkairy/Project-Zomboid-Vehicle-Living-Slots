@@ -6,11 +6,52 @@ R.fixedId = "VLSFixedRoofRack"
 R.fixedType = "Base.VLSFixedRoofRack"
 -- Registered permanent fittings share the rack's material transaction and actions.
 R.fabricatedParts = R.fabricatedParts or {}
+-- Material tiers apply only to the exact supported scripts below. They do not
+-- read cargo capacity, translated vehicle names or installed item condition.
+-- Paint/job variants in one body family use the same construction cost.
+function R.fabricationScale(vehicle)
+    local script=vehicle and vehicle:getScript()
+    local name=script and script:getFullName()
+    if not name or not R.vehicleScripts[name] then return 1 end
+    if name=="Base.SUV" or name:find("^Base%.PickUpVan") then return 0.5 end
+    if name:find("^Base%.Van") then return 0.75 end
+    return 1 -- StepVan and unclassified future scripts keep the full recipe.
+end
+local function sizedRecipe(spec,scale)
+    -- Never mutate shared recipe tables: opening an SUV menu must not reduce
+    -- the recipe subsequently used by a StepVan or another player's action.
+    local result={}
+    for key,value in pairs(spec) do result[key]=value end
+    result.materials={}
+    result.uses={}
+    result.salvage={}
+    for fullType,count in pairs(spec.materials) do
+        result.materials[fullType]=math.ceil(count*scale)
+    end
+    for fullType,count in pairs(spec.uses) do
+        result.uses[fullType]=math.ceil(count*scale)
+    end
+    -- Keep the existing salvage success parameters; cap each material by its
+    -- scaled construction input. Consumables and the tarp remain unrecoverable.
+    for index,entry in ipairs(spec.salvage) do
+        result.salvage[index]={entry[1],math.min(math.ceil(entry[2]*scale),
+            result.materials["Base."..entry[1]] or 0),entry[3]}
+    end
+    return result
+end
 function R.fabricationSpec(part)
     if not part then return nil end
-    if part:getId()==R.fixedId then return R.rackRecipe end
-    local spec=R.fabricatedParts[part:getId()]
-    return spec and spec.accepts(part) and spec or nil
+    local spec
+    if part:getId()==R.fixedId then
+        spec=R.rackRecipe
+    else
+        spec=R.fabricatedParts[part:getId()]
+        if not spec or not spec.accepts(part) then return nil end
+    end
+    if spec and spec.scaleWithVehicle then
+        return sizedRecipe(spec,R.fabricationScale(part:getVehicle()))
+    end
+    return spec
 end
 R.vehicleScripts = {["Base.StepVan"]=true, ["Base.StepVanAirportCatering"]=true, ["Base.StepVanMail"]=true, ["Base.StepVan_Blacksmith"]=true, ["Base.StepVan_Butchers"]=true, ["Base.StepVan_Cereal"]=true, ["Base.StepVan_Citr8"]=true, ["Base.StepVan_CompleteRepairShop"]=true, ["Base.StepVan_Florist"]=true, ["Base.StepVan_Genuine_Beer"]=true, ["Base.StepVan_Glass"]=true, ["Base.StepVan_Heralds"]=true, ["Base.StepVan_HuangsLaundry"]=true, ["Base.StepVan_Jorgensen"]=true, ["Base.StepVan_LouisvilleMotorShop"]=true, ["Base.StepVan_LouisvilleSWAT"]=true, ["Base.StepVan_MarineBites"]=true, ["Base.StepVan_Masonry"]=true, ["Base.StepVan_Mechanic"]=true, ["Base.StepVan_MobileLibrary"]=true, ["Base.StepVan_Plonkies"]=true, ["Base.StepVan_Propane"]=true, ["Base.StepVan_RandisPlants"]=true, ["Base.StepVan_Scarlet"]=true, ["Base.StepVan_SmartKut"]=true, ["Base.StepVan_SouthEasternHosp"]=true, ["Base.StepVan_SouthEasternPaint"]=true, ["Base.StepVan_USL"]=true, ["Base.StepVan_Zippee"]=true, ["Base.Van"]=true, ["Base.VanBeckmans"]=true, ["Base.VanBrewsterHarbin"]=true, ["Base.VanBuilder"]=true, ["Base.VanCarpenter"]=true, ["Base.VanCoastToCoast"]=true, ["Base.VanDeerValley"]=true, ["Base.VanFossoil"]=true, ["Base.VanGardenGods"]=true, ["Base.VanGardener"]=true, ["Base.VanGreenes"]=true, ["Base.VanJohnMcCoy"]=true, ["Base.VanJonesFabrication"]=true, ["Base.VanKerrHomes"]=true, ["Base.VanKnobCreekGas"]=true, ["Base.VanKnoxCom"]=true, ["Base.VanKorshunovs"]=true, ["Base.VanLouisvilleLandscaping"]=true, ["Base.VanMail"]=true, ["Base.VanMccoy"]=true, ["Base.VanMechanic"]=true, ["Base.VanMeltingPointMetal"]=true, ["Base.VanMetalheads"]=true, ["Base.VanMetalworker"]=true, ["Base.VanMicheles"]=true, ["Base.VanMobileMechanics"]=true, ["Base.VanMooreMechanics"]=true, ["Base.VanOldMill"]=true, ["Base.VanOvoFarm"]=true, ["Base.VanPennSHam"]=true, ["Base.VanPlattAuto"]=true, ["Base.VanPluggedInElectrics"]=true, ["Base.VanRiversideFabrication"]=true, ["Base.VanRosewoodworking"]=true, ["Base.VanSchwabSheetMetal"]=true, ["Base.VanSeats"]=true, ["Base.VanSeatsAirportShuttle"]=true, ["Base.VanSeats_Creature"]=true, ["Base.VanSeats_LadyDelighter"]=true, ["Base.VanSeats_Mural"]=true, ["Base.VanSeats_Prison"]=true, ["Base.VanSeats_Space"]=true, ["Base.VanSeats_Trippy"]=true, ["Base.VanSeats_Valkyrie"]=true, ["Base.VanSpiffo"]=true, ["Base.VanTreyBaines"]=true, ["Base.VanUncloggers"]=true, ["Base.VanUtility"]=true, ["Base.VanWPCarpentry"]=true, ["Base.Van_Blacksmith"]=true, ["Base.Van_BugWipers"]=true, ["Base.Van_Charlemange_Beer"]=true, ["Base.Van_CraftSupplies"]=true, ["Base.Van_Glass"]=true, ["Base.Van_HeritageTailors"]=true, ["Base.Van_KnoxDisti"]=true, ["Base.Van_Leather"]=true, ["Base.Van_LectroMax"]=true, ["Base.Van_Locksmith"]=true, ["Base.Van_Masonry"]=true, ["Base.Van_MassGenFac"]=true, ["Base.Van_Perfick_Potato"]=true, ["Base.Van_Transit"]=true, ["Base.Van_VoltMojo"]=true, ["Base.SUV"]=true, ["Base.PickUpVan"]=true, ["Base.PickUpVanBrickingIt"]=true, ["Base.PickUpVanBuilder"]=true, ["Base.PickUpVanCallowayLandscaping"]=true, ["Base.PickUpVanHeltonMetalWorking"]=true, ["Base.PickUpVanKimbleKonstruction"]=true, ["Base.PickUpVanMarchRidgeConstruction"]=true, ["Base.PickUpVanMccoy"]=true, ["Base.PickUpVanMetalworker"]=true, ["Base.PickUpVanWeldingbyCamille"]=true, ["Base.PickUpVanYingsWood"]=true, ["Base.PickUpVan_Camo"]=true}
 R.rackCapacities = {["Base.StepVan"]=300, ["Base.StepVanAirportCatering"]=300, ["Base.StepVanMail"]=300, ["Base.StepVan_Blacksmith"]=300, ["Base.StepVan_Butchers"]=300, ["Base.StepVan_Cereal"]=300, ["Base.StepVan_Citr8"]=300, ["Base.StepVan_CompleteRepairShop"]=300, ["Base.StepVan_Florist"]=300, ["Base.StepVan_Genuine_Beer"]=300, ["Base.StepVan_Glass"]=300, ["Base.StepVan_Heralds"]=300, ["Base.StepVan_HuangsLaundry"]=300, ["Base.StepVan_Jorgensen"]=300, ["Base.StepVan_LouisvilleMotorShop"]=300, ["Base.StepVan_LouisvilleSWAT"]=300, ["Base.StepVan_MarineBites"]=300, ["Base.StepVan_Masonry"]=300, ["Base.StepVan_Mechanic"]=300, ["Base.StepVan_MobileLibrary"]=300, ["Base.StepVan_Plonkies"]=300, ["Base.StepVan_Propane"]=300, ["Base.StepVan_RandisPlants"]=300, ["Base.StepVan_Scarlet"]=300, ["Base.StepVan_SmartKut"]=300, ["Base.StepVan_SouthEasternHosp"]=300, ["Base.StepVan_SouthEasternPaint"]=300, ["Base.StepVan_USL"]=300, ["Base.StepVan_Zippee"]=300, ["Base.Van"]=200, ["Base.VanBeckmans"]=200, ["Base.VanBrewsterHarbin"]=200, ["Base.VanBuilder"]=200, ["Base.VanCarpenter"]=200, ["Base.VanCoastToCoast"]=200, ["Base.VanDeerValley"]=200, ["Base.VanFossoil"]=200, ["Base.VanGardenGods"]=200, ["Base.VanGardener"]=200, ["Base.VanGreenes"]=200, ["Base.VanJohnMcCoy"]=200, ["Base.VanJonesFabrication"]=200, ["Base.VanKerrHomes"]=200, ["Base.VanKnobCreekGas"]=200, ["Base.VanKnoxCom"]=200, ["Base.VanKorshunovs"]=200, ["Base.VanLouisvilleLandscaping"]=200, ["Base.VanMail"]=200, ["Base.VanMccoy"]=200, ["Base.VanMechanic"]=200, ["Base.VanMeltingPointMetal"]=200, ["Base.VanMetalheads"]=200, ["Base.VanMetalworker"]=200, ["Base.VanMicheles"]=200, ["Base.VanMobileMechanics"]=200, ["Base.VanMooreMechanics"]=200, ["Base.VanOldMill"]=200, ["Base.VanOvoFarm"]=200, ["Base.VanPennSHam"]=200, ["Base.VanPlattAuto"]=200, ["Base.VanPluggedInElectrics"]=200, ["Base.VanRiversideFabrication"]=200, ["Base.VanRosewoodworking"]=200, ["Base.VanSchwabSheetMetal"]=200, ["Base.VanSeats"]=200, ["Base.VanSeatsAirportShuttle"]=200, ["Base.VanSeats_Creature"]=200, ["Base.VanSeats_LadyDelighter"]=200, ["Base.VanSeats_Mural"]=200, ["Base.VanSeats_Prison"]=200, ["Base.VanSeats_Space"]=200, ["Base.VanSeats_Trippy"]=200, ["Base.VanSeats_Valkyrie"]=200, ["Base.VanSpiffo"]=200, ["Base.VanTreyBaines"]=200, ["Base.VanUncloggers"]=200, ["Base.VanUtility"]=200, ["Base.VanWPCarpentry"]=200, ["Base.Van_Blacksmith"]=200, ["Base.Van_BugWipers"]=200, ["Base.Van_Charlemange_Beer"]=200, ["Base.Van_CraftSupplies"]=200, ["Base.Van_Glass"]=200, ["Base.Van_HeritageTailors"]=200, ["Base.Van_KnoxDisti"]=200, ["Base.Van_Leather"]=200, ["Base.Van_LectroMax"]=200, ["Base.Van_Locksmith"]=200, ["Base.Van_Masonry"]=200, ["Base.Van_MassGenFac"]=200, ["Base.Van_Perfick_Potato"]=200, ["Base.Van_Transit"]=200, ["Base.Van_VoltMojo"]=200, ["Base.SUV"]=150, ["Base.PickUpVan"]=150, ["Base.PickUpVanBrickingIt"]=150, ["Base.PickUpVanBuilder"]=150, ["Base.PickUpVanCallowayLandscaping"]=150, ["Base.PickUpVanHeltonMetalWorking"]=150, ["Base.PickUpVanKimbleKonstruction"]=150, ["Base.PickUpVanMarchRidgeConstruction"]=150, ["Base.PickUpVanMccoy"]=150, ["Base.PickUpVanMetalworker"]=150, ["Base.PickUpVanWeldingbyCamille"]=150, ["Base.PickUpVanYingsWood"]=150, ["Base.PickUpVan_Camo"]=150}
@@ -58,7 +99,7 @@ end
 R.materials = { ["Base.MetalBar"]=10, ["Base.SmallSheetMetal"]=4,
     ["Base.Screws"]=4, ["Base.Tarp"]=1 }
 R.uses = { ["Base.BlowTorch"]=10, ["Base.WeldingRods"]=4 }
-R.rackRecipe={itemType=R.fixedType,materials=R.materials,uses=R.uses,
+R.rackRecipe={itemType=R.fixedType,materials=R.materials,uses=R.uses,scaleWithVehicle=true,
     salvage={{"MetalBar",10,15},{"SmallSheetMetal",4,15},{"Screws",4,25}}}
 
 function R.isPart(part)
