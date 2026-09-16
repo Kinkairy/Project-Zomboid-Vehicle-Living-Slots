@@ -11,10 +11,20 @@ local function roundPositive(value)
     return math.floor(value + 0.5)
 end
 
+-- Network command IDs must be finite integers before entering Java APIs.
+-- This is the same numeric contract emitted by submitRefill on the client.
+local function isCommandId(value)
+    return type(value) == "number" and value == value
+        and value ~= math.huge and value ~= -math.huge
+        and value == math.floor(value)
+end
+
 function VLS.KI5Server.refillBlowTorch(player, args)
-    if not player or not args or not args.vehicle or not args.part
-            or not args.torch or player:getVehicle() then return false end
-    local vehicle = getVehicleById(tonumber(args.vehicle))
+    if not player or type(args) ~= "table"
+            or not isCommandId(args.vehicle) or not isCommandId(args.torch)
+            or type(args.part) ~= "string" or args.part == ""
+            or player:getVehicle() then return false end
+    local vehicle = getVehicleById(args.vehicle)
     if not vehicle or not vehicle:isStopped()
             or not VLS.isSupportedVehicle(vehicle)
             or player:DistToProper(vehicle) >= 4 then return false end
@@ -25,7 +35,7 @@ function VLS.KI5Server.refillBlowTorch(player, args)
 
     local inventory = player:getInventory()
     local torch = inventory and inventory:getItemWithIDRecursiv(
-        tonumber(args.torch)) or nil
+        args.torch) or nil
     if not torch or torch:getFullType() ~= "Base.BlowTorch"
             or not instanceof(torch, "DrainableComboItem") then return false end
 
