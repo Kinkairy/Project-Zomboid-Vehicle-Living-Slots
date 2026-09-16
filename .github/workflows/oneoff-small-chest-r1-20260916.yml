@@ -1,0 +1,192 @@
+name: Verify and apply small chest R1
+on:
+  push:
+    branches: [maintenance/small-chest-r1-20260916]
+    paths: [.github/workflows/oneoff-small-chest-r1-20260916.yml]
+permissions:
+  contents: write
+concurrency:
+  group: vls-small-chest-r1
+  cancel-in-progress: false
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Install Lua only on disposable CI runner
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+      - name: Patch two verified files, test production function slices, fast-forward main
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, subprocess, tempfile
+          from pathlib import Path
+          expected='e54971fe7f2989e88ee16d497d451f7e54c0d281'
+          P='workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
+          roof=P+'shared/VLS_RoofCargo.lua';icons=P+'client/VLS_VehicleMechanicsIcons.lua'
+          hashes={roof:'dc2c2c0ba2c2d3aca4c6a8d995cc70b1f9261713',icons:'b6dd1daccf08930c85ae66cde4a9679342fe6417'}
+          def git(*args):return subprocess.check_output(['git',*args]).decode().strip()
+          def blob(b):return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          def once(s,a,b):
+              assert s.count(a)==1,'Missing or ambiguous source anchor'
+              return s.replace(a,b,1)
+          def between(s,a,b):return s[s.index(a):s.index(b,s.index(a))]
+          assert git('rev-parse','HEAD')==expected,'Public main changed; review required'
+          before={p:Path(p).read_bytes() for p in hashes}
+          for p,b in before.items():assert blob(b)==hashes[p],p
+          old_map='    VLS.supportedMoveableSprites.furniture_storage_02_28="Base.Mov_SmallChest"\n'
+          new_map='''    -- One Small Chest family, all four orientations. Never match translated names.
+              for sprite = 28, 31 do
+                  VLS.supportedMoveableSprites["furniture_storage_02_" .. sprite] = "Base.Mov_SmallChest"
+              end
+          '''
+          # Keep the maintained Lua indentation independent of YAML indentation.
+          new_map='    -- One Small Chest family, all four orientations. Never match translated names.\n    for sprite = 28, 31 do\n        VLS.supportedMoveableSprites["furniture_storage_02_" .. sprite] = "Base.Mov_SmallChest"\n    end\n'
+          old_guard='    return accepted and chr:getInventory():contains(item)\n'
+          new_guard='    -- Match the native mechanics inventory filter again at action validation.\n    if part:getId()=="VLSRoofSmallChest" and item:getCondition()<=0 then return false end\n'+old_guard
+          tooltip='''-- The native tooltip only counts literal/script types. Canonical moveables
+          -- added to the menu above must use the same resolver in the requirement line.
+          -- Keep the native tool/recipe/key/skill/success tooltip unchanged. Do not mutate
+          -- VehicleUtils.getItems, inventory objects, item types, sprites or ModData.
+          if not VLS.smallChestTooltipHookApplied then
+              VLS.smallChestTooltipHookApplied = true
+              local originalTooltip = ISVehicleMechanics.doMenuTooltip
+              function ISVehicleMechanics:doMenuTooltip(part, option, operation, itemType)
+                  local roof = VLSRoofCargo
+                  if operation ~= "install" or itemType ~= "Base.Mov_SmallChest"
+                          or not part or part:getId() ~= "VLSRoofSmallChest"
+                          or not roof or not roof.isPart(part) then
+                      return originalTooltip(self, part, option, operation, itemType)
+                  end
+                  -- nil omits only the native item's own 0/1 line, not tool requirements.
+                  local result = originalTooltip(self, part, option, operation, nil)
+                  local tooltip = option and option.toolTip
+                  if tooltip and tooltip.description then
+                      local typeToItem = VehicleUtils.getItems(self.playerNum)
+                      local available = #getCanonicalCandidates(typeToItem, itemType) > 0
+                      local line = " " .. (available and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs)
+                          .. getItemDisplayName(itemType) .. (available and " 1/1" or " 0/1") .. " <LINE>"
+                      local header = getText("Tooltip_craft_Needs") .. " : <LINE>"
+                      if tooltip.description:sub(1, #header) == header then
+                          tooltip.description = header .. line .. tooltip.description:sub(#header + 1)
+                      else
+                          tooltip.description = tooltip.description .. line
+                      end
+                  end
+                  return result
+              end
+              print("[VLS chest-r1] four-orientation small chest menu/tooltip adapter loaded")
+          end
+
+          '''
+          anchor='local function getPreviewTexture(itemType)\n'
+          a=once(once(before[roof].decode(),old_map,new_map),old_guard,new_guard)
+          b=once(before[icons].decode(),anchor,tooltip+anchor)
+          assert once(once(a,new_guard,old_guard),new_map,old_map).encode()==before[roof]
+          assert once(b,tooltip+anchor,anchor).encode()==before[icons]
+          Path(roof).write_bytes(a.encode());Path(icons).write_bytes(b.encode())
+          for p in hashes:subprocess.run(['luac5.1','-p',p],check=True)
+          config=Path(P+'shared/VLS_Config.lua').read_text()
+          resolver=between(config,'function VLS.getEquipmentProfileByType(','function VLS.getEquipmentProfile(item)')
+          mapping=between(a,'if VLS then','\nR.legacy =')
+          candidates=between(b,'local function getCanonicalCandidates(','local function addInstallCandidate(')
+          validator=between(a,'function R.validateInstall(','-- Dedicated servers')
+          setup='''local n=0
+          local function check(v,msg)n=n+1;if not v then error(msg)end end
+          VLS={equipmentProfiles={},sleepingBagTypes={},supportedMoveableSprites={}}
+          local R={};VLSRoofCargo=R
+          function instanceof(i,k)return i.kind==k end
+          function getText(k)return k end
+          function getItemDisplayName(k)return k end
+          local visible={}
+          local function item(sprite,condition,ft,script)
+            local i={sprite=sprite,condition=condition or 100,ft=ft or "Moveables.generic",script=script or "Moveables.Moveable",kind="Moveable"}
+            function i:getFullType()return self.ft end
+            function i:getScriptItem()return {getFullName=function()return self.script end}end
+            function i:getWorldSprite()return self.sprite end
+            function i:getCondition()return self.condition end
+            return i
+          end
+          VehicleUtils={getItems=function()
+            local t={};for _,i in ipairs(visible)do if i.condition>0 then
+              for _,ft in ipairs({i.ft,i.script})do t[ft]=t[ft]or{};table.insert(t[ft],i)end
+            end end;return t,{}
+          end}
+          local nativeArg
+          local header="Tooltip_craft_Needs : <LINE>"
+          local rest=" Wrench/Skill/Recipe/Key requirements"
+          ISVehicleMechanics={ghs="<GOOD>",bhs="<BAD>"}
+          function ISVehicleMechanics:doMenuTooltip(part,opt,op,ft)
+            nativeArg=ft
+            local line=""
+            if ft then local types=VehicleUtils.getItems();line=types[ft] and " PRESENT" or " MISSING"end
+            opt.toolTip={description=header..line..rest};return 123
+          end
+          local ui=setmetatable({playerNum=0},{__index=ISVehicleMechanics})
+          local v={rack=true}
+          local part={getId=function()return "VLSRoofSmallChest"end,getVehicle=function()return v end,getInventoryItem=function(self)return self.installed end}
+          function R.isPart(p)return p==part end
+          '''
+          baseline='''visible={item("furniture_storage_02_28")}
+          check(#getCanonicalCandidates(VehicleUtils.getItems(),"Base.Mov_SmallChest")==1,"baseline canonical menu")
+          local old={};ui:doMenuTooltip(part,old,"install","Base.Mov_SmallChest")
+          check(old.toolTip.description:find("MISSING",1,true)~=nil,"baseline tooltip disagreement")
+          for i=29,31 do check(VLS.resolveEquipmentType(item("furniture_storage_02_"..i))==nil,"baseline missing orientation")end
+          '''
+          tests='''for i=28,31 do
+            local box=item("furniture_storage_02_"..i);visible={box}
+            local t=VehicleUtils.getItems();local c=getCanonicalCandidates(t,"Base.Mov_SmallChest")
+            check(#c==1 and c[1]==box,"physical box preserved")
+            check(t["Base.Mov_SmallChest"]==nil,"no native index mutation")
+            local opt={};check(ui:doMenuTooltip(part,opt,"install","Base.Mov_SmallChest")==123,"native return")
+            check(opt.toolTip.description==header.." <GOOD>Base.Mov_SmallChest 1/1 <LINE>"..rest,"tooltip consistent and native requirements retained")
+            check(VLS.resolveEquipmentType(item("ct_oac_furniture_storage_02_"..i))=="Base.Mov_SmallChest","existing OAC prefix")
+          end
+          for _,s in ipairs({"furniture_storage_02_27","furniture_storage_02_32","crafted_01_16"})do
+            visible={item(s)};check(#getCanonicalCandidates(VehicleUtils.getItems(),"Base.Mov_SmallChest")==0,"unrelated box rejected")
+          end
+          visible={item("furniture_storage_02_29",0)}
+          check(#getCanonicalCandidates(VehicleUtils.getItems(),"Base.Mov_SmallChest")==0,"native zero-condition filter")
+          local opt={};ui:doMenuTooltip(part,opt,"install","Base.Wrench");check(nativeArg=="Base.Wrench","unrelated tooltip unchanged")
+          ui:doMenuTooltip(part,opt,"uninstall","Base.Mov_SmallChest");check(nativeArg=="Base.Mov_SmallChest","uninstall unchanged")
+          R.allowed={VLSRoofSmallChest={["Base.Mov_SmallChest"]=true}}
+          R.isActionPart=R.isPart
+          function R.fabricationSpec()return nil end
+          function R.fixed(v)return v.rack end
+          function R.lampOrderReady()return true end
+          function R.isSpare()return false end
+          function R.atVehicle(chr)return chr.near end
+          VLS.enabled=true;function VLS.isInstallationEnabled()return VLS.enabled end
+          local own={};local chr={near=true,getInventory=function()return {contains=function(_,i)return own[i]==true end}end}
+          for i=28,31 do local box=item("furniture_storage_02_"..i);own[box]=true;check(R.validateInstall(chr,part,box,true)==true,"server accepts orientation")end
+          local box=item("furniture_storage_02_29");own[box]=true;box.condition=0
+          check(not R.validateInstall(chr,part,box,true),"server rejects broken queued item")
+          box.condition=100;own[box]=nil;check(not R.validateInstall(chr,part,box,true),"server ownership")
+          own[box]=true;v.rack=false;check(not R.validateInstall(chr,part,box,true),"server rack prerequisite")
+          v.rack=true;part.installed={};check(not R.validateInstall(chr,part,box,true),"server occupied slot")
+          part.installed=nil;VLS.enabled=false;check(not R.validateInstall(chr,part,box,true),"server sandbox")
+          VLS.enabled=true;chr.near=false;check(not R.validateInstall(chr,part,box,true),"server position")
+          print("PASS_PRODUCTION_SLICE_ASSERTIONS="..n)
+          '''
+          code=setup+resolver+mapping.replace(new_map,old_map)+candidates+baseline+mapping+tooltip+validator+tests
+          with tempfile.TemporaryDirectory() as td:
+              f=Path(td)/'test.lua';f.write_text(code)
+              subprocess.run(['lua5.1',str(f)],check=True)
+          assert set(git('diff','--name-only').splitlines())==set(hashes),'Unexpected changed files'
+          subprocess.run(['git','diff','--check'],check=True)
+          git('config','user.name','PZ source maintenance');git('config','user.email','maintenance@users.noreply.github.com')
+          subprocess.run(['git','add','--',*sorted(hashes)],check=True)
+          subprocess.run(['git','commit','-m','fix: recognize all small chest orientations and align install tooltip'],check=True)
+          commit=git('rev-parse','HEAD')
+          assert git('ls-remote','origin','refs/heads/main').split()[0]==expected,'Concurrent public main change'
+          subprocess.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+          print('PUBLIC_CHEST_PATCH_COMMIT='+commit)
+          print('VLS_CONTENTS_TREE='+git('rev-parse','HEAD:workshop/Contents'))
+          for path in sorted(hashes):print(path+'='+blob(Path(path).read_bytes()))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a')as h:
+              h.write('Small chest source fix: `'+commit+'`. Only two runtime files changed. Lua 5.1 syntax and production-function slices passed; NOT a game test.\n')
+          PY
