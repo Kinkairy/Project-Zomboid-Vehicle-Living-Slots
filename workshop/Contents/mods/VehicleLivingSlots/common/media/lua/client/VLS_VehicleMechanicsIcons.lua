@@ -103,6 +103,40 @@ local function attachCanonicalCandidates(mechanics, part, installMenu, typeToIte
     return candidates
 end
 
+-- The native tooltip only counts literal/script types. Canonical moveables
+-- added to the menu above must use the same resolver in the requirement line.
+-- Keep the native tool/recipe/key/skill/success tooltip unchanged. Do not mutate
+-- VehicleUtils.getItems, inventory objects, item types, sprites or ModData.
+if not VLS.smallChestTooltipHookApplied then
+    VLS.smallChestTooltipHookApplied = true
+    local originalTooltip = ISVehicleMechanics.doMenuTooltip
+    function ISVehicleMechanics:doMenuTooltip(part, option, operation, itemType)
+        local roof = VLSRoofCargo
+        if operation ~= "install" or itemType ~= "Base.Mov_SmallChest"
+                or not part or part:getId() ~= "VLSRoofSmallChest"
+                or not roof or not roof.isPart(part) then
+            return originalTooltip(self, part, option, operation, itemType)
+        end
+        -- nil omits only the native item's own 0/1 line, not tool requirements.
+        local result = originalTooltip(self, part, option, operation, nil)
+        local tooltip = option and option.toolTip
+        if tooltip and tooltip.description then
+            local typeToItem = VehicleUtils.getItems(self.playerNum)
+            local available = #getCanonicalCandidates(typeToItem, itemType) > 0
+            local line = " " .. (available and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs)
+                .. getItemDisplayName(itemType) .. (available and " 1/1" or " 0/1") .. " <LINE>"
+            local header = getText("Tooltip_craft_Needs") .. " : <LINE>"
+            if tooltip.description:sub(1, #header) == header then
+                tooltip.description = header .. line .. tooltip.description:sub(#header + 1)
+            else
+                tooltip.description = tooltip.description .. line
+            end
+        end
+        return result
+    end
+    print("[VLS chest-r1] four-orientation small chest menu/tooltip adapter loaded")
+end
+
 local function getPreviewTexture(itemType)
     if previewTextures[itemType] then return previewTextures[itemType] end
 

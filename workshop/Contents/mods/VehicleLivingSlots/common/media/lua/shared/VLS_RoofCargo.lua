@@ -17,7 +17,10 @@ R.rackCapacities = {["Base.StepVan"]=300, ["Base.StepVanAirportCatering"]=300, [
 if VLS then
     VLS.equipmentProfiles["Base.Mov_SmallChest"]={capability="roofCargo",
         previewSprite="furniture_storage_02_28",moveableName="Small Chest"}
-    VLS.supportedMoveableSprites.furniture_storage_02_28="Base.Mov_SmallChest"
+    -- One Small Chest family, all four orientations. Never match translated names.
+    for sprite = 28, 31 do
+        VLS.supportedMoveableSprites["furniture_storage_02_" .. sprite] = "Base.Mov_SmallChest"
+    end
 end
 
 R.legacy = {VLSLowRoofRack=true, VLSRoofMattress=true}
@@ -189,6 +192,8 @@ function R.validateInstall(chr,part,item,position)
     else
         accepted=types[(VLS and VLS.resolveEquipmentType(item)) or item:getFullType()]
     end
+    -- Match the native mechanics inventory filter again at action validation.
+    if part:getId()=="VLSRoofSmallChest" and item:getCondition()<=0 then return false end
     return accepted and chr:getInventory():contains(item)
 end
 -- Dedicated servers have no ISVehicleMechanics or inventory-page globals.
