@@ -1,0 +1,39 @@
+name: VLS source audit
+on:
+  push:
+    branches: [maintenance/vls-audit-deploy-20260916]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install syntax checker
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+      - name: Capture exact source and audit syntax
+        shell: bash
+        run: |
+          mkdir -p audit-output
+          git rev-parse HEAD > audit-output/source-commit.txt
+          git archive --format=zip HEAD workshop > audit-output/source-workshop.zip
+          git ls-tree -r HEAD -- workshop > audit-output/source-tree.txt
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          results = []
+          for p in sorted(pathlib.Path('workshop/Contents/mods').rglob('*.lua')):
+              r = subprocess.run(['luac5.1', '-p', str(p)], capture_output=True, text=True)
+              results.append({'path': str(p), 'ok': r.returncode == 0, 'stderr': r.stderr})
+          pathlib.Path('audit-output/lua-syntax.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
+          print('Lua files:', len(results), 'Failures:', sum(not r['ok'] for r in results))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vls-source-audit
+          path: audit-output/
+          retention-days: 7
+          if-no-files-found: error
