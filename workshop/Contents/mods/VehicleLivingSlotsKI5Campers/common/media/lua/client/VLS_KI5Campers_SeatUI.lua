@@ -163,8 +163,12 @@ if not VLS.ki5CampersSeatUIHookApplied then
         local savedPositions = scriptName == FLYING_CLOUD and
             shiftFlyingCloudNativePositions(script) or {}
 
-        local ok, err = pcall(vanillaRender, self)
-        if ok then preferNativeSeatHit(self, script, scriptName) end
+        -- Both drawing and hit-testing borrow the temporary script offsets.
+        -- Restore them even when another UI hook makes hit-testing throw.
+        local ok, err = pcall(function()
+            vanillaRender(self)
+            preferNativeSeatHit(self, script, scriptName)
+        end)
         restorePositions(savedPositions)
         if not ok then error(err) end
     end
