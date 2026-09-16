@@ -1,0 +1,64 @@
+name: Apply reviewed generator installation fix
+on:
+  push:
+    branches: [maintenance/generator-no-wrench-20260916]
+    paths: [.github/workflows/oneoff-generator-no-wrench-20260916.yml]
+permissions:
+  contents: write
+concurrency:
+  group: vls-generator-install-fix
+  cancel-in-progress: false
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out public main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Apply and verify the three-file patch
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python3 - <<'PY'
+          import hashlib, importlib.util, os, subprocess
+          from pathlib import Path
+          expected = 'de230c9eabf00b15281584832ceaf61867d56ce1'
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode().strip()
+          assert git('rev-parse','HEAD') == expected, 'Public main changed; review required'
+          helper = Path('ag-handoff/fixes/generator-install-no-wrench-20260916/apply_generator_fix.py')
+          assert git('hash-object',str(helper)) == '6bc659db0d9c99397d1dd03290b7e4752fefba55', 'Unexpected patch helper'
+          spec = importlib.util.spec_from_file_location('generator_fix', helper)
+          fix = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(fix)
+          root = Path.cwd().resolve()
+          changes = fix.prepare(root)
+          assert len(changes) == 3, 'Expected exactly three source changes'
+          for path, before, after, diff in changes:
+              rel = path.relative_to(root).as_posix()
+              assert fix.git_blob_sha(before.decode('utf-8')) == fix.EXPECTED[rel]
+              assert fix.transform(rel,after.decode('utf-8'),reverse=True) == before.decode('utf-8'), 'Patch is not lossless outside approved edits'
+              print(diff)
+          fix.write_changes(changes)
+          assert fix.prepare(root) == [], 'Patch is not idempotent'
+          changed = set(git('diff','--name-only').splitlines())
+          assert changed == set(fix.EXPECTED), 'Unrelated tracked file changed'
+          subprocess.run(['git','diff','--check'],check=True)
+          git('config','user.name','PZ source maintenance')
+          git('config','user.email','maintenance@users.noreply.github.com')
+          subprocess.run(['git','add','--',*sorted(fix.EXPECTED)],check=True)
+          assert git('ls-remote','origin','refs/heads/main').split()[0] == expected, 'Public main changed during patch'
+          subprocess.run(['git','commit','-m','fix: remove wrench requirement from roof generator installation'],check=True)
+          commit = git('rev-parse','HEAD')
+          subprocess.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+          print('PUBLIC_PATCH_COMMIT=' + commit)
+          print('Three exact source edits verified; uninstall and unrelated parts preserved. No game test or deployment.')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as summary:
+              summary.write('Public patch commit: `' + commit + '`\n\n')
+              for rel in sorted(fix.EXPECTED):
+                  summary.write('- `' + rel + '` SHA-256 `' + hashlib.sha256(Path(rel).read_bytes()).hexdigest() + '`\n')
+          PY
