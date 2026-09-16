@@ -1,4 +1,4 @@
-# Vehicle Living Slots 3.8.1 / 房车生活
+# Vehicle Living Slots 3.8.2 / 房车生活
 
 [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3791192579)
 
@@ -34,7 +34,7 @@
 
 - 通过车辆维修界面安装设备，所需材料、工具和技能以菜单提示为准。固定设施采用拆毁方式移除。
 
-- 多人游戏客户端与服务器须使用一致版本。版本：3.8.1。
+- 多人游戏客户端与服务器须使用一致版本。版本：3.8.2。
 
 ---
 
@@ -70,4 +70,4 @@ Turn supported vehicles into mobile living spaces with beds, storage, appliances
 
 - Use the vehicle mechanics menu to install equipment. The menu lists required materials, tools and skills. Fixed fittings require destructive removal.
 
-- Multiplayer clients and servers must use matching versions. Version: 3.8.1.
+- Multiplayer clients and servers must use matching versions. Version: 3.8.2.

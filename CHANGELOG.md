@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.2
+
+- 修复无法安装发电机和小箱子的问题。 / Fixed issues preventing generators and small chests from being installed.
+- 修复 KI5 房车喷枪充气菜单显示语言键值；提供简中、繁中和英文文字。 / Fixed the untranslated KI5 camper blowtorch refill label in Simplified Chinese, Traditional Chinese and English.
+- 保留已合入的护甲、保险杠维修与拆解实现；本次不修改碰撞和维修结算。 / Preserves the existing armor/bumper maintenance implementation without changing collision or repair calculations in this metadata update.
+
 ## 3.8.1
 
 3.8.1：新增车窗护甲与前后防撞杠，修复破损外观、储物容量和设备交互问题。 / Added window armor and bumper guards; fixed damage visuals, storage capacity and appliance interactions.

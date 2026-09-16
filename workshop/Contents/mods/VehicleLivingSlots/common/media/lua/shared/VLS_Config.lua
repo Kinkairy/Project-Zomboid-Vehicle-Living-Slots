@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.8.1"
-VLS.BUILD_ID = "6ceb908-fix1"
+VLS.VERSION = "3.8.2"
+VLS.BUILD_ID = "release-3.8.2-20260916"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID

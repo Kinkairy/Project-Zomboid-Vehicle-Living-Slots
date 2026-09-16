@@ -44,9 +44,9 @@
       "CH": "副水箱"
     },
     "IGUI_VLSKI5RefillBlowTorch": {
-      "EN": "Refill blowtorch (vehicle propane tank)",
-      "CN": "给喷枪充气（车载瓦斯罐）",
-      "CH": "為噴槍充氣（車載瓦斯罐）"
+      "EN": "Refill blowtorch",
+      "CN": "为喷枪充气",
+      "CH": "為噴槍充氣"
     }
   }
 }
