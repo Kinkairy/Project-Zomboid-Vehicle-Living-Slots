@@ -193,7 +193,7 @@ function R.validateInstall(chr,part,item,position)
 end
 -- Dedicated servers have no ISVehicleMechanics or inventory-page globals.
 -- Native UI moves kept tools into carried inventory before queueing an action.
--- All current cargo tables require one kept wrench; legacy retrieval needs none.
+-- Cargo removal still needs a wrench; generator installation skips it below.
 function R.serverCargoToolsReady(chr,part)
     if not chr or chr:isDead() then return false end
     if R.legacy[part:getId()] or chr:isMechanicsCheat() then return true end
@@ -212,7 +212,12 @@ function R.InstallTest(vehicle,part,chr)
             and R.empty(part) and R.plan(chr,spec)~=nil
     end
     if not R.allowed[part:getId()] or not R.fixed(vehicle) or not R.lampOrderReady(part) then return false end
-    if isServer() then return part:getVehicle()==vehicle and R.serverCargoToolsReady(chr,part) end
+    if isServer() then
+        if not chr or chr:isDead() or part:getVehicle()~=vehicle then return false end
+        -- Only installation is tool-free. UninstallTest still checks the wrench.
+        if part:getId()=="VLSRoofGenerator" then return true end
+        return R.serverCargoToolsReady(chr,part)
+    end
     return Vehicles.InstallTest.Default(vehicle,part,chr)
 end
 function R.UninstallTest(vehicle,part,chr)

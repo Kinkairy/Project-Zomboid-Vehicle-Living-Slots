@@ -79,10 +79,7 @@ module Base
             durability = 5,
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* The generator occupies both hands; no install tool is required. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
