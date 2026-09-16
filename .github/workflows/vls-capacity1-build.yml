@@ -1,0 +1,63 @@
+name: VLS capacity1 source validation
+on:
+  push:
+    branches: [maintenance/vls383-capacity1-build-20260917]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: inputs
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          ref: 8cac58cff9433b43701d829e2e5cae5758dbfd77
+      - uses: actions/checkout@v4
+        with:
+          repository: Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua
+          ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
+          path: vanilla
+          persist-credentials: false
+      - name: Apply narrowly scoped capacity changes
+        run: python3 inputs/maintenance/capacity1/apply.py candidate
+      - name: Syntax, release hash and all regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir evidence
+          sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+          cd candidate
+          find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
+          python3 tools/validate_release_383.py | tee ../evidence/manifest.txt
+          python3 tools/build_roof_capacity_translations.py --check
+          python3 tools/build_propane_ui_translations.py --check
+          python3 tools/build_wash_ui_translations.py --check
+          python3 tools/build_ki5_ui_translations.py
+          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights test_roof_capacity; do
+            lua5.1 tools/$t.lua . | tee ../evidence/$t.txt
+          done
+          lua5.1 tools/test_vls_wash.lua . ../vanilla | tee ../evidence/test_vls_wash.txt
+          git diff --cached --check
+      - name: Publish validated candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd candidate
+          git config user.name 'VLS source maintenance'
+          git config user.email 'maintenance@users.noreply.github.com'
+          git commit -m 'fix(vls): add 100 capacity to all fitted roof rack body families' -m 'Keep 3.8.3 and fabrication costs. Refresh existing installed rack item and container capacities in place; preserve cargo and condition. Verify every supported body variant and all previous regression suites. No live deployment or Workshop upload.'
+          git push origin HEAD:refs/heads/maintenance/vls383-capacity1-ready-20260917
+          git rev-parse HEAD > ../evidence/source-commit.txt
+          git rev-parse HEAD:workshop/Contents > ../evidence/runtime-tree.txt
+          git archive --format=zip HEAD > ../evidence/source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vls-capacity1-source
+          path: evidence/
+          retention-days: 7
