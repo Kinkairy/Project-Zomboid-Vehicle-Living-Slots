@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.3 capacity1 — 2026-09-17
+
+- Add 100 base capacity to every supported roof rack: StepVan 400, Van/VanSeats 300, SUV/PickUpVan 250.
+- Reconcile existing installed rack capacities in place; preserve cargo and condition.
+- Keep fabrication materials, interior storage and the four original 3.8.3 changes unchanged.
+
 ## 3.8.3
 
 - Keep rack damage, but exclude mounted cargo (including spotlights) from propagated crash damage. 不再连带损坏架上货物；不再連帶損壞架上貨物。

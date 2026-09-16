@@ -27,5 +27,5 @@
     "Sandbox_VehicleLivingSlots_EnableWaterTanks": "Enable cabin water tanks",
     "Sandbox_VehicleLivingSlots_EnableWaterTanks_tooltip": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
     "Sandbox_VehicleLivingSlots_EnableRoofRack": "Enable roof rack",
-    "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip": "Disabling prevents new racks and roof cargo. Existing racks, 300-capacity storage and cargo remain. Racks can be repaired or disassembled into materials after emptying storage and removing cargo. Re-enabling does not create items."
+    "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip": "Disabling prevents new racks and roof cargo. Existing racks, storage and cargo remain. Base rack capacity: StepVan 400; Van/VanSeats 300; SUV/PickUpVan 250. Racks are repairable; empty storage and remove cargo before disassembly into materials. Re-enabling does not create items."
 }

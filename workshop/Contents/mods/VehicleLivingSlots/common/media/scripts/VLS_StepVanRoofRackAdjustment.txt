@@ -184,7 +184,7 @@ module Base
             /* END reusable luggage attachments */
             container
             {
-                capacity = 300,
+                capacity = 400,
                 conditionAffectsCapacity = false,
                 test = VLSRoofCargo.Access,
             }

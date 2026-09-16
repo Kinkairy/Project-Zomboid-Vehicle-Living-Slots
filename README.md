@@ -85,3 +85,11 @@ Turn supported vehicles into mobile living spaces with beds, storage, appliances
 
 ### 繁體中文
 新增水箱旁清洗、車頂瓦斯罐為噴槍充氣；取消架上貨物額外碰撞傷害，修正射燈參數刷新及有效輸出。保留車型材料分檔、行李架與護甲耐久以及射燈整件裝卸。
+
+## 3.8.3 capacity1
+
+Fixed roof rack base capacity is now StepVan **400**, Van/VanSeats **300**, and SUV/PickUpVan **250** (+100 each, all supported variants). Existing installed racks are updated in place; fabrication costs do not change.
+
+行李架基础容量统一增加100：StepVan **400**，Van/VanSeats **300**，SUV/PickUpVan **250**。旧架原位更新，材料不变。
+
+行李架基礎容量統一增加100：StepVan **400**，Van/VanSeats **300**，SUV/PickUpVan **250**。舊架原位更新，材料不變。

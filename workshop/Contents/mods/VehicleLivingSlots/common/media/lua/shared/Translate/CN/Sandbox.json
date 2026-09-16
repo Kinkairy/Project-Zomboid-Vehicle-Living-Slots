@@ -27,5 +27,5 @@
     "Sandbox_VehicleLivingSlots_EnableWaterTanks": "启用车内水箱",
     "Sandbox_VehicleLivingSlots_EnableWaterTanks_tooltip": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
     "Sandbox_VehicleLivingSlots_EnableRoofRack": "启用行李架",
-    "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip": "关闭后禁止新装行李架和车顶货物。已有行李架、300容量储物及货物保留。行李架可维修，清空储物并拆下货物后可拆解为材料。重新启用不会生成物品。"
+    "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip": "关闭后禁止新装行李架和车顶挂载物，已安装的行李架、储物和挂载物保留。行李架基础容量：StepVan 400；Van/VanSeats 300；SUV/PickUpVan 250。行李架可维修，清空储物并拆下挂载物后可拆解回收材料。重新开启不会生成物品。"
 }

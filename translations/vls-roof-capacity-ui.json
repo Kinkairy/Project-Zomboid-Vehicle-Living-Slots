@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "mod": "VehicleLivingSlots",
+  "languages": ["EN", "CN", "CH"],
+  "groups": {
+    "IG_UI.json": {
+      "IGUI_VLSRoofRecipe": {
+        "EN": "Weld a fixed roof rack. Materials are consumed on completion. Includes a cover; capacity depends on vehicle model. Repairable; empty storage and remove cargo before disassembly.",
+        "CN": "焊接安装固定行李架；完成后扣除材料。自带顶盖，容量按车型区分。可维修；拆解前需清空储物并拆下挂载物。",
+        "CH": "焊接安裝固定行李架；完成後扣除材料。自帶頂蓋，容量按車型區分。可維修；拆解前需清空儲物並拆下掛載物。"
+      }
+    },
+    "Sandbox.json": {
+      "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip": {
+        "EN": "Disabling prevents new racks and roof cargo. Existing racks, storage and cargo remain. Base rack capacity: StepVan 400; Van/VanSeats 300; SUV/PickUpVan 250. Racks are repairable; empty storage and remove cargo before disassembly into materials. Re-enabling does not create items.",
+        "CN": "关闭后禁止新装行李架和车顶挂载物，已安装的行李架、储物和挂载物保留。行李架基础容量：StepVan 400；Van/VanSeats 300；SUV/PickUpVan 250。行李架可维修，清空储物并拆下挂载物后可拆解回收材料。重新开启不会生成物品。",
+        "CH": "關閉後禁止新裝行李架和車頂掛載物，已安裝的行李架、儲物和掛載物保留。行李架基礎容量：StepVan 400；Van/VanSeats 300；SUV/PickUpVan 250。行李架可維修，清空儲物並拆下掛載物後可拆解回收材料。重新開啟不會生成物品。"
+      }
+    }
+  }
+}

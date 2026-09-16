@@ -5,3 +5,4 @@
 - Share installed-propane blowtorch refilling between the base mod and optional KI5 adapter, with tank item identity checks. 车顶瓦斯罐可给喷枪充气；車頂瓦斯罐可給噴槍充氣。
 - Add exterior tank-inlet washing with native effects, shared timed-action constructors, authoritative real-water debit and source identity/position checks. 水箱旁可清洗身体及衣物；水箱旁可清洗身體及衣物。
 - Preserve materials1 body-family costs, all existing slot/item IDs, models and capacities. No live deployment, save migration or Workshop upload is implied.
+- Capacity1: +100 base roof-rack capacity for all supported variants (StepVan 400; Van/VanSeats 300; SUV/PickUpVan 250). Existing racks updated in place, cargo retained, construction costs unchanged.

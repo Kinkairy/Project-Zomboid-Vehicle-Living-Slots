@@ -32,7 +32,7 @@
   "IGUI_VehiclePartVLSRoofSpare1": "Vehicle Spare Tire",
   "IGUI_VehiclePartVLSRoofPropane2": "Propane Tank",
   "IGUI_VehiclePartVLSRoofSpare2": "Vehicle Spare Tire",
-  "IGUI_VLSRoofRecipe": "Weld a fixed roof rack. Materials are consumed on completion. Includes cover and 300 capacity; repair only.",
+  "IGUI_VLSRoofRecipe": "Weld a fixed roof rack. Materials are consumed on completion. Includes a cover; capacity depends on vehicle model. Repairable; empty storage and remove cargo before disassembly.",
   "IGUI_VLSRoofUses": "uses",
   "IGUI_VLSRoofKeepTools": "Welding mask and wrench required (kept)",
   "IGUI_VLSRoofRemoveLegacy": "Retrieve the legacy rack and cargo preview materials first",

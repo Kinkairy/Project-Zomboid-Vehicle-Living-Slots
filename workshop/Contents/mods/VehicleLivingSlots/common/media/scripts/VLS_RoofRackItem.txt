@@ -7,7 +7,7 @@ module Base
         ItemType = base:normal,
         Icon = MetalBar,
         Weight = 20,
-        MaxCapacity = 300,
+        MaxCapacity = 400,
         ConditionMax = 100,
         ConditionAffectsCapacity = false,
     }

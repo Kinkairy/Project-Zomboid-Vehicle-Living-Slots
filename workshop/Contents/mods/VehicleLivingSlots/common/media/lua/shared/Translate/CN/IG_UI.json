@@ -32,7 +32,7 @@
   "IGUI_VehiclePartVLSRoofSpare1": "车辆备胎",
   "IGUI_VehiclePartVLSRoofPropane2": "瓦斯罐",
   "IGUI_VehiclePartVLSRoofSpare2": "车辆备胎",
-  "IGUI_VLSRoofRecipe": "焊接安装固定行李架；成功后扣除材料。自带顶盖，容量300，只能维修。",
+  "IGUI_VLSRoofRecipe": "焊接安装固定行李架；完成后扣除材料。自带顶盖，容量按车型区分。可维修；拆解前需清空储物并拆下挂载物。",
   "IGUI_VLSRoofUses": "次用量",
   "IGUI_VLSRoofKeepTools": "需要焊接面罩和扳手（保留）",
   "IGUI_VLSRoofRemoveLegacy": "先拆回旧测试架和货物预览的材料",
