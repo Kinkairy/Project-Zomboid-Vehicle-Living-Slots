@@ -255,7 +255,7 @@ module Base
             {
                 create = VLSRoofLights.Create,
                 init = VLSRoofLights.Init,
-                update = Vehicles.Update.Headlight,
+                update = VLSRoofLights.Update,
             }
         }
         part VLSRoofHeadlight2
@@ -310,7 +310,7 @@ module Base
             {
                 create = VLSRoofLights.Create,
                 init = VLSRoofLights.Init,
-                update = Vehicles.Update.Headlight,
+                update = VLSRoofLights.Update,
             }
         }
         part VLSRoofHeadlight3
@@ -365,7 +365,7 @@ module Base
             {
                 create = VLSRoofLights.Create,
                 init = VLSRoofLights.Init,
-                update = Vehicles.Update.Headlight,
+                update = VLSRoofLights.Update,
             }
         }
         part VLSRoofHeadlight4
@@ -420,7 +420,7 @@ module Base
             {
                 create = VLSRoofLights.Create,
                 init = VLSRoofLights.Init,
-                update = Vehicles.Update.Headlight,
+                update = VLSRoofLights.Update,
             }
         }
         /* END roof spotlight parts */

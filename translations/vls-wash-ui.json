@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "mod": "VehicleLivingSlots",
+  "output": "common/media/lua/shared/Translate/{language}/IG_UI.json",
+  "languages": [
+    "EN",
+    "CN",
+    "CH"
+  ],
+  "entries": {
+    "IGUI_VLSTankWash": {
+      "EN": "Water tank washing",
+      "CN": "水箱清洗",
+      "CH": "水箱清洗"
+    },
+    "IGUI_VLSTankWashBody": {
+      "EN": "Wash yourself",
+      "CN": "清洗身体",
+      "CH": "清洗身體"
+    },
+    "IGUI_VLSTankWashAll": {
+      "EN": "Wash all dirty items",
+      "CN": "清洗全部脏污物品",
+      "CH": "清洗全部髒污物品"
+    },
+    "IGUI_VLSTankWashSelected": {
+      "EN": "Wash using water tank",
+      "CN": "用水箱清洗",
+      "CH": "用水箱清洗"
+    }
+  }
+}

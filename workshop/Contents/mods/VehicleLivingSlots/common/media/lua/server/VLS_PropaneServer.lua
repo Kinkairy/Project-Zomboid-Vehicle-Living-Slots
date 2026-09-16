@@ -1,0 +1,69 @@
+if isClient() then return end
+
+local VLS = require "VLS_Propane"
+
+local REFILL_MOD_ID = VLS.MOD_ID
+local REFILL_PROPANE_PER_TORCH_USE = 70
+
+VLS.PropaneServer = VLS.PropaneServer or {}
+
+local function roundPositive(value)
+    return math.floor(value + 0.5)
+end
+
+-- Network command IDs must be finite integers before entering Java APIs.
+-- This is the same numeric contract emitted by submitRefill on the client.
+local function isCommandId(value)
+    return type(value) == "number" and value == value
+        and value ~= math.huge and value ~= -math.huge
+        and value == math.floor(value)
+end
+
+function VLS.PropaneServer.refillBlowTorch(player, args)
+    if not player or type(args) ~= "table"
+            or not isCommandId(args.vehicle) or not isCommandId(args.torch)
+            or not isCommandId(args.tank)
+            or type(args.part) ~= "string" or args.part == ""
+            or player:getVehicle() then return false end
+    local vehicle = getVehicleById(args.vehicle)
+    if not vehicle or not vehicle:isStopped()
+            or not VLS.isSupportedVehicle(vehicle)
+            or player:DistToProper(vehicle) >= 4 then return false end
+
+    local propane, part = VLS.getInstalledPropaneSource(vehicle, args.part, args.tank)
+    if not propane or not part or part:getId() ~= args.part
+            or propane:getID() ~= args.tank
+            or not vehicle:isInArea(part:getArea(), player) then return false end
+
+    local inventory = player:getInventory()
+    local torch = inventory and inventory:getItemWithIDRecursiv(
+        args.torch) or nil
+    if not torch or torch:getFullType() ~= "Base.BlowTorch"
+            or not instanceof(torch, "DrainableComboItem") then return false end
+
+    local refillCapacity = torch:getMaxUses() * REFILL_PROPANE_PER_TORCH_USE
+    if refillCapacity <= 0 then return false end
+    local currentCapacity = torch:getCurrentUsesFloat() * refillCapacity
+    local transfer = math.min(refillCapacity - currentCapacity,
+        propane:getCurrentUses())
+    if transfer <= 0 then return false end
+
+    torch:setCurrentUsesFloat((currentCapacity + transfer) / refillCapacity)
+    propane:setCurrentUses(roundPositive(propane:getCurrentUses() - transfer))
+    torch:syncItemFields()
+    propane:syncItemFields()
+    vehicle:transmitPartUsedDelta(part)
+    return true
+end
+
+local function onClientCommand(module, command, player, args)
+    if module ~= REFILL_MOD_ID then return end
+    if command == "refillBlowTorch" then
+        VLS.PropaneServer.refillBlowTorch(player, args)
+    end
+end
+
+if not VLS.vehiclePropaneServerCommandHookApplied then
+    VLS.vehiclePropaneServerCommandHookApplied = true
+    Events.OnClientCommand.Add(onClientCommand)
+end

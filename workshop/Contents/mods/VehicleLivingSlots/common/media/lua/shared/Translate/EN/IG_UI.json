@@ -53,5 +53,10 @@
   "IGUI_VehiclePartVLSArmorWindowMiddleLeft": "Left side window armor",
   "IGUI_VehiclePartVLSArmorWindowMiddleRight": "Right side window armor",
   "IGUI_VehiclePartVLSBumperFront": "Front bull bar",
-  "IGUI_VehiclePartVLSBumperRear": "Rear bumper guard"
+  "IGUI_VehiclePartVLSBumperRear": "Rear bumper guard",
+  "IGUI_VLSRefillBlowTorch": "Refill blowtorch",
+  "IGUI_VLSTankWash": "Water tank washing",
+  "IGUI_VLSTankWashBody": "Wash yourself",
+  "IGUI_VLSTankWashAll": "Wash all dirty items",
+  "IGUI_VLSTankWashSelected": "Wash using water tank"
 }

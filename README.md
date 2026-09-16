@@ -1,4 +1,4 @@
-# Vehicle Living Slots 3.8.2 / 房车生活
+# Vehicle Living Slots 3.8.3 / 房车生活
 
 [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3791192579)
 
@@ -34,7 +34,7 @@
 
 - 通过车辆维修界面安装设备，所需材料、工具和技能以菜单提示为准。固定设施采用拆毁方式移除。
 
-- 多人游戏客户端与服务器须使用一致版本。版本：3.8.2。
+- 多人游戏客户端与服务器须使用一致版本。版本：3.8.3。
 
 ---
 
@@ -70,4 +70,18 @@ Turn supported vehicles into mobile living spaces with beds, storage, appliances
 
 - Use the vehicle mechanics menu to install equipment. The menu lists required materials, tools and skills. Fixed fittings require destructive removal.
 
-- Multiplayer clients and servers must use matching versions. Version: 3.8.2.
+- Multiplayer clients and servers must use matching versions. Version: 3.8.3.
+
+## 3.8.3 update
+
+- Rack-mounted cargo no longer receives VLS's propagated crash damage; the rack and fitted armor still do.
+- Roof spotlights refresh saved light parameters. Full-condition target distance is 48 and intensity is 1.0, with normalized item-condition attenuation. These are engine parameters, not a promise of additive screen brightness.
+- Installed roof propane tanks and supported KI5 camper tanks share the same blowtorch refill menu.
+- At a stopped vehicle's water-tank inlet, use the water-tank washing menu to wash yourself and carried/worn items using native washing effects and real tank water. No extra power requirement.
+- Client and server must both update. Code/mocked regressions are not a live gameplay acceptance test. No Workshop upload is performed by this source release.
+
+### 简体中文
+新增水箱旁清洗、车顶瓦斯罐为喷枪充气；取消架上货物额外碰撞伤害，修正射灯参数刷新及有效输出。保留车型材料分档、行李架与护甲耐久以及射灯整件装卸。
+
+### 繁體中文
+新增水箱旁清洗、車頂瓦斯罐為噴槍充氣；取消架上貨物額外碰撞傷害，修正射燈參數刷新及有效輸出。保留車型材料分檔、行李架與護甲耐久以及射燈整件裝卸。

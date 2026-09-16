@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.8.3
+
+- Keep rack damage, but exclude mounted cargo (including spotlights) from propagated crash damage. 不再连带损坏架上货物；不再連帶損壞架上貨物。
+- Reconfigure existing roof lights on load/install, target 48 distance / 1.0 intensity at full normalized condition, and retain native switching/battery drain. 修正射灯刷新与照明参数；修正射燈刷新與照明參數。
+- Share installed-propane blowtorch refilling between the base mod and optional KI5 adapter, with tank item identity checks. 车顶瓦斯罐可给喷枪充气；車頂瓦斯罐可給噴槍充氣。
+- Add exterior tank-inlet washing with native effects, shared timed-action constructors, authoritative real-water debit and source identity/position checks. 水箱旁可清洗身体及衣物；水箱旁可清洗身體及衣物。
+- Preserve materials1 body-family costs, all existing slot/item IDs, models and capacities. No live deployment, save migration or Workshop upload is implied.
+
 ## 3.8.2
 
 - 修复无法安装发电机和小箱子的问题。 / Fixed issues preventing generators and small chests from being installed.

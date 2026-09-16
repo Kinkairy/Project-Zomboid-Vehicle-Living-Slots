@@ -12,6 +12,8 @@ local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
 local noop=function() end
 local V={FREEZER_PART_BY_UNIVERSAL={},UNIVERSAL_PART_BY_FREEZER={},allowedItems={},equipmentProfiles={},sleepingBagTypes={},WATER_TANK_PART_IDS={},vehicleProfiles={},mechanicsDisplayProviders={},getAuxBatteryPart=noop,getPartDisplayName=noop}
 package.loaded.VLS_Config=V
+package.loaded.VLS_Propane=V
+V.MOD_ID="VehicleLivingSlots"
 local adapter=dofile(base.."shared/VLS_KI5Campers_Config.lua")
 package.loaded.VLS_KI5Campers_Config=adapter
 local file=assert(io.open(root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/42.20/mod.info"));local info=file:read("*a");file:close()
@@ -30,7 +32,7 @@ instanceof=function(item,name) return name=="DrainableComboItem" and item.draina
 local calls=0
 local charge,gas=0.25,10000
 local torch={drainable=true,getFullType=function() return "Base.BlowTorch" end,getMaxUses=function() return 10 end,getCurrentUsesFloat=function() return charge end,setCurrentUsesFloat=function(_,v) charge=v end,syncItemFields=noop}
-local propane={getCurrentUses=function() return gas end,setCurrentUses=function(_,v) gas=v end,syncItemFields=noop}
+local propane={getID=function() return 77 end,getCurrentUses=function() return gas end,setCurrentUses=function(_,v) gas=v end,syncItemFields=noop}
 local part={getId=function() return "DAMNPropaneTankOne" end,getArea=function() return "Tank" end}
 local stopped,atArea,supported,inVehicle,distance=true,true,true,false,1
 local vehicle={isStopped=function() return stopped end,isInArea=function() return atArea end,transmitPartUsedDelta=noop}
@@ -39,8 +41,8 @@ local inventory={getItemWithIDRecursiv=function(_,id) assert(type(id)=="number" 
 local player={getVehicle=function() return inVehicle and vehicle or nil end,getInventory=function() return inventory end,DistToProper=function() return distance end}
 V.isSupportedVehicle=function() return supported end
 V.getInstalledPropaneSource=function(_,pid) if pid=="DAMNPropaneTankOne" then return propane,part end end
-dofile(base.."server/VLS_KI5Campers_Server.lua")
-local function valid() return {vehicle=42,part="DAMNPropaneTankOne",torch=7} end
+dofile(root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_PropaneServer.lua")
+local function valid() return {vehicle=42,part="DAMNPropaneTankOne",torch=7,tank=77} end
 local invalid={false,true,1,"invalid",{}, {vehicle={},part="DAMNPropaneTankOne",torch=7}, {vehicle=42,part={},torch=7}}
 for _,field in ipairs({"vehicle","torch"}) do
     for _,value in ipairs({true,{},"42",0/0,math.huge,-math.huge,1.5}) do
@@ -52,23 +54,23 @@ local empty=valid();empty.part="";invalid[#invalid+1]=empty
 for i,args in ipairs(invalid) do
     test("invalid refill packet "..i.." has no lookup/debit",function()
         calls=0;charge=0.25;gas=10000
-        eq(V.KI5Server.refillBlowTorch(player,args),false)
+        eq(V.PropaneServer.refillBlowTorch(player,args),false)
         eq(calls,0);eq(charge,0.25);eq(gas,10000)
     end)
 end
-test("nil refill packet rejected",function() eq(V.KI5Server.refillBlowTorch(player,nil),false) end)
-test("dispatcher rejects malformed refill without throwing",function() commandHook("VehicleLivingSlotsKI5Campers","refillBlowTorch",player,false) end)
+test("nil refill packet rejected",function() eq(V.PropaneServer.refillBlowTorch(player,nil),false) end)
+test("dispatcher rejects malformed refill without throwing",function() commandHook("VehicleLivingSlots","refillBlowTorch",player,false) end)
 test("valid refill preserves original 70:1 conversion",function()
-    charge=0.25;gas=10000;eq(V.KI5Server.refillBlowTorch(player,valid()),true);eq(charge,1);eq(gas,9475)
+    charge=0.25;gas=10000;eq(V.PropaneServer.refillBlowTorch(player,valid()),true);eq(charge,1);eq(gas,9475)
 end)
-test("full torch does not consume propane",function() eq(V.KI5Server.refillBlowTorch(player,valid()),false);eq(gas,9475) end)
-test("limited propane still partially refills",function() charge=0;gas=70;eq(V.KI5Server.refillBlowTorch(player,valid()),true);eq(charge,0.1);eq(gas,0) end)
+test("full torch does not consume propane",function() eq(V.PropaneServer.refillBlowTorch(player,valid()),false);eq(gas,9475) end)
+test("limited propane still partially refills",function() charge=0;gas=70;eq(V.PropaneServer.refillBlowTorch(player,valid()),true);eq(charge,0.1);eq(gas,0) end)
 for _,condition in ipairs({"moving","inside","far","wrong area","unsupported","missing torch","unknown vehicle"}) do
     test(condition.." rejected",function()
         stopped=true;inVehicle=false;distance=1;atArea=true;supported=true;charge=0;gas=10000
         local args=valid()
         if condition=="moving" then stopped=false elseif condition=="inside" then inVehicle=true elseif condition=="far" then distance=5 elseif condition=="wrong area" then atArea=false elseif condition=="unsupported" then supported=false elseif condition=="missing torch" then args.torch=999 elseif condition=="unknown vehicle" then args.vehicle=999 end
-        eq(V.KI5Server.refillBlowTorch(player,args),false);eq(charge,0);eq(gas,10000)
+        eq(V.PropaneServer.refillBlowTorch(player,args),false);eq(charge,0);eq(gas,10000)
     end)
 end
 -- Seat renderer temporarily changes shared Java script offsets; always unwind.

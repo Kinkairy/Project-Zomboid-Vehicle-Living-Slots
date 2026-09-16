@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "mod": "VehicleLivingSlots",
+  "output": "common/media/lua/shared/Translate/{language}/IG_UI.json",
+  "languages": [
+    "EN",
+    "CN",
+    "CH"
+  ],
+  "entries": {
+    "IGUI_VLSRefillBlowTorch": {
+      "EN": "Refill blowtorch",
+      "CN": "为喷枪充气",
+      "CH": "為噴槍充氣"
+    }
+  }
+}

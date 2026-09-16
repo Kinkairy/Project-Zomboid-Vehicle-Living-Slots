@@ -5,6 +5,7 @@ function L.RefreshVisuals()
     for part in pairs(L.visualParts) do
         local vehicle=part:getVehicle()
         if vehicle and vehicle:getSquare() then
+            L.EnsureLight(vehicle,part)
             L.SyncVisual(part)
         else
             L.visualParts[part]=nil

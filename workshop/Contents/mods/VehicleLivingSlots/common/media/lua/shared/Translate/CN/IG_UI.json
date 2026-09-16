@@ -53,5 +53,10 @@
   "IGUI_VehiclePartVLSArmorWindowMiddleLeft": "左侧窗护甲",
   "IGUI_VehiclePartVLSArmorWindowMiddleRight": "右侧窗护甲",
   "IGUI_VehiclePartVLSBumperFront": "前防撞杠",
-  "IGUI_VehiclePartVLSBumperRear": "后防撞杠"
+  "IGUI_VehiclePartVLSBumperRear": "后防撞杠",
+  "IGUI_VLSRefillBlowTorch": "为喷枪充气",
+  "IGUI_VLSTankWash": "水箱清洗",
+  "IGUI_VLSTankWashBody": "清洗身体",
+  "IGUI_VLSTankWashAll": "清洗全部脏污物品",
+  "IGUI_VLSTankWashSelected": "用水箱清洗"
 }

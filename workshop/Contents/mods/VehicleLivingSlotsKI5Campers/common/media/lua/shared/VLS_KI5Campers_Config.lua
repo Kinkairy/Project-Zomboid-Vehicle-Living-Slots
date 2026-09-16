@@ -1,9 +1,10 @@
 local VLS = require "VLS_Config"
+require "VLS_Propane"
 
 if VLS.ki5CampersAdapterApplied then return VLS end
 VLS.ki5CampersAdapterApplied = true
 
-VLS.KI5_VERSION = "3.8.2"
+VLS.KI5_VERSION = "3.8.3"
 print("[VehicleLivingSlotsKI5Campers] Adapter version " .. VLS.KI5_VERSION)
 
 local SLOT_IDS = {
@@ -104,36 +105,6 @@ function VLS.getPartDisplayName(part, fallback)
         return getText("IGUI_VehiclePart" .. part:getId())
     end
     return originalGetPartDisplayName(part, fallback)
-end
-
-function VLS.getPropaneTankPartIds(vehicle)
-    local profile = VLS.getVehicleProfile(vehicle)
-    return profile and profile.propaneTankParts or {}
-end
-
-function VLS.isPropaneTankPart(part)
-    if not part then return false end
-    for _, partId in ipairs(VLS.getPropaneTankPartIds(part:getVehicle())) do
-        if part:getId() == partId then return true end
-    end
-    return false
-end
-
-VLS.mechanicsDisplayProviders.ki5Propane = VLS.isPropaneTankPart
-
-function VLS.getInstalledPropaneSource(vehicle, preferredPartId)
-    for _, partId in ipairs(VLS.getPropaneTankPartIds(vehicle)) do
-        if not preferredPartId or preferredPartId == partId then
-            local part = vehicle:getPartById(partId)
-            local item = part and part:getInventoryItem()
-            if item and item:getFullType() == "Base.PropaneTank"
-                    and instanceof(item, "DrainableComboItem")
-                    and item:getCurrentUses() > 0 then
-                return item, part
-            end
-        end
-    end
-    return nil
 end
 
 function VLS.getContainerIconOverride(part, containerType)

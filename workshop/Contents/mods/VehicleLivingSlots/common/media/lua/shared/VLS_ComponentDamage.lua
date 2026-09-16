@@ -116,9 +116,11 @@ isEligible = function(part)
     if not part or not part:getInventoryItem() then
         return false
     end
-    if VLSRoofCargo and VLSRoofCargo.isPart(part)
-        and (part:getId() == VLSRoofCargo.fixedId or VLSRoofCargo.allowed[part:getId()]) then
-        return true
+    if VLSRoofCargo and VLSRoofCargo.isPart(part) then
+        if part:getId() == VLSRoofCargo.fixedId then return true end
+        -- Mounted cargo is not a structural collision target. Return before
+        -- the managed-part fallback, including for the original Torch lights.
+        if VLSRoofCargo.allowed[part:getId()] then return false end
     end
     return VLS.isManagedPart and VLS.isManagedPart(part)
 end
@@ -143,10 +145,6 @@ local function apply(vehicle, part, loss)
     end
 
     part:damage(amount)
-    if part:getCondition() <= 0 and part:getId():find("^VLSRoofHeadlight") then
-        part:setLightActive(false)
-        part:setInventoryItem(nil)
-    end
     vehicle:transmitPartItem(part)
     return true
 end
