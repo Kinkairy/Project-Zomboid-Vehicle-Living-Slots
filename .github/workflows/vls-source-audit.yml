@@ -1,7 +1,7 @@
 name: VLS source audit
 on:
   push:
-    branches: [main, maintenance/vls-audit-deploy-20260916]
+    branches: [main, maintenance/vls-3.8.3-20260917]
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,35 +13,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Install syntax checker
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
-      - name: Capture exact source and audit syntax
-        shell: bash
+      - uses: actions/checkout@v4
+        with:
+          repository: Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua
+          ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
+          path: .native-fixtures
+          persist-credentials: false
+      - name: Syntax and complete release verification
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
           mkdir -p audit-output
+          find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
+          python3 tools/validate_release_383.py
+          python3 tools/build_propane_ui_translations.py --check
+          python3 tools/build_wash_ui_translations.py --check
+          python3 tools/build_ki5_ui_translations.py
+      - name: Actual-source mocked regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights; do
+            lua5.1 tools/$t.lua . | tee audit-output/$t.txt
+          done
+          lua5.1 tools/test_vls_wash.lua . .native-fixtures | tee audit-output/test_vls_wash.txt
           git rev-parse HEAD > audit-output/source-commit.txt
-          git archive --format=zip HEAD workshop > audit-output/source-workshop.zip
-          git ls-tree -r HEAD -- workshop > audit-output/source-tree.txt
-          python3 - <<'PY'
-          import json, pathlib, subprocess
-          results = []
-          for p in sorted(pathlib.Path('workshop/Contents/mods').rglob('*.lua')):
-              r = subprocess.run(['luac5.1', '-p', str(p)], capture_output=True, text=True)
-              results.append({'path': str(p), 'ok': r.returncode == 0, 'stderr': r.stderr})
-          pathlib.Path('audit-output/lua-syntax.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
-          print('Lua files:', len(results), 'Failures:', sum(not r['ok'] for r in results))
-          assert results and all(r['ok'] for r in results), 'Lua syntax audit failed'
-          PY
-      - name: Run mocked KI5 regressions against actual source
-        shell: bash
-        run: |
-          set -o pipefail
-          lua5.1 tools/test_vls_regressions.lua . | tee audit-output/regressions.txt
-      - name: Run material tiers, menu, debit and salvage regressions
-        shell: bash
-        run: |
-          set -o pipefail
-          lua5.1 tools/test_vls_material_tiers.lua . | tee audit-output/material-tiers.txt
+          git archive --format=zip HEAD > audit-output/source.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:
