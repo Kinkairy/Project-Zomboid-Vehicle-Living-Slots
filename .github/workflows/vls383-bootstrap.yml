@@ -1,0 +1,30 @@
+name: VLS 3.8.3 build inputs
+on:
+  push:
+    branches: [maintenance/vls383-inputs-20260917]
+permissions:
+  contents: read
+jobs:
+  inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 764380753d1e2871fc3fb02d824e72930a2fac69
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua
+          ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
+          path: vanilla
+          persist-credentials: false
+      - run: |
+          mkdir inputs
+          git -C source archive --format=zip HEAD > inputs/public-source.zip
+          git -C vanilla archive --format=zip HEAD > inputs/vanilla.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vls383-inputs
+          path: inputs/
+          retention-days: 3
