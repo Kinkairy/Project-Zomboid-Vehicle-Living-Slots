@@ -32,8 +32,10 @@ local function recipeTooltip(chr,part)
     end
     line(getItemName("Base.WeldingMask").." "..(status.mask and 1 or 0).."/1",status.mask)
     line(getItemName("Base.Wrench").." "..(status.wrench and 1 or 0).."/1",status.wrench)
-    line(getText("IGUI_perks_MetalWelding").." "..chr:getPerkLevel(Perks.MetalWelding).."/5",chr:getPerkLevel(Perks.MetalWelding)>=5)
-    line(getText("IGUI_perks_Mechanics").." "..chr:getPerkLevel(Perks.Mechanics).."/1",chr:getPerkLevel(Perks.Mechanics)>=1)
+    local welding,mechanics=spec.metalWelding or 5,spec.mechanics or 1
+    line(getText("IGUI_perks_MetalWelding").." "..chr:getPerkLevel(Perks.MetalWelding).."/"..welding,chr:getPerkLevel(Perks.MetalWelding)>=welding)
+    line(getText("IGUI_perks_Mechanics").." "..chr:getPerkLevel(Perks.Mechanics).."/"..mechanics,chr:getPerkLevel(Perks.Mechanics)>=mechanics)
+    if spec.extraTooltip then spec.extraTooltip(chr,part,line) end
     if part:getId()==R.fixedId then
         for id,fullType in pairs({VLSLowRoofRack="Base.MetalBar",VLSRoofMattress="Base.Mattress"}) do
             local legacy=part:getVehicle():getPartById(id)
@@ -94,6 +96,12 @@ local function dismantleTooltip(chr,part)
         end
     end
 
+    local spec=R.fabricationSpec(part)
+    if spec and spec.extraTooltip then
+        spec.extraTooltip(chr,part,function(text,ok)
+            tooltip.description=tooltip.description.." "..(ok and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs).." "..text.." <LINE>"
+        end)
+    end
     return tooltip
 end
 local function showNativeContext(mechanics)
