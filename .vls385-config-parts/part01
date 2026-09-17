@@ -1,0 +1,484 @@
+require "Entity/TimedActions/ISHandcraftAction"
+require "TimedActions/ISDeviceBatteryAction"
+
+-- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: shared
+VLS = VLS or {}
+
+VLS.MOD_ID = "VehicleLivingSlots"
+VLS.VERSION = "3.8.5"
+VLS.BUILD_ID = "release-3.8.5-accepted-water-actionfix-20260918"
+VLS.CATEGORY_ID = "VLSLiving"
+VLS.UNIVERSAL_PART_ID = "SeatBed"
+VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
+VLS.BED_PASSENGER_ID = "Bed"
+VLS.LARGE_VAN_CENTER_PASSENGER_ID = "SpaceCenter"
+VLS.LARGE_VAN_RIGHT_PASSENGER_ID = "SpaceRight"
+VLS.BED_AREA_ID = "TruckBed"
+VLS.WEAPON_PART_ID = "VLSWeaponCabinetSlot"
+VLS.AUX_BATTERY_PART_ID = "VLSAuxBatterySlot"
+VLS.FREEZER_PART_ID = "VLSUniversalFreezer"
+VLS.LARGE_VAN_SLOT_2_ID = "VLSLargeVanSlot2"
+VLS.LARGE_VAN_SLOT_3_ID = "VLSLargeVanSlot3"
+VLS.LARGE_VAN_SLOT_4_ID = "VLSLargeVanSlot4"
+VLS.LARGE_VAN_SLOT_5_ID = "VLSLargeVanSlot5"
+VLS.LARGE_VAN_FREEZER_2_ID = "VLSLargeVanFreezer2"
+VLS.LARGE_VAN_FREEZER_3_ID = "VLSLargeVanFreezer3"
+VLS.LARGE_VAN_FREEZER_4_ID = "VLSLargeVanFreezer4"
+VLS.LARGE_VAN_FREEZER_5_ID = "VLSLargeVanFreezer5"
+VLS.LARGE_VAN_WATER_TANK_PART_ID = "VLSLargeVanWaterTank"
+VLS.LARGE_VAN_SPACE_4_PASSENGER_ID = "VLSLargeVanSpace4"
+VLS.LARGE_VAN_SPACE_5_PASSENGER_ID = "VLSLargeVanSpace5"
+VLS.LARGE_VAN_WATER_TANK_DEFAULT_ITEM = "Base.NormalGasTank2"
+VLS.LARGE_VAN_WATER_TANK_ITEMS = {
+    ["Base.SmallGasTank2"] = true,
+    ["Base.NormalGasTank2"] = true,
+    ["Base.BigGasTank2"] = true,
+}
+VLS.WATER_TANK_SOURCE_RANGE = 4
+VLS.WATER_TANK_PLAYER_AREA_SCALE = 1.30
+VLS.WATER_TANK_PLAYER_MIN_HALF_EXTENT = 0.85
+VLS.APPLIANCE_CONTAINER_MAX_DEPTH = 8
+VLS.APPLIANCE_CONTAINER_MAX_ITEMS = 512
+VLS.WATER_TANK_PART_IDS = {
+    [VLS.LARGE_VAN_WATER_TANK_PART_ID] = true,
+}
+VLS.FREEZER_PART_BY_UNIVERSAL = {
+    [VLS.UNIVERSAL_PART_ID] = VLS.FREEZER_PART_ID,
+    [VLS.LARGE_VAN_SLOT_2_ID] = VLS.LARGE_VAN_FREEZER_2_ID,
+    [VLS.LARGE_VAN_SLOT_3_ID] = VLS.LARGE_VAN_FREEZER_3_ID,
+    [VLS.LARGE_VAN_SLOT_4_ID] = VLS.LARGE_VAN_FREEZER_4_ID,
+    [VLS.LARGE_VAN_SLOT_5_ID] = VLS.LARGE_VAN_FREEZER_5_ID,
+}
+VLS.UNIVERSAL_PART_BY_FREEZER = {}
+for universalId, freezerId in pairs(VLS.FREEZER_PART_BY_UNIVERSAL) do
+    VLS.UNIVERSAL_PART_BY_FREEZER[freezerId] = universalId
+end
+-- Water entering a large-van tank is normalized to clean water immediately.
+VLS.WEAPON_CAPACITY = 40
+VLS.CABINET_CAPACITY = 10
+VLS.COUNTER_CAPACITY = 50
+VLS.MICROWAVE_CAPACITY = 5
+VLS.FRIDGE_CAPACITY = 20
+VLS.FREEZER_CAPACITY = 5
+-- The fridge is a continuous load. The microwave retains its separate,
+-- intermittent-use balance because it drains only while active.
+VLS.APPLIANCE_DRAIN_DISPLAY_SCALE = 1000
+VLS.FRIDGE_POWER_CONSUMPTION = 0.04
+VLS.MICROWAVE_POWER_CONSUMPTION = 0.4
+VLS.WATER_PURIFICATION_POWER_CONSUMPTION = 0.4
+VLS.TELEVISION_POWER_CONSUMPTION = 0.4
+VLS.Create = VLS.Create or {}
+VLS.Init = VLS.Init or {}
+VLS.PartComplete = VLS.PartComplete or {}
+VLS.Update = VLS.Update or {}
+VLS.UninstallTest = VLS.UninstallTest or {}
+
+VLS.vehicleProfiles = {}
+
+-- RC2.0 scheme 1 uses only explicitly inspected, intact B42.20.4 scripts.
+VLS.smallVehicleScriptNames = {
+    "SUV",
+    "PickUpVan", "PickUpVanBrickingIt", "PickUpVanBuilder",
+    "PickUpVanCallowayLandscaping", "PickUpVanHeltonMetalWorking",
+    "PickUpVanKimbleKonstruction", "PickUpVanMarchRidgeConstruction",
+    "PickUpVanMccoy", "PickUpVanMetalworker",
+    "PickUpVanWeldingbyCamille", "PickUpVanYingsWood", "PickUpVan_Camo",
+}
+
+for _, scriptName in ipairs(VLS.smallVehicleScriptNames) do
+    VLS.vehicleProfiles["Base." .. scriptName] = {
+        kind = "smallVan",
+        universalParts = { VLS.UNIVERSAL_PART_ID },
+        bedPassenger = VLS.BED_PASSENGER_ID,
+        spacePassengers = {
+            { part = VLS.UNIVERSAL_PART_ID, passenger = VLS.BED_PASSENGER_ID },
+        },
+        rearArea = VLS.BED_AREA_ID,
+    }
+end
+
+VLS.mediumVanScriptNames = {
+    "Van", "VanBeckmans", "VanBrewsterHarbin",
+    "VanBuilder", "VanCarpenter", "VanCoastToCoast", "VanDeerValley",
+    "VanFossoil", "VanGardenGods", "VanGardener", "VanGreenes",
+    "VanJohnMcCoy", "VanJonesFabrication", "VanKerrHomes",
+    "VanKnobCreekGas", "VanKnoxCom", "VanKorshunovs",
+    "VanLouisvilleLandscaping", "VanMail", "VanMccoy", "VanMechanic",
+    "VanMeltingPointMetal", "VanMetalheads", "VanMetalworker",
+    "VanMicheles", "VanMobileMechanics", "VanMooreMechanics",
+    "VanOldMill", "VanOvoFarm", "VanPennSHam", "VanPlattAuto",
+    "VanPluggedInElectrics", "VanRiversideFabrication",
+    "VanRosewoodworking", "VanSchwabSheetMetal",
+    "VanSpiffo", "VanTreyBaines", "VanUncloggers", "VanUtility",
+    "VanWPCarpentry", "Van_Blacksmith", "Van_BugWipers",
+    "Van_Charlemange_Beer", "Van_CraftSupplies", "Van_Glass",
+    "Van_HeritageTailors", "Van_KnoxDisti", "Van_Leather",
+    "Van_LectroMax", "Van_Locksmith", "Van_Masonry", "Van_MassGenFac",
+    "Van_Perfick_Potato", "Van_Transit", "Van_VoltMojo",
+}
+
+for _, scriptName in ipairs(VLS.mediumVanScriptNames) do
+    VLS.vehicleProfiles["Base." .. scriptName] = {
+        kind = "mediumVan",
+        universalParts = {
+            VLS.UNIVERSAL_PART_ID,
+            VLS.LARGE_VAN_SLOT_2_ID,
+            VLS.LARGE_VAN_SLOT_3_ID,
+        },
+        bedPassenger = VLS.BED_PASSENGER_ID,
+        spacePassengers = {
+            { part = VLS.UNIVERSAL_PART_ID, passenger = VLS.BED_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_2_ID,
+                passenger = VLS.LARGE_VAN_CENTER_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_3_ID,
+                passenger = VLS.LARGE_VAN_RIGHT_PASSENGER_ID },
+        },
+        rearArea = "TruckBed",
+    }
+end
+
+-- Exact B42.20.4 intact Step Vans are the large-van class.
+VLS.stepVanScriptNames = {
+    "StepVan",
+    "StepVan_Blacksmith",
+    "StepVan_Butchers",
+    "StepVan_Cereal",
+    "StepVan_Citr8",
+    "StepVan_CompleteRepairShop",
+    "StepVan_Florist",
+    "StepVan_Genuine_Beer",
+    "StepVan_Glass",
+    "StepVan_Heralds",
+    "StepVan_HuangsLaundry",
+    "StepVan_Jorgensen",
+    "StepVan_LouisvilleMotorShop",
+    "StepVan_LouisvilleSWAT",
+    "StepVan_MarineBites",
+    "StepVan_Masonry",
+    "StepVan_Mechanic",
+    "StepVan_MobileLibrary",
+    "StepVan_Plonkies",
+    "StepVan_Propane",
+    "StepVan_RandisPlants",
+    "StepVan_Scarlet",
+    "StepVan_SmartKut",
+    "StepVan_SouthEasternHosp",
+    "StepVan_SouthEasternPaint",
+    "StepVan_USL",
+    "StepVan_Zippee",
+    "StepVanAirportCatering",
+    "StepVanMail",
+}
+
+for _, scriptName in ipairs(VLS.stepVanScriptNames) do
+    VLS.vehicleProfiles["Base." .. scriptName] = {
+        kind = "largeVan",
+        universalParts = {
+            VLS.UNIVERSAL_PART_ID,
+            VLS.LARGE_VAN_SLOT_2_ID,
+            VLS.LARGE_VAN_SLOT_3_ID,
+            VLS.LARGE_VAN_SLOT_4_ID,
+            VLS.LARGE_VAN_SLOT_5_ID,
+        },
+        bedPassenger = VLS.BED_PASSENGER_ID,
+        spacePassengers = {
+            { part = VLS.UNIVERSAL_PART_ID, passenger = VLS.BED_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_2_ID,
+                passenger = VLS.LARGE_VAN_CENTER_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_3_ID,
+                passenger = VLS.LARGE_VAN_RIGHT_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_4_ID,
+                passenger = VLS.LARGE_VAN_SPACE_4_PASSENGER_ID },
+            { part = VLS.LARGE_VAN_SLOT_5_ID,
+                passenger = VLS.LARGE_VAN_SPACE_5_PASSENGER_ID },
+        },
+        rearArea = "TruckBed",
+        waterTankParts = { VLS.LARGE_VAN_WATER_TANK_PART_ID },
+    }
+end
+
+VLS.equipmentProfiles = {
+    ["Base.Mov_Cot"] = {
+        capability = "bed",
+        sleepQuality = "goodBed",
+        previewSprite = "furniture_bedding_01_56",
+    },
+    ["Base.Mattress"] = {
+        capability = "bed",
+        sleepQuality = "goodBed",
+        previewSprite = "carpentry_02_76",
+    },
+    ["Base.Mov_GreenWallLocker"] = {
+        capability = "weaponStorage",
+        capacity = VLS.WEAPON_CAPACITY,
+        previewSprite = "furniture_storage_02_8",
+        containerType = "locker",
+        containerOpenSound = "LockerMetalLargeOpen",
+        containerCloseSound = "LockerMetalLargeClose",
+        containerPutSound = "LockerMetalLargeTransferItem",
+        containerTakeSound = "LockerMetalLargeTransferItem",
+    },
+    ["Base.Mov_SmallPineCabinet"] = {
+        capability = "storage",
+        genericCraftSurface = true,
+        capacity = VLS.CABINET_CAPACITY,
+        previewSprite = "furniture_storage_01_48",
+        containerType = "sidetable",
+        containerOpenSound = "DrawerWoodOpen",
+        containerCloseSound = "DrawerWoodClose",
+        containerPutSound = "DrawerWoodTransferItem",
+        containerTakeSound = "DrawerWoodTransferItem",
+    },
+    ["Base.Mov_Microwave"] = {
+        capability = "cooking",
+        previewSprite = "appliances_cooking_01_24",
+        capacity = VLS.MICROWAVE_CAPACITY,
+        containerType = "microwave",
+        containerOpenSound = "MicrowaveDoorOpen",
+        containerCloseSound = "MicrowaveDoorClose",
+        containerPutSound = "MicrowaveTransferItem",
+        containerTakeSound = "MicrowaveTransferItem",
+    },
+    ["Base.Mov_Microwave2"] = {
+        capability = "cooking",
+        previewSprite = "appliances_cooking_01_28",
+        capacity = VLS.MICROWAVE_CAPACITY,
+        containerType = "microwave",
+        containerOpenSound = "MicrowaveDoorOpen",
+        containerCloseSound = "MicrowaveDoorClose",
+        containerPutSound = "MicrowaveTransferItem",
+        containerTakeSound = "MicrowaveTransferItem",
+    },
+    ["Base.Mov_FridgeMini"] = {
+        capability = "cooling",
+        previewSprite = "appliances_refrigeration_01_25",
+        capacity = VLS.FRIDGE_CAPACITY,
+        containerType = "fridge",
+        containerOpenSound = "OpenFridge",
+        containerCloseSound = "CloseFridge",
+        containerPutSound = "PutItemInFridge",
+        containerTakeSound = "PutItemInFridge",
+    },
+    ["Base.WaterDispenserBottle"] = {
+        capability = "waterDispenser",
+    },
+    ["Base.TvAntique"] = {
+        capability = "television",
+        previewSprite = "appliances_television_01_8",
+    },
+    ["Base.TvBlack"] = {
+        capability = "television",
+        previewSprite = "appliances_television_01_4",
+    },
+    ["Base.TvWideScreen"] = {
+        capability = "television",
+        previewSprite = "appliances_television_01_0",
+    },
+}
+
+-- B42's ordinary floor-mounted kitchen counters.  The matching wall/upper
+-- cabinet rows are deliberately excluded because the small van has room only
+-- for lower furniture.
+local lowerCounterFamilies = {
+    { "Modern", 0, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Wooden", 8, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Steel", 32, "DoorMetalSmallOpen", "DoorMetalSmallClose", "DoorMetalSmallTransferItem" },
+    { "Birch", 40, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Oak", 48, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Dark", 56, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Green", 64, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "White", 72, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+}
+
+for _, family in ipairs(lowerCounterFamilies) do
+    local name, sprite = family[1], family[2]
+    local openSound, closeSound, transferSound = family[3], family[4], family[5]
+    VLS.equipmentProfiles["Base.Mov_" .. name .. "Counter"] = {
+        capability = "storage",
+        genericCraftSurface = true,
+        capacity = VLS.COUNTER_CAPACITY,
+        previewSprite = "fixtures_counters_01_" .. (sprite + 5),
+        containerType = "counter",
+        containerOpenSound = openSound,
+        containerCloseSound = closeSound,
+        containerPutSound = transferSound,
+        containerTakeSound = transferSound,
+    }
+end
+
+VLS.sleepingBagTypes = {
+    ["Base.SleepingBag_RedPlaid"] = true,
+    ["Base.SleepingBag_BluePlaid"] = true,
+    ["Base.SleepingBag_Green"] = true,
+    ["Base.SleepingBag_GreenPlaid"] = true,
+    ["Base.SleepingBag_Camo"] = true,
+    ["Base.SleepingBag_Cheap_Green"] = true,
+    ["Base.SleepingBag_Cheap_Blue"] = true,
+    ["Base.SleepingBag_Cheap_Green2"] = true,
+    ["Base.SleepingBag_Spiffo"] = true,
+    ["Base.SleepingBag_HighQuality_Brown"] = true,
+    ["Base.SleepingBag_Hide"] = true,
+}
+
+VLS.supportedMoveableSprites = {
+    ["carpentry_02_76"] = "Base.Mattress",
+    ["appliances_cooking_01_24"] = "Base.Mov_Microwave",
+    ["appliances_cooking_01_25"] = "Base.Mov_Microwave",
+    ["appliances_cooking_01_26"] = "Base.Mov_Microwave",
+    ["appliances_cooking_01_27"] = "Base.Mov_Microwave",
+    ["appliances_cooking_01_28"] = "Base.Mov_Microwave2",
+    ["appliances_cooking_01_29"] = "Base.Mov_Microwave2",
+    ["appliances_cooking_01_30"] = "Base.Mov_Microwave2",
+    ["appliances_cooking_01_31"] = "Base.Mov_Microwave2",
+    ["appliances_refrigeration_01_24"] = "Base.Mov_FridgeMini",
+    ["appliances_refrigeration_01_25"] = "Base.Mov_FridgeMini",
+    ["appliances_refrigeration_01_26"] = "Base.Mov_FridgeMini",
+    ["appliances_refrigeration_01_27"] = "Base.Mov_FridgeMini",
+    ["furniture_storage_01_48"] = "Base.Mov_SmallPineCabinet",
+    ["furniture_storage_01_49"] = "Base.Mov_SmallPineCabinet",
+    ["furniture_storage_01_50"] = "Base.Mov_SmallPineCabinet",
+    ["furniture_storage_01_51"] = "Base.Mov_SmallPineCabinet",
+    ["furniture_storage_02_8"] = "Base.Mov_GreenWallLocker",
+    ["furniture_storage_02_9"] = "Base.Mov_GreenWallLocker",
+    ["furniture_storage_02_10"] = "Base.Mov_GreenWallLocker",
+    ["furniture_storage_02_11"] = "Base.Mov_GreenWallLocker",
+}
+
+for _, family in ipairs(lowerCounterFamilies) do
+    local name, sprite = family[1], family[2]
+    -- Each counter family alternates corner and straight sprites.  Only the
+    -- four straight orientations belong in the small-van universal slot.
+    for offset = 1, 7, 2 do
+        VLS.supportedMoveableSprites["fixtures_counters_01_" .. (sprite + offset)] =
+            "Base.Mov_" .. name .. "Counter"
+    end
+end
+
+VLS.allowedItems = {
+    [VLS.UNIVERSAL_PART_ID] = {},
+    [VLS.LARGE_VAN_SLOT_2_ID] = {},
+    [VLS.LARGE_VAN_SLOT_3_ID] = {},
+    [VLS.LARGE_VAN_SLOT_4_ID] = {},
+    [VLS.LARGE_VAN_SLOT_5_ID] = {},
+    [VLS.WEAPON_PART_ID] = {
+        ["Base.Mov_GreenWallLocker"] = true,
+    },
+    [VLS.AUX_BATTERY_PART_ID] = {
+        ["Base.CarBattery1"] = true,
+        ["Base.CarBattery2"] = true,
+        ["Base.CarBattery3"] = true,
+    },
+}
+
+local generalSlotIds = {
+    VLS.UNIVERSAL_PART_ID,
+    VLS.LARGE_VAN_SLOT_2_ID,
+    VLS.LARGE_VAN_SLOT_3_ID,
+    VLS.LARGE_VAN_SLOT_4_ID,
+    VLS.LARGE_VAN_SLOT_5_ID,
+}
+
+for fullType, profile in pairs(VLS.equipmentProfiles) do
+    if profile.capability ~= "weaponStorage" then
+        for _, partId in ipairs(generalSlotIds) do
+            VLS.allowedItems[partId][fullType] = true
+        end
+    end
+end
+for fullType in pairs(VLS.sleepingBagTypes) do
+    for _, partId in ipairs(generalSlotIds) do
+        VLS.allowedItems[partId][fullType] = true
+    end
+end
+
+function VLS.getVehicleProfile(vehicle)
+    if not vehicle then return nil end
+    return VLS.vehicleProfiles[vehicle:getScriptName()]
+end
+
+function VLS.isSupportedVehicle(vehicle)
+    return VLS.getVehicleProfile(vehicle) ~= nil
+end
+
+function VLS.isMediumVan(vehicle)
+    local profile = VLS.getVehicleProfile(vehicle)
+    return profile ~= nil and profile.kind == "mediumVan"
+end
+
+function VLS.isLargeVan(vehicle)
+    local profile = VLS.getVehicleProfile(vehicle)
+    return profile ~= nil and profile.kind == "largeVan"
+end
+
+function VLS.isMediumOrLargeVan(vehicle)
+    return VLS.isMediumVan(vehicle) or VLS.isLargeVan(vehicle)
+end
+
+function VLS.getWaterTankPartIds(vehicle)
+    local profile = VLS.getVehicleProfile(vehicle)
+    return profile and profile.waterTankParts or {}
+end
+
+function VLS.hasWaterTankCapability(vehicle)
+    return #VLS.getWaterTankPartIds(vehicle) > 0
+end
+
+local function isProfileWaterTankPartId(vehicle, partId)
+    for _, profilePartId in ipairs(VLS.getWaterTankPartIds(vehicle)) do
+        if profilePartId == partId then return true end
+    end
+    return false
+end
+
+function VLS.isWaterTankPart(part)
+    return part ~= nil
+        and isProfileWaterTankPartId(part:getVehicle(), part:getId())
+end
+
+function VLS.isUniversalPart(part)
+    if not part then return false end
+    local profile = VLS.getVehicleProfile(part:getVehicle())
+    if not profile then return false end
+    for _, partId in ipairs(profile.universalParts) do
+        if part:getId() == partId then return true end
+    end
+    return false
+end
+
+function VLS.getEquipmentProfileByType(fullType)
+    if VLS.sleepingBagTypes[fullType] then
+        return { capability = "bed", sleepQuality = "averageBed" }
+    end
+    return VLS.equipmentProfiles[fullType]
+end
+
+function VLS.resolveEquipmentType(item)
+    if not item then return nil end
+
+    local fullType = item:getFullType()
+    if VLS.getEquipmentProfileByType(fullType) then return fullType end
+
+    local scriptItem = item:getScriptItem()
+    local scriptType = scriptItem and scriptItem:getFullName() or nil
+    if scriptType and VLS.getEquipmentProfileByType(scriptType) then
+        return scriptType
+    end
+
+    if not instanceof(item, "Moveable") then return nil end
+    local sprite = item:getWorldSprite()
+    if not sprite then return nil end
+    sprite = sprite:gsub("^ct_oac_", "")
+    return VLS.supportedMoveableSprites[sprite]
+end
+
+function VLS.getEquipmentProfile(item)
+    local itemType = VLS.resolveEquipmentType(item)
+    return itemType and VLS.getEquipmentProfileByType(itemType) or nil
+end
+
+function VLS.getEquipmentCapability(item)
+    local profile = VLS.getEquipmentProfile(item)
+    return profile and profile.capability or nil
+end
+
+-- A vehicle provides a vanilla generic handcraft surface only when one of the
