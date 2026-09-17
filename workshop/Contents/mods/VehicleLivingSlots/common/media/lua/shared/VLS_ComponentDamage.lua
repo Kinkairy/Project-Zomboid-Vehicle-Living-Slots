@@ -9,6 +9,7 @@ local samples = setmetatable({}, { __mode = "k" })
 local FRONT = { "EngineDoor", "Windshield", "HeadlightLeft", "HeadlightRight" }
 local REAR = { "TruckBed", "TrailerTrunk", "DoorRear", "TrunkDoor", "WindshieldRear" }
 local STATE_KEY = "VLSComponentDamage"
+local DAMAGE_SCALE = { front = 0.0, rear = 0.0, rack = 0.80 }
 local SOURCE_IDS = {}
 for _, id in ipairs(FRONT) do SOURCE_IDS[id] = true end
 for _, id in ipairs(REAR) do SOURCE_IDS[id] = true end
@@ -177,8 +178,9 @@ function D.Update(vehicle)
                 end
             elseif not guarded then
                 local zone = region(part)
-                local loss = zone == "front" and frontLoss
+                local sourceLoss = zone == "front" and frontLoss
                     or (zone == "rack" and math.max(frontLoss, rearLoss) or rearLoss)
+                local loss = sourceLoss * (DAMAGE_SCALE[zone] or 0)
                 if loss > 0 then
                     if apply(vehicle, part, loss) then changed = true end
                 end
