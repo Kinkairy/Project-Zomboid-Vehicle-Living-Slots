@@ -1,0 +1,139 @@
+module Base
+{
+    template vehicle VLSChassisUpgrade
+    {
+        part VLSImprovedChassis
+        {
+            category = engine,
+            area = Engine,
+            itemType = Base.VLSImprovedChassis,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items
+                {
+                    1 { type = Base.Wrench, count = 1, keep = true, equip = primary, }
+                    2 { type = Base.Jack, count = 1, keep = true, }
+                }
+                time = 600,
+                skills = MetalWelding:5;Mechanics:5,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+    }
+    vehicle StepVan { template = VLSChassisUpgrade, }
+    vehicle StepVanAirportCatering { template = VLSChassisUpgrade, }
+    vehicle StepVanMail { template = VLSChassisUpgrade, }
+    vehicle StepVan_Blacksmith { template = VLSChassisUpgrade, }
+    vehicle StepVan_Butchers { template = VLSChassisUpgrade, }
+    vehicle StepVan_Cereal { template = VLSChassisUpgrade, }
+    vehicle StepVan_Citr8 { template = VLSChassisUpgrade, }
+    vehicle StepVan_CompleteRepairShop { template = VLSChassisUpgrade, }
+    vehicle StepVan_Florist { template = VLSChassisUpgrade, }
+    vehicle StepVan_Genuine_Beer { template = VLSChassisUpgrade, }
+    vehicle StepVan_Glass { template = VLSChassisUpgrade, }
+    vehicle StepVan_Heralds { template = VLSChassisUpgrade, }
+    vehicle StepVan_HuangsLaundry { template = VLSChassisUpgrade, }
+    vehicle StepVan_Jorgensen { template = VLSChassisUpgrade, }
+    vehicle StepVan_LouisvilleMotorShop { template = VLSChassisUpgrade, }
+    vehicle StepVan_LouisvilleSWAT { template = VLSChassisUpgrade, }
+    vehicle StepVan_MarineBites { template = VLSChassisUpgrade, }
+    vehicle StepVan_Masonry { template = VLSChassisUpgrade, }
+    vehicle StepVan_Mechanic { template = VLSChassisUpgrade, }
+    vehicle StepVan_MobileLibrary { template = VLSChassisUpgrade, }
+    vehicle StepVan_Plonkies { template = VLSChassisUpgrade, }
+    vehicle StepVan_Propane { template = VLSChassisUpgrade, }
+    vehicle StepVan_RandisPlants { template = VLSChassisUpgrade, }
+    vehicle StepVan_Scarlet { template = VLSChassisUpgrade, }
+    vehicle StepVan_SmartKut { template = VLSChassisUpgrade, }
+    vehicle StepVan_SouthEasternHosp { template = VLSChassisUpgrade, }
+    vehicle StepVan_SouthEasternPaint { template = VLSChassisUpgrade, }
+    vehicle StepVan_USL { template = VLSChassisUpgrade, }
+    vehicle StepVan_Zippee { template = VLSChassisUpgrade, }
+    vehicle Van { template = VLSChassisUpgrade, }
+    vehicle VanBeckmans { template = VLSChassisUpgrade, }
+    vehicle VanBrewsterHarbin { template = VLSChassisUpgrade, }
+    vehicle VanBuilder { template = VLSChassisUpgrade, }
+    vehicle VanCarpenter { template = VLSChassisUpgrade, }
+    vehicle VanCoastToCoast { template = VLSChassisUpgrade, }
+    vehicle VanDeerValley { template = VLSChassisUpgrade, }
+    vehicle VanFossoil { template = VLSChassisUpgrade, }
+    vehicle VanGardenGods { template = VLSChassisUpgrade, }
+    vehicle VanGardener { template = VLSChassisUpgrade, }
+    vehicle VanGreenes { template = VLSChassisUpgrade, }
+    vehicle VanJohnMcCoy { template = VLSChassisUpgrade, }
+    vehicle VanJonesFabrication { template = VLSChassisUpgrade, }
+    vehicle VanKerrHomes { template = VLSChassisUpgrade, }
+    vehicle VanKnobCreekGas { template = VLSChassisUpgrade, }
+    vehicle VanKnoxCom { template = VLSChassisUpgrade, }
+    vehicle VanKorshunovs { template = VLSChassisUpgrade, }
+    vehicle VanLouisvilleLandscaping { template = VLSChassisUpgrade, }
+    vehicle VanMail { template = VLSChassisUpgrade, }
+    vehicle VanMccoy { template = VLSChassisUpgrade, }
+    vehicle VanMechanic { template = VLSChassisUpgrade, }
+    vehicle VanMeltingPointMetal { template = VLSChassisUpgrade, }
+    vehicle VanMetalheads { template = VLSChassisUpgrade, }
+    vehicle VanMetalworker { template = VLSChassisUpgrade, }
+    vehicle VanMicheles { template = VLSChassisUpgrade, }
+    vehicle VanMobileMechanics { template = VLSChassisUpgrade, }
+    vehicle VanMooreMechanics { template = VLSChassisUpgrade, }
+    vehicle VanOldMill { template = VLSChassisUpgrade, }
+    vehicle VanOvoFarm { template = VLSChassisUpgrade, }
+    vehicle VanPennSHam { template = VLSChassisUpgrade, }
+    vehicle VanPlattAuto { template = VLSChassisUpgrade, }
+    vehicle VanPluggedInElectrics { template = VLSChassisUpgrade, }
+    vehicle VanRiversideFabrication { template = VLSChassisUpgrade, }
+    vehicle VanRosewoodworking { template = VLSChassisUpgrade, }
+    vehicle VanSchwabSheetMetal { template = VLSChassisUpgrade, }
+    vehicle VanSeats { template = VLSChassisUpgrade, }
+    vehicle VanSeatsAirportShuttle { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Creature { template = VLSChassisUpgrade, }
+    vehicle VanSeats_LadyDelighter { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Mural { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Prison { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Space { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Trippy { template = VLSChassisUpgrade, }
+    vehicle VanSeats_Valkyrie { template = VLSChassisUpgrade, }
+    vehicle VanSpiffo { template = VLSChassisUpgrade, }
+    vehicle VanTreyBaines { template = VLSChassisUpgrade, }
+    vehicle VanUncloggers { template = VLSChassisUpgrade, }
+    vehicle VanUtility { template = VLSChassisUpgrade, }
+    vehicle VanWPCarpentry { template = VLSChassisUpgrade, }
+    vehicle Van_Blacksmith { template = VLSChassisUpgrade, }
+    vehicle Van_BugWipers { template = VLSChassisUpgrade, }
+    vehicle Van_Charlemange_Beer { template = VLSChassisUpgrade, }
+    vehicle Van_CraftSupplies { template = VLSChassisUpgrade, }
+    vehicle Van_Glass { template = VLSChassisUpgrade, }
+    vehicle Van_HeritageTailors { template = VLSChassisUpgrade, }
+    vehicle Van_KnoxDisti { template = VLSChassisUpgrade, }
+    vehicle Van_Leather { template = VLSChassisUpgrade, }
+    vehicle Van_LectroMax { template = VLSChassisUpgrade, }
+    vehicle Van_Locksmith { template = VLSChassisUpgrade, }
+    vehicle Van_Masonry { template = VLSChassisUpgrade, }
+    vehicle Van_MassGenFac { template = VLSChassisUpgrade, }
+    vehicle Van_Perfick_Potato { template = VLSChassisUpgrade, }
+    vehicle Van_Transit { template = VLSChassisUpgrade, }
+    vehicle Van_VoltMojo { template = VLSChassisUpgrade, }
+    vehicle SUV { template = VLSChassisUpgrade, }
+    vehicle PickUpVan { template = VLSChassisUpgrade, }
+    vehicle PickUpVanBrickingIt { template = VLSChassisUpgrade, }
+    vehicle PickUpVanBuilder { template = VLSChassisUpgrade, }
+    vehicle PickUpVanCallowayLandscaping { template = VLSChassisUpgrade, }
+    vehicle PickUpVanHeltonMetalWorking { template = VLSChassisUpgrade, }
+    vehicle PickUpVanKimbleKonstruction { template = VLSChassisUpgrade, }
+    vehicle PickUpVanMarchRidgeConstruction { template = VLSChassisUpgrade, }
+    vehicle PickUpVanMccoy { template = VLSChassisUpgrade, }
+    vehicle PickUpVanMetalworker { template = VLSChassisUpgrade, }
+    vehicle PickUpVanWeldingbyCamille { template = VLSChassisUpgrade, }
+    vehicle PickUpVanYingsWood { template = VLSChassisUpgrade, }
+    vehicle PickUpVan_Camo { template = VLSChassisUpgrade, }
+}
