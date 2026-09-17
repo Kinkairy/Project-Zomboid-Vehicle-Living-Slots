@@ -1,6 +1,7 @@
 require "VLS_InstallGuard"
 require "VLS_RoofCargo"
 require "VLS_BodyArmor"
+require "VLS_Chassis"
 require "TimedActions/ISFixVehiclePartAction"
 require "Vehicles/TimedActions/ISRemoveBurntVehicle"
 local R=VLSRoofCargo
