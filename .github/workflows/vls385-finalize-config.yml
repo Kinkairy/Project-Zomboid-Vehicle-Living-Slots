@@ -1,0 +1,44 @@
+name: VLS 3.8.5 finalize config
+
+on:
+  push:
+    paths:
+      - '.vls385-config-sync-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch and verify accepted config
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET='workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua'
+          python3 - "$TARGET" <<'PY'
+          import re,sys
+          p=sys.argv[1]
+          s=open(p,'r',encoding='utf-8').read()
+          s,n1=re.subn(r'^VLS\.VERSION = "[^"]+"$', 'VLS.VERSION = "3.8.5"', s, count=1, flags=re.M)
+          s,n2=re.subn(r'^VLS\.BUILD_ID = "[^"]+"$', 'VLS.BUILD_ID = "release-3.8.5-accepted-water-actionfix-20260918"', s, count=1, flags=re.M)
+          if (n1,n2)!=(1,1):
+              raise SystemExit(f'unexpected replacement counts: VERSION={n1} BUILD_ID={n2}')
+          open(p,'w',encoding='utf-8',newline='').write(s)
+          PY
+          actual="$(git hash-object "$TARGET")"
+          test "$actual" = '27293cda983fddec376ad6a193b7c037184b011e' || {
+            echo "VLS_Config.lua blob mismatch: $actual" >&2
+            exit 1
+          }
+          rm -f .vls385-config-sync-trigger .github/workflows/vls385-finalize-config.yml
+          git config user.name 'Kinkairy VLS Release Bot'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --exit-code && exit 0 || true
+          git commit -m 'release(vls): finalize 3.8.5 accepted config'
+          git push
