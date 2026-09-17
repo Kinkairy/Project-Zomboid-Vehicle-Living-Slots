@@ -1,95 +1,11 @@
-# Vehicle Living Slots 3.8.3 / 房车生活
+# Vehicle Living Slots 3.8.5
 
-[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3791192579)
+Accepted Build 42.20 release source.
 
-## 房车生活
+Build: `release-3.8.5-accepted-water-actionfix-20260918`
 
-把受支持的车辆改装成移动生活空间，安装床铺、储物柜、家电和车顶装备。支持 B42.20 单人、多人及专用服务器。
+This source promotes the fully accepted 3.8.4 test baseline to 3.8.5 and includes the final vehicle-water-source action fix: drinking and filling containers keep the native B42.20 water menu/action behavior while avoiding world-sprite classification on `BaseVehicle`.
 
-### 功能特色
-
-- 车内生活：安装床铺、柜台、储物柜、小冰箱、微波炉和电视，在车内休息、收纳和使用设备。
-
-- 饮水与供电：车载电源支持生活设备；配备水箱的车型支持储水、净化和液体转移。耗电可通过沙盒选项调整。
-
-- 车顶装备：为受支持的原版车型安装行李架、发电机、储物箱、帐篷、油罐、瓦斯罐及备胎。
-
-- 车顶射灯：独立安装，使用车辆主电瓶供电，随原车大灯开关。
-
-- 车辆防护：焊接安装车窗护甲和前后防撞杠，具有独立耐久与破损外观；拆毁可回收部分材料。
-
-### 支持范围
-
-- 原版 StepVan、Van、SUV、PickUpVan 及指定变种，包括邮政版。客运 Van 可安装车顶装备，不增加车内生活空间。
-
-- 不改装 PickUpTruck、指定警用／救护／广播等特殊车型，以及损毁、烧毁车辆。
-
-- 可选 KI5 Campers! 适配，为四款受支持房车增加生活设备位与净水箱，同时保留原有座位、床位和储物功能。车顶改装及新增护甲限受支持的原版车型。
-
-### 启用方式
-
-- 原版车辆：启用 VehicleLivingSlots，无需其他 Mod。
-
-- KI5 房车：额外启用 VehicleLivingSlotsKI5Campers，并安装 [KI5 Campers!](https://steamcommunity.com/workshop/filedetails/?id=3670064951) 和 [damnlib](https://steamcommunity.com/workshop/filedetails/?id=3171167894)。
-
-- 通过车辆维修界面安装设备，所需材料、工具和技能以菜单提示为准。固定设施采用拆毁方式移除。
-
-- 多人游戏客户端与服务器须使用一致版本。版本：3.8.3。
-
----
-
-## Mobile Living
-
-Turn supported vehicles into mobile living spaces with beds, storage, appliances and roof equipment. Supports B42.20 single-player, multiplayer and dedicated servers.
-
-### Features
-
-- Living space: fit beds, counters, storage cabinets, mini fridges, microwaves and televisions for resting, storage and appliance use.
-
-- Water and power: vehicle power supplies living equipment. Vehicles with tank slots support water storage, purification and fluid transfers. Power consumption is configurable in sandbox settings.
-
-- Roof equipment: fit supported vanilla vehicles with racks, generators, storage boxes, packed tents, fuel cans, propane tanks and spare tyres.
-
-- Roof spotlights: install individually; powered by the main vehicle battery and switched with the original headlights.
-
-- Vehicle protection: weld on window armor and front/rear bumper guards with separate durability and damage visuals. Destructive removal recovers some materials.
-
-### Supported vehicles
-
-- Vanilla StepVan, Van, SUV, PickUpVan and selected variants, including postal vans. Passenger Vans support roof equipment without added interior living spaces.
-
-- PickUpTrucks, specified police/ambulance/broadcast variants, wrecks and burnt vehicles are excluded.
-
-- Optional KI5 Campers! support adds living-equipment slots and clean-water tanks to four supported campers while retaining their original seats, beds and storage. Roof upgrades and added armor are limited to supported vanilla vehicles.
-
-### Setup
-
-- Vanilla vehicles: enable VehicleLivingSlots. No other Mod is required.
-
-- KI5 campers: also enable VehicleLivingSlotsKI5Campers and install [KI5 Campers!](https://steamcommunity.com/workshop/filedetails/?id=3670064951) and [damnlib](https://steamcommunity.com/workshop/filedetails/?id=3171167894).
-
-- Use the vehicle mechanics menu to install equipment. The menu lists required materials, tools and skills. Fixed fittings require destructive removal.
-
-- Multiplayer clients and servers must use matching versions. Version: 3.8.3.
-
-## 3.8.3 update
-
-- Rack-mounted cargo no longer receives VLS's propagated crash damage; the rack and fitted armor still do.
-- Roof spotlights refresh saved light parameters. Full-condition target distance is 48 and intensity is 1.0, with normalized item-condition attenuation. These are engine parameters, not a promise of additive screen brightness.
-- Installed roof propane tanks and supported KI5 camper tanks share the same blowtorch refill menu.
-- At a stopped vehicle's water-tank inlet, use the water-tank washing menu to wash yourself and carried/worn items using native washing effects and real tank water. No extra power requirement.
-- Client and server must both update. Code/mocked regressions are not a live gameplay acceptance test. No Workshop upload is performed by this source release.
-
-### 简体中文
-新增水箱旁清洗、车顶瓦斯罐为喷枪充气；取消架上货物额外碰撞伤害，修正射灯参数刷新及有效输出。保留车型材料分档、行李架与护甲耐久以及射灯整件装卸。
-
-### 繁體中文
-新增水箱旁清洗、車頂瓦斯罐為噴槍充氣；取消架上貨物額外碰撞傷害，修正射燈參數刷新及有效輸出。保留車型材料分檔、行李架與護甲耐久以及射燈整件裝卸。
-
-## 3.8.3 capacity1
-
-Fixed roof rack base capacity is now StepVan **400**, Van/VanSeats **300**, and SUV/PickUpVan **250** (+100 each, all supported variants). Existing installed racks are updated in place; fabrication costs do not change.
-
-行李架基础容量统一增加100：StepVan **400**，Van/VanSeats **300**，SUV/PickUpVan **250**。旧架原位更新，材料不变。
-
-行李架基礎容量統一增加100：StepVan **400**，Van/VanSeats **300**，SUV/PickUpVan **250**。舊架原位更新，材料不變。
+Main mod: `VehicleLivingSlots`
+Optional adapter: `VehicleLivingSlotsKI5Campers`
+Workshop item: `3791192579`
