@@ -55,8 +55,10 @@
   "IGUI_VehiclePartVLSBumperFront": "前防撞杠",
   "IGUI_VehiclePartVLSBumperRear": "后防撞杠",
   "IGUI_VLSRefillBlowTorch": "为喷枪充气",
-  "IGUI_VLSTankWash": "水箱清洗",
-  "IGUI_VLSTankWashBody": "清洗身体",
-  "IGUI_VLSTankWashAll": "清洗全部脏污物品",
-  "IGUI_VLSTankWashSelected": "用水箱清洗"
+  "IGUI_VehiclePartVLSImprovedChassis": "底盘改良",
+  "IGUI_VLSChassisEngineOff": "进行底盘作业前需要关闭发动机。",
+  "IGUI_VLSChassisReduction": "车辆净减重：%1。货物重量不变。",
+  "IGUI_VLSChassisProjected": "预计整车重量：%1（保持当前货物）。",
+  "IGUI_VLSChassisConflict": "无法取得底盘原始重量，或重量已被其他模组修改。",
+  "IGUI_VLSTankSource": "水箱水源"
 }
