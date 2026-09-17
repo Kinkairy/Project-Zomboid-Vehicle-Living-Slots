@@ -55,8 +55,10 @@
   "IGUI_VehiclePartVLSBumperFront": "前防撞桿",
   "IGUI_VehiclePartVLSBumperRear": "後防撞桿",
   "IGUI_VLSRefillBlowTorch": "為噴槍充氣",
-  "IGUI_VLSTankWash": "水箱清洗",
-  "IGUI_VLSTankWashBody": "清洗身體",
-  "IGUI_VLSTankWashAll": "清洗全部髒污物品",
-  "IGUI_VLSTankWashSelected": "用水箱清洗"
+  "IGUI_VehiclePartVLSImprovedChassis": "底盤改良",
+  "IGUI_VLSChassisEngineOff": "進行底盤作業前需要關閉引擎。",
+  "IGUI_VLSChassisReduction": "車輛淨減重：%1。貨物重量不變。",
+  "IGUI_VLSChassisProjected": "預計整車重量：%1（保持目前貨物）。",
+  "IGUI_VLSChassisConflict": "無法取得底盤原始重量，或重量已被其他模組修改。",
+  "IGUI_VLSTankSource": "水箱水源"
 }
