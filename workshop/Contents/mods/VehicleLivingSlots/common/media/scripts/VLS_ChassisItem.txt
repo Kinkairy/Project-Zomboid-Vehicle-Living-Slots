@@ -1,0 +1,20 @@
+module Base
+{
+    item VLSImprovedChassis
+    {
+        DisplayName = Improved Chassis,
+        DisplayCategory = VehicleMaintenance,
+        ItemType = base:normal,
+        Icon = MetalBar,
+        Weight = 0,
+        ConditionMax = 100,
+    }
+    fixing VLSImprovedChassisWelding
+    {
+        Require = Base.VLSImprovedChassis,
+        GlobalItem = Base.BlowTorch=2,
+        ConditionModifier = 1.2,
+        Fixer = Base.SheetMetal; MetalWelding=5;Mechanics=5,
+        Fixer = Base.SmallSheetMetal=2; MetalWelding=5;Mechanics=5,
+    }
+}
