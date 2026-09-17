@@ -1,0 +1,460 @@
+-- approved lower cabinets/counters is actually installed in one of that same
+-- supported vehicle's universal living slots.
+function VLS.isGenericCraftSurfaceEquipment(item)
+    local profile = VLS.getEquipmentProfile(item)
+    return profile ~= nil and profile.genericCraftSurface == true
+end
+
+function VLS.getInstalledGenericCraftSurfacePart(vehicle)
+    local vehicleProfile = vehicle and VLS.getVehicleProfile(vehicle) or nil
+    if not vehicleProfile then return nil end
+
+    for _, partId in ipairs(vehicleProfile.universalParts or {}) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.isGenericCraftSurfaceEquipment(
+                part:getInventoryItem()) then
+            return part
+        end
+    end
+
+    return nil
+end
+
+function VLS.hasGenericCraftSurface(vehicle)
+    return VLS.getInstalledGenericCraftSurfacePart(vehicle) ~= nil
+end
+
+function VLS.getVehicleGenericCraftSurface(playerObj)
+    local vehicle = playerObj and playerObj:getVehicle() or nil
+    if vehicle and VLS.hasGenericCraftSurface(vehicle) then
+        return vehicle
+    end
+    return nil
+end
+
+function VLS.canUseVehicleGenericCraftSurface(playerObj, vehicle)
+    return playerObj ~= nil
+        and vehicle ~= nil
+        and playerObj:getVehicle() == vehicle
+        and VLS.isSupportedVehicle(vehicle)
+        and VLS.hasGenericCraftSurface(vehicle)
+end
+
+function VLS.isBedEquipment(item)
+    return VLS.getEquipmentCapability(item) == "bed"
+end
+
+function VLS.isStorageEquipment(item)
+    local profile = VLS.getEquipmentProfile(item)
+    return profile ~= nil and profile.capacity ~= nil and profile.capacity > 0
+end
+
+function VLS.isManagedPart(part)
+    return VLS.isUniversalPart(part)
+        or (part and part:getId() == VLS.WEAPON_PART_ID
+            and VLS.isSupportedVehicle(part:getVehicle()))
+        or (part and part:getId() == VLS.AUX_BATTERY_PART_ID
+            and VLS.isSupportedVehicle(part:getVehicle()))
+        or VLS.isFreezerPart(part)
+        or VLS.isWaterTankPart(part)
+end
+
+-- Installation policy only. Existing equipment recognition, use, storage and
+-- removal deliberately keep their original contracts when an option changes.
+VLS.installationOptions = {
+    bed = "EnableBeds", storage = "EnableCabinets",
+    weaponStorage = "EnableWeaponCabinets", cooking = "EnableMicrowaves",
+    cooling = "EnableFridges", waterDispenser = "EnableWaterDispensers",
+    television = "EnableTelevisions",
+}
+VLS.installationOptionProviders = VLS.installationOptionProviders or {}
+function VLS.getInstallationOption(part, itemOrType)
+    if not part then return nil end
+    for _, provider in pairs(VLS.installationOptionProviders) do
+        local option = provider(part, itemOrType)
+        if option then return option end
+    end
+    if not VLS.isSupportedVehicle(part:getVehicle()) then return nil end
+    if part:getId() == VLS.AUX_BATTERY_PART_ID then return "EnableAuxBatteries" end
+    if VLS.isWaterTankPart(part) then return "EnableWaterTanks" end
+    if not VLS.isUniversalPart(part) and part:getId() ~= VLS.WEAPON_PART_ID then
+        return nil
+    end
+    local profile
+    if type(itemOrType) == "string" then
+        profile = VLS.getEquipmentProfileByType(itemOrType)
+    elseif itemOrType then
+        profile = VLS.getEquipmentProfile(itemOrType)
+    end
+    return profile and VLS.installationOptions[profile.capability] or nil
+end
+function VLS.isInstallationEnabled(part, itemOrType)
+    local option = VLS.getInstallationOption(part, itemOrType)
+    local settings = SandboxVars and SandboxVars.VehicleLivingSlots
+    return not option or not settings or settings[option] ~= false
+end
+
+function VLS.isAllowedItem(part, item)
+    if not part or not item or not VLS.isSupportedVehicle(part:getVehicle()) then
+        return false
+    end
+    local allowed = VLS.allowedItems[part:getId()]
+    if not allowed then return false end
+    local itemType = item:getFullType()
+    if not allowed[itemType] then itemType = VLS.resolveEquipmentType(item) end
+    if allowed[itemType] ~= true then return false end
+    if part:getId() == VLS.AUX_BATTERY_PART_ID then
+        return instanceof(item, "DrainableComboItem")
+    end
+    local profile = VLS.getEquipmentProfile(item)
+    if part:getId() == VLS.WEAPON_PART_ID then
+        return profile and profile.capability == "weaponStorage"
+    end
+    return profile ~= nil and profile.capability ~= "weaponStorage"
+end
+
+function VLS.getInstalledPart(vehicle, partId)
+    if not VLS.isSupportedVehicle(vehicle) then return nil end
+    local part = vehicle:getPartById(partId)
+    if not part or not part:getInventoryItem() then return nil end
+    if not VLS.isAllowedItem(part, part:getInventoryItem()) then return nil end
+    return part
+end
+
+function VLS.getInstalledBedPart(vehicle)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return nil end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.isBedEquipment(part:getInventoryItem()) then return part end
+    end
+    return nil
+end
+
+function VLS.getInstalledBedParts(vehicle)
+    local result = {}
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return result end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.isBedEquipment(part:getInventoryItem()) then
+            table.insert(result, part)
+        end
+    end
+    return result
+end
+
+function VLS.getFirstInstalledUniversalPart(vehicle)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return nil end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part then return part end
+    end
+    return nil
+end
+
+function VLS.getPartDisplayName(part, fallback)
+    local item = part and part:getInventoryItem()
+    if item and VLS.isManagedPart(part) then
+        if VLS.isWaterTankPart(part) then
+            return getText("IGUI_VehiclePartVLSLargeVanWaterTank")
+        end
+        return item:getDisplayName()
+    end
+    if part and VLS.isUniversalPart(part) then
+        local vehicle = part:getVehicle()
+        local profile = VLS.getVehicleProfile(vehicle)
+        local partId = part:getId()
+        if profile and profile.kind == "smallVan" then
+            return getText("IGUI_VLSSmallVanRearLivingArea")
+        end
+        if profile and profile.kind == "mediumVan" then
+            if partId == VLS.UNIVERSAL_PART_ID then
+                return getText("IGUI_VLSLargeVanLeftLivingArea")
+            elseif partId == VLS.LARGE_VAN_SLOT_2_ID then
+                return getText("IGUI_VLSLargeVanCenterLivingArea")
+            elseif partId == VLS.LARGE_VAN_SLOT_3_ID then
+                return getText("IGUI_VLSLargeVanRightLivingArea")
+            end
+        end
+        if profile and profile.kind == "largeVan" then
+            local names = {
+                [VLS.UNIVERSAL_PART_ID] = "IGUI_VLSLargeVanFrontLeftSpace",
+                [VLS.LARGE_VAN_SLOT_2_ID] = "IGUI_VLSLargeVanFrontRightSpace",
+                [VLS.LARGE_VAN_SLOT_3_ID] = "IGUI_VLSLargeVanMiddleLeftSpace",
+                [VLS.LARGE_VAN_SLOT_4_ID] = "IGUI_VLSLargeVanMiddleRightSpace",
+                [VLS.LARGE_VAN_SLOT_5_ID] = "IGUI_VLSLargeVanRearSpace",
+            }
+            return getText(names[partId] or "IGUI_VLSLargeVanLivingSpace")
+        end
+    end
+    return fallback
+end
+
+function VLS.getSeatEquipmentDisplayName(vehicle, seat)
+    if not VLS.isBedSeat(vehicle, seat) then return nil end
+    local part = VLS.getUniversalPartForSeat(vehicle, seat)
+    local item = part and part:getInventoryItem()
+    return item and item:getDisplayName() or VLS.getPartDisplayName(part, nil)
+end
+
+local CONTAINER_PROFILE_VERSION = 2
+
+local function applyContainerProfile(container, profile, fallbackType)
+    if not container then return false end
+    local changed = false
+    local capacity = profile and profile.capacity or 0
+    if container:getCapacity() ~= capacity then
+        container:setCapacity(capacity)
+        changed = true
+    end
+    local containerType = profile and profile.containerType or fallbackType
+    local openSound = profile and profile.containerOpenSound or "VehicleTrunkOpen"
+    local closeSound = profile and profile.containerCloseSound or "VehicleTrunkClose"
+    local putSound = profile and profile.containerPutSound or "VehicleTrunkTransferItem"
+    local takeSound = profile and profile.containerTakeSound or "VehicleTrunkTransferItem"
+    if container:getType() ~= containerType then
+        container:setType(containerType)
+        changed = true
+    end
+    if container:getOpenSound() ~= openSound then
+        container:setOpenSound(openSound)
+        changed = true
+    end
+    if container:getCloseSound() ~= closeSound then
+        container:setCloseSound(closeSound)
+        changed = true
+    end
+    if container:getPutSound() ~= putSound then
+        container:setPutSound(putSound)
+        changed = true
+    end
+    if container:getTakeSound() ~= takeSound then
+        container:setTakeSound(takeSound)
+        changed = true
+    end
+    return changed
+end
+
+-- Appliance inventories may contain bags inside bags. Keep every client and
+-- server traversal on the same bounded, cycle-safe implementation so a bad or
+-- unusually deep item graph cannot turn a visible refrigerator into an
+-- unbounded per-tick scan.
+function VLS.walkApplianceContainer(container, visitor, state)
+    state = state or {
+        visited = {},
+        items = 0,
+        maxDepth = VLS.APPLIANCE_CONTAINER_MAX_DEPTH,
+        maxItems = VLS.APPLIANCE_CONTAINER_MAX_ITEMS,
+    }
+    if not container or state.visited[container]
+            or (state.depth or 0) > state.maxDepth
+            or state.items >= state.maxItems then
+        return state
+    end
+
+    state.visited[container] = true
+    local items = container:getItems()
+    if not items then return state end
+    local parentDepth = state.depth or 0
+    for index = 0, items:size() - 1 do
+        if state.items >= state.maxItems then break end
+        local item = items:get(index)
+        state.items = state.items + 1
+        visitor(item, state)
+        if instanceof(item, "InventoryContainer") then
+            state.depth = parentDepth + 1
+            VLS.walkApplianceContainer(item:getInventory(), visitor, state)
+            state.depth = parentDepth
+        end
+    end
+    return state
+end
+
+function VLS.getInstalledCapabilityPart(vehicle, capability)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return nil end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.getEquipmentCapability(part:getInventoryItem()) == capability then
+            return part
+        end
+    end
+    return nil
+end
+
+function VLS.getInstalledCapabilityParts(vehicle, capability)
+    local result = {}
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return result end
+    for _, partId in ipairs(profile.universalParts) do
+        local part = VLS.getInstalledPart(vehicle, partId)
+        if part and VLS.getEquipmentCapability(part:getInventoryItem()) == capability then
+            table.insert(result, part)
+        end
+    end
+    return result
+end
+
+function VLS.isFreezerPart(part)
+    return part ~= nil and VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()] ~= nil
+        and VLS.isSupportedVehicle(part:getVehicle())
+end
+
+function VLS.getFreezerPartForUniversal(vehicle, universalPartId)
+    local freezerId = VLS.FREEZER_PART_BY_UNIVERSAL[universalPartId]
+    return freezerId and vehicle and vehicle:getPartById(freezerId) or nil
+end
+
+function VLS.ensureUniversalContainerProfile(part)
+    if not VLS.isUniversalPart(part) then return nil end
+    local container = part:getItemContainer()
+    if not container then return nil end
+    local profile = VLS.getEquipmentProfile(part:getInventoryItem())
+    local changed = applyContainerProfile(container,
+        profile and profile.capacity and profile or nil,
+        VLS.UNIVERSAL_PART_ID)
+    return profile, changed
+end
+
+-- Restore the installed equipment profile for this living-slot part while
+-- preserving the vehicle-wide damage baseline initialization.  This must be
+-- a per-part callback: VLS.Damage.Init caches by vehicle and may return after
+-- the first living slot has initialized.
+function VLS.Init.UniversalSlot(vehicle, part)
+    if not vehicle or not part
+            or part:getVehicle() ~= vehicle
+            or vehicle:getPartById(part:getId()) ~= part
+            or not VLS.isUniversalPart(part) then
+        return
+    end
+
+    if VLS.Damage and VLS.Damage.Init then
+        VLS.Damage.Init(vehicle)
+    end
+
+    VLS.ensureUniversalContainerProfile(part)
+end
+
+function VLS.syncUniversalSlot(part)
+    if not VLS.isUniversalPart(part) then return false end
+    local container = part:getItemContainer()
+    if not container then return false end
+    local item = part:getInventoryItem()
+    local profile = VLS.getEquipmentProfile(item)
+    local capability = profile and profile.capability
+    local vehicle = part:getVehicle()
+    local data = part:getModData()
+    local itemId = item and item:getID() or -1
+    local itemChanged = data.vlsEquipmentItemId ~= itemId
+    local profileChanged = data.vlsContainerProfileVersion
+        ~= CONTAINER_PROFILE_VERSION
+
+    -- Part modData and the installed item can arrive before the client-side
+    -- ItemContainer fields. Reapply the desired profile on every lifecycle
+    -- pass; applyContainerProfile itself writes only fields that differ.
+    local _, containerChanged = VLS.ensureUniversalContainerProfile(part)
+    data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
+
+    if (itemChanged or profileChanged)
+            and (capability == "cooking" or capability == "cooling")
+            and vehicle and vehicle.setNeedPartsUpdate then
+        vehicle:setNeedPartsUpdate(true)
+    end
+    if itemChanged then
+        data.vlsEquipmentItemId = itemId
+        data.vlsMicrowaveActive = false
+        data.vlsMicrowaveTimer = 0
+        data.vlsMicrowaveRemaining = 0
+        data.vlsMicrowaveLastHours = nil
+        data.vlsMicrowaveClockItemId = nil
+        data.vlsMicrowaveTemperature = 90
+        container:setCustomTemperature(1.0)
+        container:setAgeFactor(1.0)
+    end
+    return itemChanged or profileChanged or containerChanged
+end
+
+local function syncOneFreezerSlot(vehicle, universalPartId)
+    local freezerId = VLS.FREEZER_PART_BY_UNIVERSAL[universalPartId]
+    if not freezerId then return false end
+    local freezer = vehicle:getPartById(freezerId)
+    local container = freezer and freezer:getItemContainer()
+    if not container then return false end
+    local fridge = VLS.getInstalledPart(vehicle, universalPartId)
+    if fridge and VLS.getEquipmentCapability(fridge:getInventoryItem()) ~= "cooling" then
+        fridge = nil
+    end
+    local containerProfile = fridge and {
+        capacity = VLS.FREEZER_CAPACITY,
+        containerType = "freezer",
+        containerOpenSound = "OpenFridge",
+        containerCloseSound = "CloseFridge",
+        containerPutSound = "PutItemInFridge",
+        containerTakeSound = "PutItemInFridge",
+    } or nil
+    local data = freezer:getModData()
+    local item = fridge and fridge:getInventoryItem()
+    local itemId = item and item:getID() or -1
+    local stateChanged = data.vlsEquipmentItemId ~= itemId
+        or data.vlsContainerProfileVersion ~= CONTAINER_PROFILE_VERSION
+
+    -- Keep the hidden freezer container's runtime profile in sync even when
+    -- replicated modData already says the correct appliance is installed.
+    local containerChanged = applyContainerProfile(
+        container, containerProfile, freezerId)
+    data.vlsEquipmentItemId = itemId
+    data.vlsContainerProfileVersion = CONTAINER_PROFILE_VERSION
+
+    if stateChanged and not containerProfile then
+        container:setCustomTemperature(1.0)
+        container:setAgeFactor(1.0)
+    end
+    return stateChanged or containerChanged
+end
+
+function VLS.syncFreezerSlot(vehicle, universalPartId)
+    if not VLS.isSupportedVehicle(vehicle) then return false end
+    if universalPartId then
+        return syncOneFreezerSlot(vehicle, universalPartId)
+    end
+    local changed = false
+    local profile = VLS.getVehicleProfile(vehicle)
+    for _, partId in ipairs(profile.universalParts) do
+        if syncOneFreezerSlot(vehicle, partId) then changed = true end
+    end
+    return changed
+end
+
+local function ensureTelevisionPresets(deviceData)
+    if not deviceData then return false end
+    local presetData = deviceData:getDevicePresets()
+    local presets = presetData and presetData:getPresets()
+    if presets and presets:size() > 0 then return false end
+
+    -- Vanilla vehicle radios generate their station list on creation. Installed
+    -- televisions need the same step after their original device metadata has
+    -- been copied into the vehicle part.
+    deviceData:generatePresets()
+    presetData = deviceData:getDevicePresets()
+    presets = presetData and presetData:getPresets()
+    if not presets or presets:size() <= 0 then return false end
+    local channel = deviceData:getChannel()
+    if channel < deviceData:getMinChannelRange()
+            or channel > deviceData:getMaxChannelRange() then
+        deviceData:setRandomChannel()
+    end
+    return true
+end
+
+function VLS.getTelevisionDevicePart(part)
+    if not VLS.isUniversalPart(part) then return nil end
+    return VLS.getFreezerPartForUniversal(part:getVehicle(), part:getId())
+end
+
+function VLS.getTelevisionDeviceData(part)
+    local item = part and part:getInventoryItem()
+    if VLS.getEquipmentCapability(item) ~= "television" then return nil end
+    local devicePart = VLS.getTelevisionDevicePart(part)
+    local deviceData = devicePart and devicePart:getDeviceData()
