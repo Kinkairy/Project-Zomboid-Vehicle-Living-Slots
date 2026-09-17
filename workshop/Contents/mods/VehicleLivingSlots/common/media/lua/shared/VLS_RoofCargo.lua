@@ -171,8 +171,9 @@ end
 function R.plan(chr,spec)
     spec=spec or R.rackRecipe
     if not chr or chr:isDead() then return nil,"character" end
-    if chr:getPerkLevel(Perks.MetalWelding)<5
-            or chr:getPerkLevel(Perks.Mechanics)<1 then return nil,"skills" end
+    if chr:getPerkLevel(Perks.MetalWelding)<(spec.metalWelding or 5)
+            or chr:getPerkLevel(Perks.Mechanics)<(spec.mechanics or 1) then return nil,"skills" end
+    if spec.toolsReady and not spec.toolsReady(chr) then return nil,"tools" end
     local need,uses={},{}
     for k,v in pairs(spec.materials) do need[k]=v end
     for k,v in pairs(spec.uses) do uses[k]=v end
@@ -221,7 +222,8 @@ function R.validateInstall(chr,part,item,position)
     local spec=R.fabricationSpec(part)
     if spec then
         return (part:getId()~=R.fixedId or R.legacyEmpty(part:getVehicle()))
-            and R.empty(part) and R.plan(chr,spec)~=nil
+            and R.empty(part) and (not spec.canInstall or spec.canInstall(chr,part))
+            and R.plan(chr,spec)~=nil
     end
     if not R.lampOrderReady(part) then return false end
     local types=R.allowed[part:getId()]
@@ -255,7 +257,8 @@ function R.InstallTest(vehicle,part,chr)
     local spec=R.fabricationSpec(part)
     if spec then
         return (part:getId()~=R.fixedId or R.legacyEmpty(vehicle))
-            and R.empty(part) and R.plan(chr,spec)~=nil
+            and R.empty(part) and (not spec.canInstall or spec.canInstall(chr,part))
+            and R.plan(chr,spec)~=nil
     end
     if not R.allowed[part:getId()] or not R.fixed(vehicle) or not R.lampOrderReady(part) then return false end
     if isServer() then
@@ -297,6 +300,7 @@ function R.canDismantle(chr,part,position)
         end
         if not R.legacyEmpty(vehicle) then return false end
     end
+    if spec.canDismantle and not spec.canDismantle(chr,part) then return false end
     local torch,mask=R.dismantleTools(chr)
     return torch~=nil and torch:getCurrentUses()>=10 and mask~=nil
 end
@@ -408,6 +412,9 @@ function R.installFixed(chr,part)
     if part:getId()==R.fixedId then
         fixed:setMaxCapacity(R.rackCapacities[part:getVehicle():getScript():getFullName()])
     end
+    -- Optional per-part state transaction, constructed before material debit.
+    local transaction=spec.prepareInstall and spec.prepareInstall(chr,part,fixed) or nil
+    if spec.prepareInstall and not transaction then return false end
     local removed,drained={},{}
     local primary,secondary=chr:getPrimaryHandItem(),chr:getSecondaryHandItem()
     local function remove(entry)
@@ -427,9 +434,11 @@ function R.installFixed(chr,part)
         end
         part:setInventoryItem(fixed,chr:getPerkLevel(Perks.Mechanics))
         if part:getInventoryItem()~=fixed then error("rack assignment failed") end
+        if transaction then transaction.commit() end
     end)
     if not ok then
         if part:getInventoryItem()==fixed then part:setInventoryItem(nil) end
+        if transaction then transaction.rollback() end
         for _,entry in ipairs(drained) do entry.item:setUsedDelta(entry.before) end
         for _,entry in ipairs(removed) do
             if not entry.container:contains(entry.item) then entry.container:AddItem(entry.item) end
