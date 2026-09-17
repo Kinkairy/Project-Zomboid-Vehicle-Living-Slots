@@ -1,0 +1,86 @@
+    if not part or not VLS.isStorageEquipment(part:getInventoryItem()) then return false end
+    if not character or character:getVehicle() ~= vehicle then return false end
+    if not vehicle or part:getVehicle() ~= vehicle
+            or vehicle:getPartById(part:getId()) ~= part
+            or not VLS.isUniversalPart(part) then
+        return false
+    end
+    VLS.ensureUniversalContainerProfile(part)
+    return true
+end
+
+function VLS.ContainerAccess.WeaponLocker(vehicle, part, character)
+    VLS.syncWeaponLocker(part)
+    if not part or not VLS.isAllowedItem(part, part:getInventoryItem()) then return false end
+    local truckBed = vehicle and vehicle:getPartById("TruckBed")
+    return truckBed ~= nil
+        and character ~= nil
+        and vehicle:canAccessContainer(truckBed:getIndex(), character)
+end
+
+function VLS.ContainerAccess.UniversalFreezer(vehicle, part, character)
+    local universalId = part and VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()]
+    local fridge = universalId and VLS.getInstalledPart(vehicle, universalId)
+    if not fridge
+            or VLS.getEquipmentCapability(fridge:getInventoryItem()) ~= "cooling" then
+        return false
+    end
+    return character ~= nil and character:getVehicle() == vehicle
+end
+
+
+-- Revalidate queued/running AnySurfaceCraft actions that use a VLS vehicle as
+-- their real IsoObject. Leaving the vehicle or removing the final approved
+-- cabinet prevents the queued action from producing output or consuming input.
+VLS.genericCraftSurfaceActionHooks =
+    VLS.genericCraftSurfaceActionHooks or {}
+
+function VLS.installGenericCraftSurfaceActionHooks()
+    local hooks = VLS.genericCraftSurfaceActionHooks
+
+    local function isVLSVehicleSurfaceAction(action)
+        return action ~= nil
+            and action.craftRecipe ~= nil
+            and action.craftRecipe:isAnySurfaceCraft()
+            and action.isoObject ~= nil
+            and instanceof(action.isoObject, "BaseVehicle")
+            and VLS.isSupportedVehicle(action.isoObject)
+    end
+
+    local function isStillValid(action)
+        if not isVLSVehicleSurfaceAction(action) then return true end
+        return VLS.canUseVehicleGenericCraftSurface(
+            action.character, action.isoObject)
+    end
+
+    if ISHandcraftAction
+            and ISHandcraftAction.isValid
+            and ISHandcraftAction.isValid ~= hooks.isValidWrapper then
+        local previousIsValid = ISHandcraftAction.isValid
+
+        hooks.isValidWrapper = function(self)
+            if not isStillValid(self) then return false end
+            return previousIsValid(self)
+        end
+
+        ISHandcraftAction.isValid = hooks.isValidWrapper
+    end
+
+    if ISHandcraftAction
+            and ISHandcraftAction.performRecipe
+            and ISHandcraftAction.performRecipe
+                ~= hooks.performRecipeWrapper then
+        local previousPerformRecipe = ISHandcraftAction.performRecipe
+
+        hooks.performRecipeWrapper = function(self)
+            if not isStillValid(self) then return end
+            return previousPerformRecipe(self)
+        end
+
+        ISHandcraftAction.performRecipe = hooks.performRecipeWrapper
+    end
+end
+
+VLS.installGenericCraftSurfaceActionHooks()
+
+return VLS
