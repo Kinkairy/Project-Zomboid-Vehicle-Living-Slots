@@ -1,0 +1,479 @@
+    if not deviceData or not deviceData:getIsTelevision() then return nil end
+    return deviceData
+end
+
+local function copyTelevisionMetadata(target, source)
+    target:setDeviceName(source:getDeviceName())
+    target:setIsTwoWay(source:getIsTwoWay())
+    target:setTransmitRange(source:getTransmitRange())
+    target:setMicRange(source:getMicRange())
+    target:setBaseVolumeRange(source:getBaseVolumeRange())
+    target:setIsPortable(false)
+    target:setIsTelevision(source:getIsTelevision())
+    target:setMinChannelRange(source:getMinChannelRange())
+    target:setMaxChannelRange(source:getMaxChannelRange())
+    -- Keep the television's original grid-powered presentation. Auxiliary
+    -- battery availability is adapted below the vanilla radio window.
+    target:setIsBatteryPowered(false)
+    target:setHasBattery(false)
+    target:setIsHighTier(source:getIsHighTier())
+    -- Auxiliary-battery drain is centralized in VLS_ApplianceServer. The
+    -- hidden signal device only mirrors charge for vanilla validity/UI logic.
+    target:setUseDelta(0)
+    target:setMediaType(source:getMediaType())
+    target:setChannelRaw(source:getChannel())
+    target:setDeviceVolumeRaw(source:getDeviceVolume())
+    target:cloneDevicePresets(source:getDevicePresets())
+end
+
+function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
+    if not VLS.isUniversalPart(part) then return false end
+    local item = part:getInventoryItem()
+    local television = VLS.getEquipmentCapability(item) == "television"
+        and instanceof(item, "Radio")
+    local source = television and item:getDeviceData() or nil
+    television = television and source and source:getIsTelevision()
+    local devicePart = VLS.getTelevisionDevicePart(part)
+    if not devicePart then return false end
+    local deviceData = devicePart:getDeviceData()
+    local data = devicePart:getModData()
+
+    if not television then
+        local changed = false
+        if deviceData and deviceData:getIsTurnedOn() then
+            deviceData:setTurnedOnRaw(false)
+            changed = true
+        end
+        if data.vlsTelevisionItemId ~= -1 then
+            data.vlsTelevisionItemId = -1
+            changed = true
+        end
+        if changed and not isClient() then
+            vehicle:transmitPartItem(devicePart)
+            vehicle:transmitPartModData(devicePart)
+        end
+        return changed
+    end
+
+    if not deviceData then deviceData = devicePart:createSignalDevice() end
+    if not deviceData then return false end
+
+    local itemId = item:getID()
+    local changed = false
+    if data.vlsTelevisionItemId ~= itemId or not deviceData:getIsTelevision() then
+        copyTelevisionMetadata(deviceData, source)
+        data.vlsTelevisionItemId = itemId
+        changed = true
+    end
+    if ensureTelevisionPresets(deviceData) then changed = true end
+
+    local power = VLS.getAuxBatteryCharge(vehicle)
+    if deviceData:getIsBatteryPowered() then
+        deviceData:setIsBatteryPowered(false)
+        deviceData:setHasBattery(false)
+        changed = true
+    end
+    if math.abs(deviceData:getPower() - power) > 0.000001 then
+        deviceData:setPower(power)
+        changed = true
+    end
+    if power <= 0 and deviceData:getIsTurnedOn() then
+        deviceData:setTurnedOnRaw(false)
+        changed = true
+    end
+    if changed and not isClient() then
+        vehicle:transmitPartItem(devicePart)
+        vehicle:transmitPartModData(devicePart)
+    end
+    return changed
+end
+
+function VLS.copyTelevisionStateToItem(part, item)
+    if not VLS.isUniversalPart(part)
+            or VLS.getEquipmentCapability(item) ~= "television"
+            or not instanceof(item, "Radio") then
+        return false
+    end
+    local source = VLS.getTelevisionDeviceData(part)
+    local target = item:getDeviceData()
+    if not source or not target then return false end
+
+    target:setChannelRaw(source:getChannel())
+    target:setDeviceVolumeRaw(source:getDeviceVolume())
+    target:cloneDevicePresets(source:getDevicePresets())
+    target:setTurnedOnRaw(false)
+    return true
+end
+
+local VLS_TELEVISION_ACTION_PREFIX = "VLS_TV_DEVICE:"
+
+function VLS.getTelevisionPartForDevicePart(devicePart)
+    if not devicePart or not instanceof(devicePart, "VehiclePart") then
+        return nil
+    end
+    local vehicle = devicePart:getVehicle()
+    if not VLS.isSupportedVehicle(vehicle) then return nil end
+    local universalId = VLS.UNIVERSAL_PART_BY_FREEZER[devicePart:getId()]
+    local part = universalId and VLS.getInstalledPart(vehicle, universalId)
+        or nil
+    if not part
+            or VLS.getEquipmentCapability(part:getInventoryItem())
+                ~= "television"
+            or VLS.getTelevisionDevicePart(part) ~= devicePart then
+        return nil
+    end
+    return part
+end
+
+function VLS.getTelevisionDeviceActionParameter(devicePart)
+    local part = VLS.getTelevisionPartForDevicePart(devicePart)
+    local vehicle = part and part:getVehicle() or nil
+    if not vehicle then return nil end
+    return VLS_TELEVISION_ACTION_PREFIX
+        .. tostring(vehicle:getId()) .. ":" .. devicePart:getId()
+end
+
+function VLS.resolveTelevisionDeviceActionParameter(character, parameter)
+    if type(parameter) ~= "string"
+            or string.sub(parameter, 1, #VLS_TELEVISION_ACTION_PREFIX)
+                ~= VLS_TELEVISION_ACTION_PREFIX then
+        return nil, false
+    end
+
+    local vehicleText, devicePartId = string.match(parameter,
+        "^VLS_TV_DEVICE:(%d+):(.+)$")
+    local vehicleId = tonumber(vehicleText)
+    local vehicle = character and character:getVehicle() or nil
+    if not vehicleId or not vehicle or vehicle:getId() ~= vehicleId
+            or not VLS.isSupportedVehicle(vehicle) then
+        return nil, true
+    end
+
+    local devicePart = vehicle:getPartById(devicePartId)
+    local televisionPart = VLS.getTelevisionPartForDevicePart(devicePart)
+    local deviceData = televisionPart
+        and VLS.getTelevisionDeviceData(televisionPart) or nil
+    return deviceData, true
+end
+
+VLS.televisionDeviceActionHooks = VLS.televisionDeviceActionHooks or {}
+
+function VLS.installTelevisionDeviceActionHooks()
+    if not ISDeviceBatteryAction then return end
+    local hooks = VLS.televisionDeviceActionHooks
+
+    if ISDeviceBatteryAction.getDeviceDataParameter
+            ~= hooks.getDeviceDataParameterWrapper then
+        local previous = ISDeviceBatteryAction.getDeviceDataParameter
+        hooks.getDeviceDataParameterWrapper = function(self, character,
+                device, deviceType)
+            if deviceType == "VehiclePart" then
+                local parameter =
+                    VLS.getTelevisionDeviceActionParameter(device)
+                if parameter then return parameter end
+            end
+            return previous(self, character, device, deviceType)
+        end
+        ISDeviceBatteryAction.getDeviceDataParameter =
+            hooks.getDeviceDataParameterWrapper
+    end
+
+    if ISDeviceBatteryAction.getDeviceDataFromParameter
+            ~= hooks.getDeviceDataFromParameterWrapper then
+        local previous = ISDeviceBatteryAction.getDeviceDataFromParameter
+        hooks.getDeviceDataFromParameterWrapper = function(self, character,
+                parameter)
+            local deviceData, handled =
+                VLS.resolveTelevisionDeviceActionParameter(
+                    character, parameter)
+            if handled then return deviceData end
+            return previous(self, character, parameter)
+        end
+        ISDeviceBatteryAction.getDeviceDataFromParameter =
+            hooks.getDeviceDataFromParameterWrapper
+    end
+end
+
+VLS.installTelevisionDeviceActionHooks()
+
+function VLS.Create.UniversalSlot(vehicle, part)
+    VLS.syncUniversalSlot(part)
+    VLS.syncFreezerSlot(vehicle, part and part:getId())
+    VLS.syncTelevisionDevice(vehicle, part, false)
+    VLS.refreshApplianceEnvironment(vehicle, part, true, true)
+    if VLS.Server and VLS.Server.trackVehicle then
+        VLS.Server.trackVehicle(vehicle)
+    end
+end
+
+function VLS.PartComplete.UniversalSlot(vehicle, part)
+    VLS.syncUniversalSlot(part)
+    VLS.syncFreezerSlot(vehicle, part and part:getId())
+    VLS.syncTelevisionDevice(vehicle, part, true)
+    VLS.refreshApplianceEnvironment(vehicle, part, true, true)
+    if VLS.Server and VLS.Server.trackVehicle then
+        VLS.Server.trackVehicle(vehicle)
+    end
+end
+
+function VLS.Update.UniversalSlot(vehicle, part, elapsedMinutes)
+    if VLS.Damage then VLS.Damage.Update(vehicle) end
+    local changed = VLS.syncUniversalSlot(part)
+    if VLS.syncFreezerSlot(vehicle, part and part:getId()) then changed = true end
+    if VLS.syncTelevisionDevice(vehicle, part, false) then changed = true end
+    if VLS.Server and VLS.Server.updateAppliance then
+        VLS.Server.updateAppliance(vehicle, part, elapsedMinutes or 0, changed, true)
+    else
+        VLS.refreshApplianceEnvironment(vehicle, part, changed, true)
+    end
+end
+
+function VLS.Create.UniversalFreezer(vehicle, part)
+    VLS.syncFreezerSlot(vehicle,
+        part and VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()])
+end
+
+function VLS.Update.UniversalFreezer(vehicle, part)
+    VLS.syncFreezerSlot(vehicle,
+        part and VLS.UNIVERSAL_PART_BY_FREEZER[part:getId()])
+end
+
+function VLS.syncWeaponLocker(part)
+    if not part or part:getId() ~= VLS.WEAPON_PART_ID then return end
+    local container = part:getItemContainer()
+    if not container then return end
+    local item = part:getInventoryItem()
+    local profile = item and VLS.isAllowedItem(part, item)
+        and VLS.getEquipmentProfile(item) or nil
+    applyContainerProfile(container, profile, VLS.WEAPON_PART_ID)
+end
+
+function VLS.Create.WeaponLocker(vehicle, part)
+    VLS.syncWeaponLocker(part)
+end
+
+function VLS.PartComplete.WeaponLocker(vehicle, part)
+    VLS.syncWeaponLocker(part)
+end
+
+function VLS.Update.WeaponLocker(vehicle, part)
+    VLS.syncWeaponLocker(part)
+end
+
+function VLS.getItemConditionPercent(item)
+    if not item then return nil end
+    local maxCondition = item:getConditionMax()
+    if not maxCondition or maxCondition <= 0 then return nil end
+    return math.max(0, math.min(100,
+        math.floor(item:getCondition() * 100 / maxCondition + 0.5)))
+end
+
+-- Display-only extensions must not turn transport cargo into living-system parts.
+VLS.mechanicsDisplayProviders = VLS.mechanicsDisplayProviders or {}
+function VLS.usesNormalizedPartCondition(part)
+    if VLS.isManagedPart(part) then return true end
+    for _, test in pairs(VLS.mechanicsDisplayProviders) do
+        if test(part) then return true end
+    end
+    return false
+end
+
+function VLS.getDisplayPartCondition(part)
+    if not VLS.usesNormalizedPartCondition(part) or not part:getInventoryItem() then
+        return part and part:getCondition() or 0
+    end
+    return VLS.getItemConditionPercent(part:getInventoryItem()) or part:getCondition()
+end
+
+function VLS.getSpaceAssignmentForPart(vehicle, partOrId)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return nil end
+    local partId = type(partOrId) == "string" and partOrId
+        or (partOrId and partOrId:getId())
+    if not partId then return nil end
+    for _, assignment in ipairs(profile.spacePassengers or {}) do
+        if assignment.part == partId then return assignment end
+    end
+    return nil
+end
+
+function VLS.getSpaceAssignmentForSeat(vehicle, seat)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return nil end
+    local script = vehicle:getScript()
+    if not script then return nil end
+    for _, assignment in ipairs(profile.spacePassengers or {}) do
+        local passengerSeat = script:getPassengerIndex(assignment.passenger)
+        if passengerSeat >= 0 and passengerSeat == seat then return assignment end
+    end
+    return nil
+end
+
+function VLS.getUniversalPartForSeat(vehicle, seat)
+    local assignment = VLS.getSpaceAssignmentForSeat(vehicle, seat)
+    return assignment and vehicle:getPartById(assignment.part) or nil
+end
+
+function VLS.getInstalledUniversalPartForSeat(vehicle, seat)
+    local assignment = VLS.getSpaceAssignmentForSeat(vehicle, seat)
+    return assignment and VLS.getInstalledPart(vehicle, assignment.part) or nil
+end
+
+function VLS.getInstalledBedPartForSeat(vehicle, seat)
+    local part = VLS.getInstalledUniversalPartForSeat(vehicle, seat)
+    return part and VLS.isBedEquipment(part:getInventoryItem()) and part or nil
+end
+
+function VLS.getBedSeat(vehicle, bedPart)
+    local profile = VLS.getVehicleProfile(vehicle)
+    if not profile then return -1 end
+    local script = vehicle:getScript()
+    if not script then return -1 end
+    bedPart = bedPart or VLS.getInstalledBedPart(vehicle)
+    local assignment = bedPart and VLS.getSpaceAssignmentForPart(vehicle, bedPart)
+        or (profile.spacePassengers and profile.spacePassengers[1])
+    return assignment and script:getPassengerIndex(assignment.passenger) or -1
+end
+
+function VLS.isBedSeat(vehicle, seat)
+    return VLS.getSpaceAssignmentForSeat(vehicle, seat) ~= nil
+end
+
+function VLS.isUsingBedSeat(playerObj, vehicle)
+    if not playerObj or not vehicle or playerObj:getVehicle() ~= vehicle then return false end
+    local seat = vehicle:getSeat(playerObj)
+    return seat >= 0 and VLS.getInstalledBedPartForSeat(vehicle, seat) ~= nil
+end
+
+function VLS.getVehicleBedQuality(playerObj)
+    local vehicle = playerObj and playerObj:getVehicle()
+    if not vehicle or not VLS.isUsingBedSeat(playerObj, vehicle) then return nil end
+    local part = VLS.getInstalledBedPartForSeat(vehicle, vehicle:getSeat(playerObj))
+    local profile = part and VLS.getEquipmentProfile(part:getInventoryItem())
+    return profile and profile.sleepQuality or nil
+end
+
+function VLS.getFridgeAgeFactor()
+    local value = SandboxVars and SandboxVars.FridgeFactor or 3
+    local factors = { 0.4, 0.3, 0.2, 0.1, 0.03, 0.0 }
+    return factors[value] or 0.2
+end
+
+function VLS.getFoodRotSpeed()
+    local value = SandboxVars and SandboxVars.FoodRotSpeed or 3
+    return ({ 1.7, 1.4, 1.0, 0.7, 0.4 })[value] or 1.0
+end
+
+-- Preserve the temperature trajectory a Food item has already reached while a
+-- VLS refrigerator/freezer is genuinely powered. This rejects a stale item
+-- synchronization that jumps heat upward, but does not snap newly inserted hot
+-- food directly to the refrigerator target.
+function VLS.preservePoweredFoodHeat(item, state, targetHeat)
+    if not item or not state or not instanceof(item, "Food") then
+        return false
+    end
+
+    local currentHeat = tonumber(item:getHeat()) or 1.0
+    local target = tonumber(targetHeat) or 1.0
+    local previousHeat = tonumber(state.heat)
+
+    if previousHeat == nil then
+        state.heat = currentHeat
+        state.targetHeat = target
+        return false
+    end
+
+    local epsilon = 0.0001
+    local correctedHeat = currentHeat
+
+    if previousHeat > target + epsilon then
+        -- Normal powered cooling is monotonic toward the target.
+        if currentHeat > previousHeat + epsilon then
+            correctedHeat = previousHeat
+        end
+    elseif previousHeat < target - epsilon then
+        -- Food moved from a freezer to a fridge may warm, but not beyond the
+        -- currently powered container's target.
+        if currentHeat > target + epsilon then
+            correctedHeat = target
+        end
+    elseif currentHeat > target + epsilon then
+        correctedHeat = target
+    end
+
+    local changed = math.abs(correctedHeat - currentHeat) > epsilon
+    if changed then item:setHeat(correctedHeat) end
+
+    state.heat = correctedHeat
+    state.targetHeat = target
+    return changed
+end
+
+local function getApplianceBalanceOption(optionName, fallback, maximum)
+    local options = SandboxVars and SandboxVars.VehicleLivingSlots
+    local value = options and tonumber(options[optionName]) or fallback
+    if not value or value ~= value then return fallback end
+    return math.max(0.01, math.min(value, maximum))
+end
+
+function VLS.getFridgePowerConsumption()
+    return getApplianceBalanceOption("FridgePowerConsumption",
+        VLS.FRIDGE_POWER_CONSUMPTION, 100)
+end
+
+function VLS.getMicrowavePowerConsumption()
+    return getApplianceBalanceOption("MicrowavePowerConsumption",
+        VLS.MICROWAVE_POWER_CONSUMPTION, 100)
+end
+
+function VLS.getWaterPurificationPowerConsumption()
+    return getApplianceBalanceOption("WaterPurificationPowerConsumption",
+        VLS.WATER_PURIFICATION_POWER_CONSUMPTION, 100)
+end
+
+function VLS.getTelevisionPowerConsumption()
+    return getApplianceBalanceOption("TelevisionPowerConsumption",
+        VLS.TELEVISION_POWER_CONSUMPTION, 100)
+end
+
+function VLS.getFridgeDrainPerMinute()
+    return VLS.getFridgePowerConsumption() / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+end
+
+function VLS.getMicrowaveDrainPerMinute()
+    return VLS.getMicrowavePowerConsumption() / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+end
+
+function VLS.getWaterPurificationDrainPerLiter()
+    return VLS.getWaterPurificationPowerConsumption()
+        / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+end
+
+function VLS.getTelevisionDrainPerMinute()
+    return VLS.getTelevisionPowerConsumption()
+        / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+end
+
+function VLS.getAuxBatteryPart(vehicle)
+    return VLS.getInstalledPart(vehicle, VLS.AUX_BATTERY_PART_ID)
+end
+
+function VLS.getAuxBatteryCharge(vehicle)
+    local part = VLS.getAuxBatteryPart(vehicle)
+    local item = part and part:getInventoryItem()
+    return item and item:getCurrentUsesFloat() or 0
+end
+
+function VLS.hasAuxBatteryPower(vehicle, required)
+    local part = VLS.getAuxBatteryPart(vehicle)
+    local item = part and part:getInventoryItem()
+    if not item then return false end
+    local minimum = math.max(0, tonumber(required) or 0.0001)
+    return item:getCurrentUsesFloat() >= minimum
+end
+
+function VLS.getWaterPurificationCapacity(vehicle)
+    local drain = VLS.getWaterPurificationDrainPerLiter()
+    if drain <= 0 then return math.huge end
+    local part = VLS.getAuxBatteryPart(vehicle)
+    local item = part and part:getInventoryItem()
