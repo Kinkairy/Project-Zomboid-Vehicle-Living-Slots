@@ -1,6 +1,6 @@
 version=1
 id=3791192579
-title=房车生活 / Mobile Living
+title=Mobile Living
 description=[h1]房车生活[/h1]
 description=把受支持的车辆改装成移动生活空间，安装床铺、储物柜、家电和车顶装备。支持 B42.20 单人、多人及专用服务器。
 description=[h2]功能特色[/h2]
