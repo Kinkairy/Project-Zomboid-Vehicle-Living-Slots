@@ -1,6 +1,6 @@
 name=Mobile Living
 id=VehicleLivingSlots
-description=Build 42.20: SUV and PickUpVan small living vans, Van medium living vans, and StepVan large living vans.
+description=Turns supported vanilla SUVs, PickUpVans, Vans, and StepVans into mobile living spaces with furniture, appliances, clean-water systems, roof racks, storage, and spotlights. / 把受支持的原版 SUV、PickUpVan、Van 和 StepVan 改造成移动生活空间，可安装家具、家电、净水系统、车顶行李架、储物和射灯。 / 把受支援的原版 SUV、PickUpVan、Van 和 StepVan 改造成移動生活空間，可安裝家具、家電、淨水系統、車頂行李架、儲物和射燈。
 modversion=3.8.5
 versionMin=42.20.2
 author=Kinkairy
