@@ -1,4 +1,4 @@
--- lua5.1 tools/test_vls_material_tiers.lua [repo root]
+-- lua5.1 tests/test_vls_material_tiers.lua [repo root]
 -- Actual VLS Lua, mocked PZ objects. Not a Java engine or multiplayer playtest.
 local root=arg[1] or "."
 local media=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/"

@@ -9,3 +9,6 @@ This source promotes the fully accepted 3.8.4 test baseline to 3.8.5 and include
 Main mod: `VehicleLivingSlots`
 Optional adapter: `VehicleLivingSlotsKI5Campers`
 Workshop item: `3791192579`
+
+Regression tests are centralized in tests/. The source-audit workflow invokes them
+with the repository root as the source argument; translation generators remain in tools/.

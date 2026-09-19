@@ -1,4 +1,4 @@
--- lua5.1 tools/test_roof_capacity.lua [repo root]
+-- lua5.1 tests/test_roof_capacity.lua [repo root]
 -- Loads actual VLS Lua and scripts. Native engine objects below are mocks.
 local root=arg[1] or "."
 local base=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/"

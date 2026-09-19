@@ -33,9 +33,9 @@ jobs:
         run: |
           set -euo pipefail
           for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights test_roof_capacity; do
-            lua5.1 tools/$t.lua . | tee audit-output/$t.txt
+            lua5.1 tests/$t.lua . | tee audit-output/$t.txt
           done
-          lua5.1 tools/test_vls_wash.lua . .native-fixtures | tee audit-output/test_vls_wash.txt
+          lua5.1 tests/test_vls_wash.lua . .native-fixtures | tee audit-output/test_vls_wash.txt
           git rev-parse HEAD > audit-output/source-commit.txt
           git archive --format=zip HEAD > audit-output/source.zip
       - uses: actions/upload-artifact@v4

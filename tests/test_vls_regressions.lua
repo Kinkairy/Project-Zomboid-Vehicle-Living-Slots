@@ -1,4 +1,4 @@
--- Run with Lua 5.1+: lua tools/test_vls_regressions.lua [repository root]
+-- Run with Lua 5.1+: lua tests/test_vls_regressions.lua [repository root]
 -- Mocks test Lua contracts, not Project Zomboid's Java engine or gameplay.
 local root=arg[1] or "."
 local base=root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/"
