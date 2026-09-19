@@ -143,6 +143,41 @@ end
 
 local contextProxy=setmetatable({}, {__mode="k"})
 
+-- VLS_TANK_PROXY_TAINT_FIX_20260919
+-- The transient tank proxy is attached to the player's outdoor floor square so
+-- vanilla B42 water menus can be reused. During rain, IsoObject:isTaintedWater()
+-- may classify that proxy from world/rain state even though its FluidContainer
+-- contains clean vehicle-tank water. Keep the real tank authoritative and remove
+-- only the false vanilla "Tainted Water" tooltip from menu entries bound to this
+-- proxy.
+local function clearProxyTaintedWaterTooltip(menu,proxy,seen)
+    if not menu or seen[menu] then return end
+    seen[menu]=true
+    local taintedText=getText("Tooltip_item_TaintedWater")
+    for _,option in ipairs(menu.options or {}) do
+        local direct=option.target==proxy
+        if not direct then
+            for i=1,10 do
+                if option["param"..i]==proxy then
+                    direct=true
+                    break
+                end
+            end
+        end
+        if direct and option.toolTip and option.toolTip.description
+                and taintedText and string.find(option.toolTip.description,
+                    taintedText,1,true) then
+            option.toolTip=nil
+        end
+        if option.subOption and menu.getSubMenu then
+            clearProxyTaintedWaterTooltip(
+                menu:getSubMenu(option.subOption),proxy,seen)
+        end
+    end
+end
+
+
+
 -- Inject the temporary vehicle-tank adapter into the exact vanilla fetch table
 -- before vanilla world-object menu generation runs. Vanilla then
 -- creates Wash / Drink / Fill and every nested wash option itself.
@@ -196,6 +231,7 @@ local function renameTankNativeRoot(playerNum,context,worldobjects,test)
             end
         end
     end
+    clearProxyTaintedWaterTooltip(context,proxy,{})
     contextProxy[context]=nil
 end
 
