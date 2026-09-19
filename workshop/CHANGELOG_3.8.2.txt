@@ -1,5 +1,0 @@
-3.8.2
-
-简体中文：修复无法安装发电机和小箱子的问题；修复 KI5 房车为喷枪充气选项显示为语言键值的问题。
-繁體中文：修復無法安裝發電機和小箱子的問題；修復 KI5 房車為噴槍充氣選項顯示為語言鍵值的問題。
-English: Fixed issues preventing generators and small chests from being installed. Fixed the KI5 camper blowtorch refill option displaying an untranslated key.

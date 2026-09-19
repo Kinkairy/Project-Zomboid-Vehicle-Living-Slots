@@ -1,7 +1,7 @@
 name: VLS source audit
 on:
   push:
-    branches: [main, maintenance/vls-3.8.3-20260917, maintenance/vls383-capacity1-ready-20260917]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,12 +19,11 @@ jobs:
           ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
           path: .native-fixtures
           persist-credentials: false
-      - name: Syntax and complete release verification
+      - name: Syntax and current source checks
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
           mkdir -p audit-output
           find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
-          python3 tools/validate_release_383.py
           python3 tools/build_roof_capacity_translations.py --check
           python3 tools/build_propane_ui_translations.py --check
           python3 tools/build_wash_ui_translations.py --check
