@@ -1,6 +1,7 @@
--- lua5.1 tests/test_vls_material_tiers.lua [repo root]
+-- lua5.1 ../../tests/vehicle-living-slots/test_vls_material_tiers.lua [repo root]
 -- Actual VLS Lua, mocked PZ objects. Not a Java engine or multiplayer playtest.
 local root=arg[1] or "."
+package.path=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/?.lua;"..package.path
 local media=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/"
 local passed,failed=0,0
 local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
@@ -262,5 +263,61 @@ test("rack cargo attachment blocks dismantling",function()
     local cargo=part("Base.SUV","VLSRoofGenerator");cargo.installed=item("Base.Generator");p.vehicle.parts[cargo.id]=cargo
     eq(R.canDismantle(chr,p,true),false)
 end)
+-- All roof attachments use native skill recommendations and no carried tools.
+for id in pairs(R.allowed)do
+ test('cargo installs and uninstalls without tools on server '..id,function()
+  local p=part('Base.StepVan',id);local v=p.vehicle
+  v.parts[R.fixedId]={getInventoryItem=function()return item(R.fixedType)end}
+  local chr=character({materials={}});chr.inv.items={};chr.isMechanicsCheat=function()return false end
+  eq(R.InstallTest(v,p,chr),true)
+  p.installed=item(next(R.allowed[id]));p.installed.getModData=function()return {}end
+  eq(R.UninstallTest(v,p,chr),true)
+  p.storage:AddItem(item('Base.Nails'));eq(R.UninstallTest(v,p,chr),false)
+  p.storage.items={};p.installed=nil
+  v.parts[R.fixedId]=nil;eq(R.InstallTest(v,p,chr),false)
+ end)
+ for _,script in ipairs({'VLS_StepVanRoofRackAdjustment.txt','VLS_VehicleRoofAdapters.txt'})do
+  test('native cargo tables tool free skill one '..script..' '..id,function()
+   local source=read(media..'scripts/'..script)
+   local body=source:match('part%s+'..id..'%s*(%b{})')
+   local install=body and body:match('table%s+install%s*(%b{})')
+   if not install then
+    assert(script=='VLS_VehicleRoofAdapters.txt' and (id=='VLSRoofPetrol2' or id=='VLSRoofPetrol3' or id=='VLSRoofPropane2' or id=='VLSRoofSpare2'))
+    return
+   end
+   assert(install:find('requireInstalled%s*=%s*VLSFixedRoofRack'))
+   local uninstall=assert(body:match('table%s+uninstall%s*(%b{})'))
+   for _,operation in ipairs({install,uninstall})do
+    assert(not operation:find('base:wrench',1,true),'still requires wrench')
+    assert(operation:match('skills%s*=%s*Mechanics:1%s*,'),'native skill recommendation changed')
+   end
+   local rack=assert(source:match('part%s+VLSFixedRoofRack%s*(%b{})'))
+   assert(rack:find('base:wrench',1,true),'rack fabrication tools changed')
+   assert(rack:find('MetalWelding:5;Mechanics:1',1,true),'rack skills changed')
+  end)
+ end
+end
+-- Actual presentation provider delegates petrol state names to native item:getName.
+package.loaded['Definitions/ContainerButtonIcons']=true
+package.loaded['VLS_VehicleMechanicsIcons']=true
+ContainerButtonIcons={};getTexture=noop
+VLS.getMechanicsPreviewTexture=noop
+local provider
+VLS.registerMechanicsUIProvider=function(_,p)provider=p end
+getItemName=function(ft)return 'STATIC:'..ft end
+getText=function(key)return key end
+Translator={getMoveableDisplayName=function(s)return s end}
+dofile(media..'lua/client/VLS_RoofCargoUI.lua')
+for _,ft in ipairs({'Base.PetrolCan','Base.JerryCan'})do
+ test('petrol native dynamic name '..ft,function()
+  local p=part('Base.StepVan','VLSRoofPetrol1');local it=item(ft);p.installed=it
+  it.nativeName='Empty petrol container'
+  it.getName=function(self)return self.nativeName end
+  eq(provider.name(p),'Empty petrol container')
+  it.nativeName='Petrol container (full)';eq(provider.name(p),'Petrol container (full)')
+  eq(provider.itemName(p,it),'Petrol container (full)')
+  p.installed=nil;eq(provider.name(p),'IGUI_VehiclePartVLSRoofPetrol1')
+ end)
+end
 print(string.format("RESULT tests=%d passed=%d failures=%d adapter_variants=%d",passed+failed,passed,failed,variants))
 if failed>0 then os.exit(1) end

@@ -55,9 +55,9 @@ local function makeProxy(character,vehicle,part,tank,fluid)
     local container=ComponentType.FluidContainer:CreateComponent()
     container:setCapacity(math.max(1,fluid:getCapacity(),fluid:getAmount()))
     container:setCanPlayerEmpty(true)
-    container:addFluid(FluidType.Water,fluid:getAmount())
+    container:copyFluidsFrom(fluid)
     GameEntityFactory.AddComponent(proxy,true,container)
-    W.menuProxies[proxy]={vehicle=vehicle:getId(),part=part:getId(),tank=tank:getID()}
+    W.menuProxies[proxy]={vehicle=vehicle:getId(),part=part:getId(),tank=tank:getID(),clean=not fluid:contains(Fluid.TaintedWater)}
     return proxy
 end
 
@@ -151,7 +151,8 @@ local contextProxy=setmetatable({}, {__mode="k"})
 -- only the false vanilla "Tainted Water" tooltip from menu entries bound to this
 -- proxy.
 local function clearProxyTaintedWaterTooltip(menu,proxy,seen)
-    if not menu or seen[menu] then return end
+    local info=proxyInfo(proxy)
+    if not info or not info.clean or not menu or seen[menu] then return end
     seen[menu]=true
     local taintedText=getText("Tooltip_item_TaintedWater")
     for _,option in ipairs(menu.options or {}) do
@@ -167,7 +168,9 @@ local function clearProxyTaintedWaterTooltip(menu,proxy,seen)
         if direct and option.toolTip and option.toolTip.description
                 and taintedText and string.find(option.toolTip.description,
                     taintedText,1,true) then
-            option.toolTip=nil
+            local text=option.toolTip.description
+            local first,last=string.find(text,taintedText,1,true)
+            option.toolTip.description=string.sub(text,1,first-1)..string.sub(text,last+1)
         end
         if option.subOption and menu.getSubMenu then
             clearProxyTaintedWaterTooltip(

@@ -128,6 +128,15 @@ module Base
     /* END reusable luggage aliases */
     template vehicle VLSRoofCargoTemplate
     {
+        /* Side access aligned with the roof equipment, using native areas. */
+        area VLSRoofGeneratorService
+        {
+            xywh = 0.6813 0.343038 0.4725 0.4725,
+        }
+        area VLSRoofPropaneService
+        {
+            xywh = -0.6813 0.070428 0.4725 0.4725,
+        }
         part VLSFixedRoofRack
         {
             category = Other,
@@ -236,7 +245,6 @@ module Base
             }
             table install
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 requireInstalled = VLSFixedRoofRack,
@@ -245,7 +253,6 @@ module Base
             }
             table uninstall
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -291,7 +298,6 @@ module Base
             }
             table install
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 requireInstalled = VLSFixedRoofRack,
@@ -300,7 +306,6 @@ module Base
             }
             table uninstall
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -346,7 +351,6 @@ module Base
             }
             table install
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 requireInstalled = VLSFixedRoofRack,
@@ -355,7 +359,6 @@ module Base
             }
             table uninstall
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -401,7 +404,6 @@ module Base
             }
             table install
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 requireInstalled = VLSFixedRoofRack,
@@ -410,7 +412,6 @@ module Base
             }
             table uninstall
             {
-                items { 1 { tags = base:wrench, count = 1, keep = true, equip = primary, } }
                 time = 100,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -427,7 +428,7 @@ module Base
         part VLSRoofGenerator
         {
             category = Other,
-            area = TruckBed,
+            area = VLSRoofGeneratorService,
             itemType = Base.Generator;Base.Generator_Old;Base.Generator_Yellow;Base.Generator_Blue,
             specificItem = false,
             mechanicRequireKey = false,
@@ -452,10 +453,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -489,10 +486,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -501,10 +495,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -516,8 +506,8 @@ module Base
         part VLSRoofPetrol1
         {
             category = Other,
-            area = TruckBed,
-            itemType = Base.PetrolCan,
+            area = VLSRoofGeneratorService,
+            itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
             setAllModelsVisible = true,
@@ -530,12 +520,16 @@ module Base
                 rotate = 0 0 0,
                 scale = 0.8241758242,
             }
+            model JerryCan1
+            {
+                file = JerryCan,
+                offset = 0.229600 0.632613 0.070428,
+                rotate = 90 0 0,
+                scale = 0.8241758242,
+            }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -544,23 +538,19 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
-                complete = Vehicles.UninstallComplete.Default,
+                complete = VLSRoofCargo.UninstallPetrolComplete,
                 requireEmpty = true,
             }
-            lua { create = VLSRoofCargo.Create, }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.SyncPetrolVisual, update = VLSRoofCargo.SyncPetrolVisual, }
         }
         part VLSRoofPetrol2
         {
             category = Other,
-            area = TruckBed,
-            itemType = Base.PetrolCan,
+            area = VLSRoofGeneratorService,
+            itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
             setAllModelsVisible = true,
@@ -573,12 +563,16 @@ module Base
                 rotate = 0 0 0,
                 scale = 0.8241758242,
             }
+            model JerryCan2
+            {
+                file = JerryCan,
+                offset = 0.129246 0.632613 0.070428,
+                rotate = 90 0 0,
+                scale = 0.8241758242,
+            }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -587,23 +581,19 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
-                complete = Vehicles.UninstallComplete.Default,
+                complete = VLSRoofCargo.UninstallPetrolComplete,
                 requireEmpty = true,
             }
-            lua { create = VLSRoofCargo.Create, }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.SyncPetrolVisual, update = VLSRoofCargo.SyncPetrolVisual, }
         }
         part VLSRoofPetrol3
         {
             category = Other,
-            area = TruckBed,
-            itemType = Base.PetrolCan,
+            area = VLSRoofGeneratorService,
+            itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
             setAllModelsVisible = true,
@@ -616,12 +606,16 @@ module Base
                 rotate = 0 0 0,
                 scale = 0.8241758242,
             }
+            model JerryCan3
+            {
+                file = JerryCan,
+                offset = 0.028891 0.632613 0.070428,
+                rotate = 90 0 0,
+                scale = 0.8241758242,
+            }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -630,22 +624,18 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
-                complete = Vehicles.UninstallComplete.Default,
+                complete = VLSRoofCargo.UninstallPetrolComplete,
                 requireEmpty = true,
             }
-            lua { create = VLSRoofCargo.Create, }
+            lua { create = VLSRoofCargo.Create, init = VLSRoofCargo.SyncPetrolVisual, update = VLSRoofCargo.SyncPetrolVisual, }
         }
         part VLSRoofPropane1
         {
             category = Other,
-            area = TruckBed,
+            area = VLSRoofPropaneService,
             itemType = Base.PropaneTank,
             specificItem = false,
             mechanicRequireKey = false,
@@ -661,10 +651,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -673,10 +660,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -688,7 +671,7 @@ module Base
         part VLSRoofPropane2
         {
             category = Other,
-            area = TruckBed,
+            area = VLSRoofPropaneService,
             itemType = Base.PropaneTank,
             specificItem = false,
             mechanicRequireKey = false,
@@ -704,10 +687,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -716,10 +696,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -747,10 +723,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -759,10 +732,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -790,10 +759,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -802,10 +768,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,
@@ -833,10 +795,7 @@ module Base
             }
             table install
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
+                /* Portable luggage: no installation tool. */
                 time = 350,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.InstallTest,
@@ -845,10 +804,6 @@ module Base
             }
             table uninstall
             {
-                items
-                {
-                    1 { tags = base:wrench, count = 1, keep = true, equip = primary, }
-                }
                 time = 250,
                 skills = Mechanics:1,
                 test = VLSRoofCargo.UninstallTest,

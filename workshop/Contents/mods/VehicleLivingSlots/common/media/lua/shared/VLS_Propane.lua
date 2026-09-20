@@ -4,6 +4,10 @@ require "VLS_RoofCargo"
 -- Shared by the main mod and optional KI5 adapter. Query profiles at call time:
 -- the adapter may register its vehicles after this module has already loaded.
 local ROOF_PROPANE_IDS = { "VLSRoofPropane1", "VLSRoofPropane2" }
+function VLS.isRoofPropaneRefillEnabled()
+    local settings = SandboxVars and SandboxVars.VehicleLivingSlots
+    return not settings or settings.EnableRoofPropaneShortcut ~= false
+end
 
 local function hasRoofProfile(vehicle)
     local script = vehicle and vehicle:getScript()
@@ -37,7 +41,7 @@ function VLS.getInstalledPropaneSource(vehicle, preferredPartId, expectedItemId)
             local roof = id == "VLSRoofPropane1" or id == "VLSRoofPropane2"
             local part = vehicle:getPartById(id)
             local item = part and part:getInventoryItem()
-            if (not roof or VLSRoofCargo.fixed(vehicle))
+            if (not roof or (VLS.isRoofPropaneRefillEnabled() and VLSRoofCargo.fixed(vehicle)))
                     and item and item:getFullType() == "Base.PropaneTank"
                     and instanceof(item, "DrainableComboItem")
                     and (not expectedItemId or item:getID() == expectedItemId)

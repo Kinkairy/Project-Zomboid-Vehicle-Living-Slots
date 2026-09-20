@@ -1,0 +1,991 @@
+{
+  "schema": 1,
+  "languages": [
+    "EN",
+    "CN",
+    "CH"
+  ],
+  "alignment_rule": "same key, same player-visible meaning",
+  "entries": [
+    {
+      "key": "ContextMenu_VLSFillWaterTank",
+      "en": "Fill Water Tank",
+      "cn": "给水箱加水",
+      "ch": "給水箱加水",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSNoAuxPower",
+      "en": "The auxiliary battery has no power",
+      "cn": "副电瓶没有电",
+      "ch": "副電瓶沒有電",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "Fluid_Container_LargeVanWaterTank",
+      "en": "Large Van Water Tank",
+      "cn": "大型厢车水箱",
+      "ch": "大型廂車水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Fluids.json"
+    },
+    {
+      "key": "IGUI_SeatBed",
+      "en": "Rear Space",
+      "cn": "后舱空间",
+      "ch": "後艙空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanCenterLivingArea",
+      "en": "Center Space",
+      "cn": "中央空间",
+      "ch": "中央空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanFrontLeftSpace",
+      "en": "Front Left Space",
+      "cn": "左前空间",
+      "ch": "左前空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanFrontRightSpace",
+      "en": "Front Right Space",
+      "cn": "右前空间",
+      "ch": "右前空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanLeftLivingArea",
+      "en": "Left Space",
+      "cn": "左侧空间",
+      "ch": "左側空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanLivingSpace",
+      "en": "Space",
+      "cn": "空间",
+      "ch": "空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanMiddleLeftSpace",
+      "en": "Middle Left Space",
+      "cn": "左中空间",
+      "ch": "左中空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanMiddleRightSpace",
+      "en": "Middle Right Space",
+      "cn": "右中空间",
+      "ch": "右中空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanRearSpace",
+      "en": "Rear Space",
+      "cn": "后部空间",
+      "ch": "後部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSLargeVanRightLivingArea",
+      "en": "Right Space",
+      "cn": "右侧空间",
+      "ch": "右側空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSSmallVanRearLivingArea",
+      "en": "Rear Space",
+      "cn": "后舱空间",
+      "ch": "後艙空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartCatVLSLiving",
+      "en": "Living Equipment",
+      "cn": "生活设备",
+      "ch": "生活設備",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json",
+      "runtime_groups": [
+        "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json",
+        "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+      ]
+    },
+    {
+      "key": "IGUI_VehiclePartSeatBed",
+      "en": "Rear Space",
+      "cn": "后舱空间",
+      "ch": "後艙空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSAuxBatterySlot",
+      "en": "Auxiliary Battery",
+      "cn": "副电瓶",
+      "ch": "副電瓶",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLargeVanSlot2",
+      "en": "Center Space",
+      "cn": "中央空间",
+      "ch": "中央空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLargeVanSlot3",
+      "en": "Right Space",
+      "cn": "右侧空间",
+      "ch": "右側空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLargeVanSlot4",
+      "en": "Middle Right Space",
+      "cn": "右中空间",
+      "ch": "右中空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLargeVanSlot5",
+      "en": "Rear Space",
+      "cn": "后部空间",
+      "ch": "後部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLargeVanWaterTank",
+      "en": "Water Tank",
+      "cn": "水箱",
+      "ch": "水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSWeaponCabinetSlot",
+      "en": "Weapon Chest",
+      "cn": "武器箱",
+      "ch": "武器箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_Vehicle_ContainerCapacity_Water",
+      "en": "Water: %1",
+      "cn": "水: %1",
+      "ch": "水: %1",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots",
+      "en": "Mobile Living",
+      "cn": "房车生活",
+      "ch": "房車生活",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_FridgePowerConsumption",
+      "en": "Fridge power consumption",
+      "cn": "冰箱耗电量",
+      "ch": "冰箱耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_FridgePowerConsumption_tooltip",
+      "en": "Displayed at 1000 times the fridge's actual auxiliary-battery drain per game minute. Default: 0.04, giving about 17.36 game days on a full battery. Minimum: 0.01. A charged auxiliary battery is required.",
+      "cn": "冰箱每游戏分钟实际耗电量的 1000 倍显示值。默认 0.04，满电约可持续 17.36 个游戏日；最小 0.01，须安装有电的副电瓶。",
+      "ch": "冰箱每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.04，滿電約可持續 17.36 個遊戲日；最小 0.01，須安裝有電的副電瓶。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption",
+      "en": "Microwave power consumption",
+      "cn": "微波炉耗电量",
+      "ch": "微波爐耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_MicrowavePowerConsumption_tooltip",
+      "en": "Displayed at 1000 times the microwave's actual auxiliary-battery drain per active game minute. Default: 0.4, ten times the fridge rate. Minimum: 0.01. A charged auxiliary battery is required.",
+      "cn": "微波炉工作时每游戏分钟实际耗电量的 1000 倍显示值。默认 0.4，是冰箱的 10 倍；最小 0.01，须安装有电的副电瓶。",
+      "ch": "微波爐工作時每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.4，是冰箱的 10 倍；最小 0.01，須安裝有電的副電瓶。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption",
+      "en": "Television power consumption",
+      "cn": "电视机耗电量",
+      "ch": "電視機耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_TelevisionPowerConsumption_tooltip",
+      "en": "Displayed at 1000 times the television's actual auxiliary-battery drain per active game minute. Default: 0.4, matching the microwave rate. Minimum: 0.01. A charged auxiliary battery is required.",
+      "cn": "电视机开启时每游戏分钟实际耗电量的 1000 倍显示值。默认 0.4，与微波炉相同；最小 0.01，须安装有电的副电瓶。",
+      "ch": "電視機開啟時每遊戲分鐘實際耗電量的 1000 倍顯示值。預設 0.4，與微波爐相同；最小 0.01，須安裝有電的副電瓶。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption",
+      "en": "Vehicle water-purification power consumption",
+      "cn": "房车净水耗电量",
+      "ch": "房車淨水耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption_tooltip",
+      "en": "Displayed at 1000 times the auxiliary-battery drain per litre of water purified. Default: 0.4, matching the microwave rate. Minimum: 0.01. A charged auxiliary battery is required.",
+      "cn": "房车水箱每净化 1 升水实际耗电量的 1000 倍显示值。默认 0.4，与微波炉相同；最小 0.01，须安装有电的副电瓶。",
+      "ch": "房車水箱每淨化 1 公升水實際耗電量的 1000 倍顯示值。預設 0.4，與微波爐相同；最小 0.01，須安裝有電的副電瓶。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperSlot1",
+      "en": "Space",
+      "cn": "空间",
+      "ch": "空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperSlot2",
+      "en": "Space",
+      "cn": "空间",
+      "ch": "空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperSlot3",
+      "en": "Space",
+      "cn": "空间",
+      "ch": "空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperSlot4",
+      "en": "Space",
+      "cn": "空间",
+      "ch": "空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperWaterTank1",
+      "en": "Water Tank",
+      "cn": "水箱",
+      "ch": "水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSKI5CamperWaterTank2",
+      "en": "Auxiliary Water Tank",
+      "cn": "副水箱",
+      "ch": "副水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSLowRoofRack",
+      "en": "Metal Bar",
+      "cn": "金属棒",
+      "ch": "金屬棒",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofMattress",
+      "en": "Mattress",
+      "cn": "床垫",
+      "ch": "床墊",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSFixedRoofRack",
+      "en": "Roof Rack",
+      "cn": "行李架",
+      "ch": "行李架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofGenerator",
+      "en": "Generator",
+      "cn": "发电机",
+      "ch": "發電機",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofSmallChest",
+      "en": "Small Chest",
+      "cn": "小箱子",
+      "ch": "小箱子",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofPetrol1",
+      "en": "Gas Can",
+      "cn": "汽油罐",
+      "ch": "汽油罐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofPetrol2",
+      "en": "Gas Can",
+      "cn": "汽油罐",
+      "ch": "汽油罐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofPetrol3",
+      "en": "Gas Can",
+      "cn": "汽油罐",
+      "ch": "汽油罐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofPropane1",
+      "en": "Propane Tank",
+      "cn": "瓦斯罐",
+      "ch": "瓦斯罐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofSpare1",
+      "en": "Vehicle Spare Tire",
+      "cn": "车辆备胎",
+      "ch": "車輛備胎",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofPropane2",
+      "en": "Propane Tank",
+      "cn": "瓦斯罐",
+      "ch": "瓦斯罐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofSpare2",
+      "en": "Vehicle Spare Tire",
+      "cn": "车辆备胎",
+      "ch": "車輛備胎",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSRoofRecipe",
+      "en": "Weld a fixed roof rack. Materials are consumed on completion. Includes a cover; capacity depends on vehicle model. Repairable; empty storage and remove cargo before disassembly.",
+      "cn": "焊接安装固定行李架；完成后扣除材料。自带顶盖，容量按车型区分。可维修；拆解前需清空储物并拆下挂载物。",
+      "ch": "焊接安裝固定行李架；完成後扣除材料。自帶頂蓋，容量按車型區分。可維修；拆解前需清空儲物並拆下掛載物。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSRoofUses",
+      "en": "uses",
+      "cn": "次用量",
+      "ch": "次用量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSRoofKeepTools",
+      "en": "Welding mask and wrench required (kept)",
+      "cn": "需要焊接面罩和扳手（保留）",
+      "ch": "需要焊接面罩和扳手（保留）",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSRoofRemoveLegacy",
+      "en": "Retrieve the legacy rack and cargo preview materials first",
+      "cn": "先拆回旧测试架和货物预览的材料",
+      "ch": "先拆回舊測試架和貨物預覽的材料",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSRoofWeldInstall",
+      "en": "Weld and install roof rack",
+      "cn": "焊接安装行李架",
+      "ch": "焊接安裝行李架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofTent",
+      "en": "Tent (Packed)",
+      "cn": "帐篷（打包）",
+      "ch": "帳篷（打包）",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofHeadlight1",
+      "en": "Roof spotlight",
+      "cn": "车顶射灯",
+      "ch": "車頂射燈",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofHeadlight2",
+      "en": "Roof spotlight",
+      "cn": "车顶射灯",
+      "ch": "車頂射燈",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofHeadlight3",
+      "en": "Roof spotlight",
+      "cn": "车顶射灯",
+      "ch": "車頂射燈",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSRoofHeadlight4",
+      "en": "Roof spotlight",
+      "cn": "车顶射灯",
+      "ch": "車頂射燈",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSFluidRequestTimeout",
+      "en": "Transfer request timed out. Check the amounts before trying again.",
+      "cn": "转水请求超时，请先确认水量后再操作。",
+      "ch": "轉水請求逾時，請先確認水量後再操作。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSFluidRequestFailed",
+      "en": "Transfer was not completed. Check the source, containers and battery.",
+      "cn": "转水未完成，请检查水源、容器和电量。",
+      "ch": "轉水未完成，請檢查水源、容器和電量。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindshield",
+      "en": "Windshield armor",
+      "cn": "前挡风玻璃护甲",
+      "ch": "前擋風玻璃護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindshieldRear",
+      "en": "Rear window armor",
+      "cn": "后窗护甲",
+      "ch": "後窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowFrontLeft",
+      "en": "Left front window armor",
+      "cn": "左前窗护甲",
+      "ch": "左前窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowFrontRight",
+      "en": "Right front window armor",
+      "cn": "右前窗护甲",
+      "ch": "右前窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowRearLeft",
+      "en": "Left rear window armor",
+      "cn": "左后窗护甲",
+      "ch": "左後窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowRearRight",
+      "en": "Right rear window armor",
+      "cn": "右后窗护甲",
+      "ch": "右後窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowMiddleLeft",
+      "en": "Left side window armor",
+      "cn": "左侧窗护甲",
+      "ch": "左側窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSArmorWindowMiddleRight",
+      "en": "Right side window armor",
+      "cn": "右侧窗护甲",
+      "ch": "右側窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSBumperFront",
+      "en": "Front bull bar",
+      "cn": "前防撞杠",
+      "ch": "前防撞桿",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSBumperRear",
+      "en": "Rear bumper guard",
+      "cn": "后防撞杠",
+      "ch": "後防撞桿",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSImprovedChassis",
+      "en": "Chassis improvement",
+      "cn": "底盘改良",
+      "ch": "底盤改良",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSChassisEngineOff",
+      "en": "Stop the engine before chassis work.",
+      "cn": "进行底盘作业前需要关闭发动机。",
+      "ch": "進行底盤作業前需要關閉引擎。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSChassisReduction",
+      "en": "Net vehicle weight reduction: %1. Cargo weight is unchanged.",
+      "cn": "车辆净减重：%1。货物重量不变。",
+      "ch": "車輛淨減重：%1。貨物重量不變。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSChassisProjected",
+      "en": "Projected total weight: %1 (with current cargo).",
+      "cn": "预计整车重量：%1（保持当前货物）。",
+      "ch": "預計整車重量：%1（保持目前貨物）。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSChassisConflict",
+      "en": "Chassis mass baseline is unavailable or changed by another mod.",
+      "cn": "无法取得底盘原始重量，或重量已被其他模组修改。",
+      "ch": "無法取得底盤原始重量，或重量已被其他模組修改。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSTankSource",
+      "en": "Water tank source",
+      "cn": "水箱水源",
+      "ch": "水箱水源",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "Base.VLSFixedRoofRack",
+      "en": "Roof Rack",
+      "cn": "行李架",
+      "ch": "行李架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "Base.VLSWindowArmor",
+      "en": "Window Armor",
+      "cn": "车窗护甲",
+      "ch": "車窗護甲",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "Base.VLSBumperArmor",
+      "en": "Pipe Bumper",
+      "cn": "管材保险杠",
+      "ch": "管材保險桿",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "ItemName_Base.VLSImprovedChassis",
+      "en": "Improved Chassis",
+      "cn": "改良底盘",
+      "ch": "改良底盤",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableBeds",
+      "en": "Enable cabin beds",
+      "cn": "启用车内床铺",
+      "ch": "啟用車內床鋪",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableBeds_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableCabinets",
+      "en": "Enable cabin cabinets",
+      "cn": "启用车内橱柜",
+      "ch": "啟用車內櫥櫃",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableCabinets_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWeaponCabinets",
+      "en": "Enable cabin weapon cabinets",
+      "cn": "启用车内武器柜",
+      "ch": "啟用車內武器櫃",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWeaponCabinets_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableMicrowaves",
+      "en": "Enable cabin microwaves",
+      "cn": "启用车内微波炉",
+      "ch": "啟用車內微波爐",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableMicrowaves_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableFridges",
+      "en": "Enable cabin fridges",
+      "cn": "启用车内冰箱",
+      "ch": "啟用車內冰箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableFridges_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterDispensers",
+      "en": "Enable cabin water dispensers",
+      "cn": "启用车内饮水机",
+      "ch": "啟用車內飲水機",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterDispensers_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableTelevisions",
+      "en": "Enable cabin televisions",
+      "cn": "启用车内电视",
+      "ch": "啟用車內電視",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableTelevisions_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableAuxBatteries",
+      "en": "Enable auxiliary battery installation",
+      "cn": "启用辅助电池安装",
+      "ch": "啟用輔助電池安裝",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableAuxBatteries_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterTanks",
+      "en": "Enable cabin water tanks",
+      "cn": "启用车内水箱",
+      "ch": "啟用車內水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterTanks_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
+      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
+      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofRack",
+      "en": "Enable roof rack",
+      "cn": "启用行李架",
+      "ch": "啟用行李架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofRack_tooltip",
+      "en": "Disabling prevents new racks and roof cargo. Existing racks, storage and cargo remain. Base rack capacity: StepVan 400; Van/VanSeats 300; SUV/PickUpVan 250. Racks are repairable; empty storage and remove cargo before disassembly into materials. Re-enabling does not create items.",
+      "cn": "关闭后禁止新装行李架和车顶挂载物，已安装的行李架、储物和挂载物保留。行李架基础容量：StepVan 400；Van/VanSeats 300；SUV/PickUpVan 250。行李架可维修，清空储物并拆下挂载物后可拆解回收材料。重新开启不会生成物品。",
+      "ch": "關閉後禁止新裝行李架和車頂掛載物，已安裝的行李架、儲物和掛載物保留。行李架基礎容量：StepVan 400；Van/VanSeats 300；SUV/PickUpVan 250。行李架可維修，清空儲物並拆下掛載物後可拆解回收材料。重新開啟不會生成物品。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "IGUI_VLSKI5RefillBlowTorch",
+      "en": "Refill blowtorch",
+      "cn": "为喷枪充气",
+      "ch": "為噴槍充氣",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "ContextMenu_VLSGeneratorConnect",
+      "en": "Connect generator to building power",
+      "cn": "连接发电机向建筑供电",
+      "ch": "連接發電機向建築供電",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSGeneratorDisconnect",
+      "en": "Disconnect and stow generator",
+      "cn": "断开供电并收回发电机",
+      "ch": "斷開供電並收回發電機",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceFront",
+      "en": "Front Space",
+      "cn": "前部空间",
+      "ch": "前部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceMiddle",
+      "en": "Middle Space",
+      "cn": "中部空间",
+      "ch": "中部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceRear",
+      "en": "Rear Space",
+      "cn": "后部空间",
+      "ch": "後部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceFrontLeft",
+      "en": "Front Left Space",
+      "cn": "左前空间",
+      "ch": "左前空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceMiddleLeft",
+      "en": "Middle Left Space",
+      "cn": "左中空间",
+      "ch": "左中空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceRearLeft",
+      "en": "Rear Left Space",
+      "cn": "左后空间",
+      "ch": "左後空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceFrontRight",
+      "en": "Front Right Space",
+      "cn": "右前空间",
+      "ch": "右前空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSKI5SpaceMiddleRight",
+      "en": "Middle Right Space",
+      "cn": "右中空间",
+      "ch": "右中空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofGeneratorShortcut",
+      "en": "Enable vehicle generator quick menu",
+      "cn": "启用车辆发电机快捷菜单",
+      "ch": "啟用車輛發電機快捷選單",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofGeneratorShortcut_tooltip",
+      "en": "Allows operating the roof generator beside a parked vehicle to power nearby buildings. Moving or disabling this option disconnects the supply. Does not power interior appliances or prevent installation/removal.",
+      "cn": "允许在停放的车辆旁操作车顶发电机，为附近建筑供电。行车或关闭此选项会断开供电。不向车内设备供电，不影响设备安装与拆卸。",
+      "ch": "允許在停放的車輛旁操作車頂發電機，為附近建築供電。行車或關閉此選項會斷開供電。不向車內設備供電，不影響設備安裝與拆卸。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofPetrolShortcut",
+      "en": "Enable vehicle petrol can quick menu",
+      "cn": "启用车辆汽油罐快捷菜单",
+      "ch": "啟用車輛汽油罐快捷選單",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofPetrolShortcut_tooltip",
+      "en": "Allows collecting petrol from installed roof cans into carried containers using the original fuel-pump menu. Does not refuel the vehicle fuel tank or prevent can installation/removal.",
+      "cn": "允许使用原版加油泵菜单，把车顶汽油罐中的汽油收集到随身容器。此功能不向车辆油箱加油，不影响油罐安装与拆卸。",
+      "ch": "允許使用原版加油泵選單，把車頂汽油罐中的汽油收集到隨身容器。此功能不向車輛油箱加油，不影響油罐安裝與拆卸。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofPropaneShortcut",
+      "en": "Enable vehicle propane tank quick menu",
+      "cn": "启用车辆瓦斯罐快捷菜单",
+      "ch": "啟用車輛瓦斯罐快捷選單",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableRoofPropaneShortcut_tooltip",
+      "en": "Allows refuelling a blowtorch from installed roof propane tanks beside the vehicle. Does not prevent tank installation/removal or change built-in KI5 camper propane tanks.",
+      "cn": "允许在车辆旁使用车顶瓦斯罐为喷枪补充燃料。不影响气罐安装与拆卸，也不改变 KI5 房车自带的丙烷罐功能。",
+      "ch": "允許在車輛旁使用車頂瓦斯罐為噴槍補充燃料。不影響氣罐安裝與拆卸，也不改變 KI5 房車自帶的丙烷罐功能。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterTankShortcut",
+      "en": "Enable vehicle water tank quick menu",
+      "cn": "启用车辆水箱快捷菜单",
+      "ch": "啟用車輛水箱快捷選單",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableWaterTankShortcut_tooltip",
+      "en": "Allows quick filling, drinking, collecting water and washing from the vehicle water tank while outside. Does not prevent tank installation/removal or change interior equipment functions.",
+      "cn": "允许在车外使用水箱加水、饮水、取水和洗涤快捷菜单。不影响水箱安装与拆卸，也不改变车内设备功能。",
+      "ch": "允許在車外使用水箱加水、飲水、取水和洗滌快捷選單。不影響水箱安裝與拆卸，也不改變車內設備功能。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    }
+  ]
+}

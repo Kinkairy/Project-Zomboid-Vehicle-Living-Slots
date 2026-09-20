@@ -1,6 +1,10 @@
 -- Loads the actual shared resolver, shared refill handler, client action and KI5
 -- adapter. Native PZ objects are mocked; this is not an engine/MP playtest.
 local root=assert(arg[1], 'repo root required')
+local roundtripPath=root.."/tests/net_action_roundtrip.lua"
+local roundtripFile=io.open(roundtripPath)
+if roundtripFile then roundtripFile:close()
+else roundtripPath=root.."/../../tests/vehicle-living-slots/net_action_roundtrip.lua" end
 local base=root..'/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
 local ki5=root..'/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/'
 package.path=base..'shared/?.lua;'..base..'client/?.lua;'..base..'server/?.lua;'..ki5..'shared/?.lua;'..package.path
@@ -12,18 +16,17 @@ local function test(name,fn)
  if not ok then failures=failures+1 end
  print((ok and 'PASS ' or 'FAIL ')..name..(ok and '' or ': '..tostring(err)))
 end
+Translator={getRecipeName=function(name) return name end}
 local noop=function() end
+Vector2={new=function()return {}end}
 local isMPClient=false
 isClient=function() return isMPClient end
 isServer=function() return not isMPClient end
-VLS={MOD_ID='VehicleLivingSlots',equipmentProfiles={},supportedMoveableSprites={},installationOptionProviders={},
- vehicleProfiles={},FREEZER_PART_BY_UNIVERSAL={},UNIVERSAL_PART_BY_FREEZER={},allowedItems={},sleepingBagTypes={},
- WATER_TANK_PART_IDS={},mechanicsDisplayProviders={},getAuxBatteryPart=noop,getPartDisplayName=noop}
-function VLS.getVehicleProfile(vehicle) return vehicle and VLS.vehicleProfiles[vehicle.name] end
-function VLS.isSupportedVehicle(vehicle) return VLS.getVehicleProfile(vehicle)~=nil end
-package.loaded.VLS_Config=VLS
+-- Use real profiles: VanSeats has roof equipment but no interior profile.
+package.loaded['Entity/TimedActions/ISHandcraftAction']=true
+package.loaded['TimedActions/ISDeviceBatteryAction']=true
+require 'VLS_Config'
 require 'VLS_Propane'
-for name in pairs(VLSRoofCargo.vehicleScripts) do VLS.vehicleProfiles[name]={} end
 local nextId=10
 local function item(ft,charge,maxUses)
  nextId=nextId+1
@@ -36,6 +39,8 @@ local function item(ft,charge,maxUses)
  function i:setCurrentUses(n) self.charge=n/self.maximum end
  function i:setCurrentUsesFloat(n) self.charge=n end
  function i:syncItemFields() self.synced=self.synced+1 end
+ function i:setJobType(n) self.jobType=n end
+ function i:getModData() self.md=self.md or {};return self.md end
  function i:setJobDelta(n) self.job=n end
  return i
 end
@@ -44,17 +49,21 @@ local vehicles={}
 local function vehicle(name)
  nextId=nextId+1;local v={id=nextId,name=name or 'Base.StepVan',parts={},stopped=true,area=true,synced=0}
  function v:getId() return self.id end
+  function v:getScriptName() return self.name end
  function v:getScript() return {getFullName=function() return self.name end} end
  function v:getPartById(id) return self.parts[id] end
  function v:isStopped() return self.stopped end
  function v:isInArea() return self.area end
+ function v:getAreaFacingPosition(area,point)
+  self.facingArea=area;return {getX=function()return 8.5 end,getY=function()return 11.25 end}
+ end
  function v:transmitPartUsedDelta(p) self.synced=self.synced+1;self.lastPart=p end
  function v:add(id,it)
   local p={id=id,it=it,v=self}
   function p:getId() return self.id end
   function p:getVehicle() return self.v end
   function p:getInventoryItem() return self.it end
-  function p:getArea() return 'TruckBed' end
+  function p:getArea() return self.id:find('VLSRoofPropane') and 'VLSRoofPropaneService' or 'TruckBed' end
   self.parts[id]=p;return p
  end
  v:add('VLSFixedRoofRack',item('Base.VLSFixedRoofRack'))
@@ -64,10 +73,15 @@ getVehicleById=function(id) assert(type(id)=='number');return vehicles[id] end
 local function player(torch)
  local p={items={[torch.id]=torch},distance=1,inside=nil,sounds=0,stoppedSounds=0}
  local inv={getItemWithIDRecursiv=function(_,id) return p.items[id] end}
+ function p:isTimedActionInstant() return false end
+ function p:hasTrait() return false end
+ function p:isWearingAwkwardGloves() return false end
  function p:getInventory() return inv end
  function p:getVehicle() return self.inside end
  function p:DistToProper() return self.distance end
  function p:getX() return 0 end;function p:getY() return 0 end;function p:getZ() return 0 end
+  function p:shouldBeTurning() return self.turning==true end
+ function p:faceLocationF(x,y)self.facing={x,y}end
  function p:faceThisObject() end;function p:setMetabolicTarget() end
  function p:playSound() self.sounds=self.sounds+1;return 1 end
  function p:getEmitter() return {isPlaying=function() return true end} end
@@ -82,169 +96,243 @@ end
 local handlers,menuHooks={},{}
 Events={OnClientCommand={Add=function(fn) handlers[#handlers+1]=fn end},
  OnFillInventoryObjectContextMenu={Add=function(fn) menuHooks[#menuHooks+1]=fn end}}
-require 'VLS_PropaneServer'
-local function refill(f) return VLS.PropaneServer.refillBlowTorch(f.chr,f.args) end
-local function unchanged(f) near(f.torch.charge,0.25);near(f.gas.charge,1);eq(f.v.synced,0) end
 
-test('main mod alone supports roof tank without KI5 adapter',function()
- local f=fixture();eq(VLS.ki5CampersAdapterApplied,nil);eq(refill(f),true);near(f.torch.charge,1);eq(f.gas:getCurrentUses(),9475)
-end)
-for _,name in ipairs({'Base.StepVan','Base.Van','Base.VanSeats','Base.SUV','Base.PickUpVan'}) do
- test(name..' installed roof propane source works',function() local f=fixture(name);eq(refill(f),true) end)
-end
-test('second roof tank supported when present',function() local f=fixture(nil,'VLSRoofPropane2');eq(refill(f),true) end)
-test('first empty tank is skipped by selection',function()
- local f=fixture(nil,'VLSRoofPropane2');f.v:add('VLSRoofPropane1',item('Base.PropaneTank',0))
- local gas,part=VLS.getInstalledPropaneSource(f.v);eq(gas,f.gas);eq(part,f.part)
-end)
-test('one tank does not require a second tank slot',function() local f=fixture('Base.SUV');eq(f.v:getPartById('VLSRoofPropane2'),nil);eq(refill(f),true) end)
-for _,mode in ipairs({'no rack','wrong rack','uninstalled tank','petrol','empty tank','not drainable','unknown vehicle'}) do
- test('reject '..mode,function()
-  local f=fixture()
-  if mode=='no rack' then f.v.parts.VLSFixedRoofRack.it=nil
-  elseif mode=='wrong rack' then f.v.parts.VLSFixedRoofRack.it=item('Base.MetalBar')
-  elseif mode=='uninstalled tank' then f.part.it=nil
-  elseif mode=='petrol' then f.gas.ft='Base.PetrolCan'
-  elseif mode=='empty tank' then f.gas.charge=0
-  elseif mode=='not drainable' then f.gas.drainable=false
-  elseif mode=='unknown vehicle' then f.v.name='Other.StepVan' end
-  local before=f.gas.charge;eq(refill(f),false);near(f.torch.charge,0.25);near(f.gas.charge,before)
- end)
-end
-for _,mode in ipairs({'moving','inside','too far','wrong area','missing torch','wrong torch','full torch','zero max uses'}) do
- test('no debit when '..mode,function()
-  local f=fixture()
-  if mode=='moving' then f.v.stopped=false elseif mode=='inside' then f.chr.inside=f.v
-  elseif mode=='too far' then f.chr.distance=4 elseif mode=='wrong area' then f.v.area=false
-  elseif mode=='missing torch' then f.chr.items={} elseif mode=='wrong torch' then f.torch.ft='Base.Torch'
-  elseif mode=='full torch' then f.torch.charge=1 elseif mode=='zero max uses' then f.torch.maximum=0 end
-  local before=f.torch.charge;eq(refill(f),false);near(f.torch.charge,before);near(f.gas.charge,1)
- end)
-end
-test('tank replaced in same slot is rejected',function()
- local f=fixture();local other=item('Base.PropaneTank',1);f.part.it=other
- eq(refill(f),false);unchanged(f);near(other.charge,1)
-end)
-test('pinned empty source does not silently charge second tank',function()
- local f=fixture();f.gas.charge=0;local other=item('Base.PropaneTank',1);f.v:add('VLSRoofPropane2',other)
- eq(refill(f),false);near(f.torch.charge,0.25);near(other.charge,1)
-end)
-test('missing source identity rejected before native lookup',function() local f=fixture();f.args.tank=nil;eq(refill(f),false);unchanged(f) end)
-for _,field in ipairs({'vehicle','torch','tank'}) do
- test('malformed '..field..' rejected',function()
-  for _,value in ipairs({'2',{},true,1.5,0/0,math.huge,-math.huge}) do
-   local f=fixture();f.args[field]=value;eq(refill(f),false);unchanged(f)
-  end
- end)
-end
-test('partial refill consumes only remaining source',function()
- local f=fixture();f.torch.charge=0;f.gas:setCurrentUses(70)
- eq(refill(f),true);near(f.torch.charge,0.1);eq(f.gas:getCurrentUses(),0);eq(f.part.it,f.gas)
-end)
-test('normal refill synchronizes both items and vehicle fuel part',function()
- local f=fixture();eq(refill(f),true);eq(f.gas.synced,1);eq(f.torch.synced,1);eq(f.v.synced,1);eq(f.v.lastPart,f.part)
-end)
-test('two players cannot spend the same gas twice',function()
- local f=fixture();f.gas:setCurrentUses(70);f.torch.charge=0
- local other=item('Base.BlowTorch',0,10);local chr2=player(other)
- eq(refill(f),true)
- eq(VLS.PropaneServer.refillBlowTorch(chr2,{vehicle=f.v.id,part=f.part.id,tank=f.gas.id,torch=other.id}),false)
- near(f.torch.charge,0.1);near(other.charge,0);eq(f.gas:getCurrentUses(),0)
-end)
-test('immediate duplicate command after full refill does not debit',function()
- local f=fixture();eq(refill(f),true);local gas=f.gas:getCurrentUses();eq(refill(f),false);eq(f.gas:getCurrentUses(),gas)
-end)
--- Register the actual KI5 profiles after the main common service is loaded.
-require 'VLS_KI5Campers_Config'
-for _,name in ipairs({'Base.Trailer87Scamp13','Base.Trailer87Scamp16','Base.Trailer61Bambi16','Base.Trailer54FlyingCloud22'}) do
- test('existing KI5 source works '..name,function()
-  local f=fixture(name,'DAMNPropaneTankOne');f.v.parts.VLSFixedRoofRack=nil
-  eq(refill(f),true);eq(f.gas:getCurrentUses(),9475)
- end)
-end
-test('KI5 second tank works unchanged',function() local f=fixture('Base.Trailer87Scamp13','DAMNPropaneTankTwo');eq(refill(f),true) end)
--- Mock native timed action shell and UI infrastructure only.
+local native=assert(arg[2])
+package.loaded['TimedActions/ISBaseTimedAction']=true
 ISBaseTimedAction={}
 function ISBaseTimedAction:derive() return setmetatable({},{__index=self}) end
 function ISBaseTimedAction:new(chr) return setmetatable({character=chr},{__index=self}) end
 function ISBaseTimedAction:perform() self.didPerform=true end
 function ISBaseTimedAction:stop() self.didStop=true end
+-- Use native forceStop: server actions have no client self.action.
 function ISBaseTimedAction:setActionAnim(v) self.anim=v end
-function ISBaseTimedAction:setOverrideHandModels(a,b) self.handA=a;self.handB=b end
+-- Execute the real native method: dedicated server actions have no self.action.
+local f=assert(io.open(native..'/shared/TimedActions/ISBaseTimedAction.lua','r'))
+local nativeBase=f:read('*a');f:close()
+local first=assert(nativeBase:find('function ISBaseTimedAction:setOverrideHandModels(',1,true))
+local last=assert(nativeBase:find('\nend',first,true))
+assert((loadstring or load)(nativeBase:sub(first,last+3)))()
+local stopFirst=assert(nativeBase:find('function ISBaseTimedAction:forceStop()',1,true))
+local stopLast=assert(nativeBase:find('\nend',stopFirst,true))
+assert((loadstring or load)(nativeBase:sub(stopFirst,stopLast+3)))()
 function ISBaseTimedAction:getJobDelta() return 0.5 end
-local currentPlayer,currentVehicle
-getSpecificPlayer=function() return currentPlayer end
-ISVehicleMenu={getVehicleToInteractWith=function() return currentVehicle end}
-getCell=function() return {getGridSquare=function() return nil end} end
-local queue={}
-ISTimedActionQueue={add=function(a) queue[#queue+1]=a end}
-ISPathFindAction={pathToVehicleArea=function(_,v,area) return {v=v,area=area,setOnFail=function(self,fn,chr) self.failed=fn end} end}
-HaloTextHelper={addBadText=noop}
-Metabolics={LightWork='LightWork'}
-getText=function(key) return key=='IGUI_VLSRefillBlowTorch' and '为喷枪充气' or key end
-VLS.providers={};VLS.registerMechanicsUIProvider=function(id,p) VLS.providers[id]=p end
-for _,m in ipairs({'Definitions/ContainerButtonIcons','ISUI/ISInventoryPaneContextMenu','Vehicles/ISUI/ISVehicleMenu',
- 'Vehicles/ISUI/ISVehicleMechanics','Vehicles/TimedActions/ISPathFindAction','TimedActions/ISBaseTimedAction',
- 'TimedActions/ISTimedActionQueue','VLS_VehicleMechanicsIcons'}) do package.loaded[m]=true end
-local requests={}
-sendClientCommand=function(chr,module,command,args) requests[#requests+1]={chr=chr,module=module,command=command,args=args} end
-require 'VLS_PropaneRefill'
-dofile(ki5..'client/VLS_KI5Campers_Utilities.lua')
-dofile(ki5..'server/VLS_KI5Campers_Server.lua')
-test('main plus KI5 registers only one refill menu and one command handler',function() eq(#menuHooks,1);eq(#handlers,1) end)
-local function menu(f,items)
- currentPlayer=f.chr;currentVehicle=f.v
- local ctx={options={}}
- function ctx:addOption(label,target,fn,...) self.options[#self.options+1]={label=label,target=target,fn=fn,args={...}} end
- menuHooks[1](0,ctx,items or {f.torch});return ctx
+ArrayList={new=function()
+ local t={};function t:add(x) self[#self+1]=x end;function t:size() return #self end
+ function t:get(i) return self[i+1] end; return t
+end}
+local inputs=ArrayList.new();inputs:add('torch');inputs:add('tank')
+local recipe={getInputs=function()return inputs end,getTime=function()return 50 end,
+ getTranslationName=function()return 'RefillBlowTorch' end,getName=function()return 'RefillBlowTorch' end,
+ isCanWalk=function()return false end,getTimedActionScript=function()return nil end}
+ScriptManager={instance={getCraftRecipe=function(_,name)eq(name,'Base.RefillBlowTorch');return recipe end}}
+CharacterTrait={ALL_THUMBS=1};DebugType={CraftLogic=1};log=noop;showDebugInfoInChat=noop
+convertToPZNetTable=function(x)assert(type(x)=="table", "expected argument of type KahluaTable");return x end;ISInventoryPage={dirtyUI=noop}
+local nativePerform=0
+HandcraftLogic={new=function(chr)
+ local supplied=ArrayList.new();local consumed=ArrayList.new()
+ local output=item('Base.BlowTorch',1,10)
+ local data={offerInputItem=function(_,script,it) supplied:add(it);return true end,
+ getAllInputItems=function()return supplied end,getAllConsumedItems=function()return consumed end,
+ luaCallOnCreate=function()nativePerform=nativePerform+1 end,
+ processDestroyAndUsedItems=function()chr.items[supplied:get(0).id]=nil end}
+ return {setContainers=noop,setRecipe=noop,setTargetVariableInputRatio=noop,
+ setManualSelectInputs=noop,clearManualInputs=function()for i=#supplied,1,-1 do supplied[i]=nil end end,
+ getRecipeData=function()return data end,canPerformCurrentRecipe=function()return #supplied==2 end,
+ getModelHandOne=function()return 'native-hand-one' end,getModelHandTwo=function()return 'native-hand-two' end,
+ performCurrentRecipe=function()consumed:add(supplied:get(0));return true end,
+ getCreatedOutputItems=function(_,list)list:add(output)end}
+end}
+Actions={addOrDropItem=function(chr,it)chr.items[it.id]=it end}
+dofile(native..'/shared/Entity/TimedActions/ISHandcraftAction.lua')
+package.loaded['Entity/TimedActions/ISHandcraftAction']=true
+require 'VLS_PropaneRefillAction'
+local Action=VLSRefillBlowTorchFromVehicleAction
+local function action(f) return Action:new(f.chr,f.args.vehicle,f.args.part,f.args.torch,f.args.tank) end
+local function clientAction(f)
+ local a=action(f)
+ a.action={setOverrideHandModelsObject=function(_,one,two) a.handA=one;a.handB=two end}
+ return a
 end
-for _,kind in ipairs({'roof','KI5'}) do
- test(kind..' UI follows existing path, action, duration, animation',function()
-  local f=kind=='roof' and fixture() or fixture('Base.Trailer87Scamp13','DAMNPropaneTankOne')
-  local ctx=menu(f,{{items={f.torch}}});eq(#ctx.options,1);local op=ctx.options[1];eq(op.label,'为喷枪充气')
-  queue={};op.fn(op.target,(table.unpack or unpack)(op.args));eq(#queue,2)
-  local action=queue[2];eq(action.maxTime,50);eq(action.partId,f.part.id);eq(action.tankId,f.gas.id)
-  action:start();eq(action.anim,'Welding');eq(action.handA,'Base.CraftingWeldingTorch');eq(f.chr.sounds,1)
-  action:update();near(f.torch.job,0.5)
+local function valid(f) return not not action(f):isValid() end
+for _,name in ipairs({'Base.StepVan','Base.Van','Base.VanSeats','Base.SUV','Base.PickUpVan'}) do
+ test(name..' mounted input identity',function()eq(valid(fixture(name)),true)end)
+end
+for _,mode in ipairs({'moving','inside','far','wrong area','missing torch','wrong torch','full torch',
+ 'no rack','wrong rack','missing tank','empty tank','wrong tank','replacement','unsupported'}) do
+ test('reject '..mode,function()
+  local f=fixture()
+  if mode=='moving' then f.v.stopped=false elseif mode=='inside' then f.chr.inside=f.v
+  elseif mode=='far' then f.chr.distance=4 elseif mode=='wrong area' then f.v.area=false
+  elseif mode=='missing torch' then f.chr.items={} elseif mode=='wrong torch' then f.torch.ft='Base.Torch'
+  elseif mode=='full torch' then f.torch.charge=1 elseif mode=='no rack' then f.v.parts.VLSFixedRoofRack=nil
+  elseif mode=='wrong rack' then f.v.parts.VLSFixedRoofRack.it=item('Base.MetalBar')
+  elseif mode=='missing tank' then f.part.it=nil elseif mode=='empty tank' then f.gas.charge=0
+  elseif mode=='wrong tank' then f.gas.ft='Base.PetrolCan' elseif mode=='replacement' then f.part.it=item('Base.PropaneTank',1)
+  elseif mode=='unsupported' then f.v.name='Other.Vehicle' end
+  eq(valid(f),false)
  end)
 end
-test('menu absent for full torch or moving vehicle',function()
- local f=fixture();f.torch.charge=1;eq(#menu(f).options,0)
- f.torch.charge=0.25;f.v.stopped=false;eq(#menu(f).options,0)
+for _,field in ipairs({'vehicle','tank','torch'}) do
+ test('malformed '..field..' stops before Java lookup',function()
+  for _,bad in ipairs({true,{},'1',1.5,0/0,math.huge,-math.huge}) do
+   local f=fixture();f.args[field]=bad;eq(valid(f),false)
+  end
+ end)
+end
+test('original recipe duration replaces hardcoded action time',function()eq(action(fixture()).maxTime,250)end)
+test('native start and original recipe receive the real installed tank',function()
+ local f=fixture();local a=clientAction(f);a:start();eq(a.didStop,nil)
+ eq(a.items:get(0),f.torch);eq(a.items:get(1),f.gas);eq(a.handA,'native-hand-one')
+ a:update();eq(f.v.facingArea,'VLSRoofPropaneService');near(f.chr.facing[1],8.5)
 end)
-test('MP client only requests; server alone performs debit',function()
- local f=fixture();local action=VLSRefillBlowTorchFromVehicleAction:new(f.chr,f.v,f.part,f.torch)
- requests={};isMPClient=true;action:perform();isMPClient=false
- eq(#requests,1);unchanged(f);local req=requests[1];eq(req.module,'VehicleLivingSlots');eq(req.args.tank,f.gas.id)
- handlers[1](req.module,req.command,req.chr,req.args);near(f.torch.charge,1);eq(f.gas:getCurrentUses(),9475)
+test('dedicated server binds installed recipe inputs without presentation action',function()
+ local f=fixture();local a=action(f);eq(a.action,nil)
+ a:serverStart();eq(a.didStop,nil);eq(a.items:get(1),f.gas)
+ eq(a.handA,nil);eq(f.gas.jobType,nil);eq(f.torch.jobType,nil)
 end)
-test('single player action invokes same authoritative refill',function()
- local f=fixture();requests={};VLSRefillBlowTorchFromVehicleAction:new(f.chr,f.v,f.part,f.torch):perform()
- eq(#requests,0);near(f.torch.charge,1);eq(f.gas:getCurrentUses(),9475)
+for _,mode in ipairs({'moving','inside','far','missing torch','full torch',
+ 'missing tank','empty tank','replacement','native recipe rejects inputs'})do
+ test('headless server rejects '..mode..' without effects',function()
+  local f=fixture();local a=action(f);local before=nativePerform
+  local oldLogic=HandcraftLogic.new
+  if mode=='moving' then f.v.stopped=false elseif mode=='inside' then f.chr.inside=f.v
+  elseif mode=='far' then f.chr.distance=4 elseif mode=='wrong area' then f.v.area=false
+  elseif mode=='missing torch' then f.chr.items={} elseif mode=='full torch' then f.torch.charge=1
+  elseif mode=='missing tank' then f.part.it=nil elseif mode=='empty tank' then f.gas.charge=0
+  elseif mode=='replacement' then f.part.it=item('Base.PropaneTank',1)
+  elseif mode=='native recipe rejects inputs' then HandcraftLogic.new=function(...)
+   local logic=oldLogic(...);logic.canPerformCurrentRecipe=function()return false end;return logic end
+  end
+  local gasBefore=f.gas.charge;local torchBefore=f.torch.charge
+  local finished=0;a.netAction={forceComplete=function()finished=finished+1 end}
+  eq(a.action,nil)
+  local ok,err=pcall(function()a:serverStart()end);HandcraftLogic.new=oldLogic
+  assert(ok,err);eq(finished,1);eq(a:isValid(),false)
+  near(f.gas.charge,gasBefore);near(f.torch.charge,torchBefore)
+  -- Scheduler completes even rejected actions; later recovery must not revive crafting.
+  f.v.stopped=true;f.chr.inside=nil;f.chr.distance=1;f.v.area=true
+  f.part.it=f.gas;f.gas.charge=1;f.torch.charge=.25;f.chr.items[f.torch.id]=f.torch
+  eq(a:complete(),true);eq(a:complete(),true)
+  eq(nativePerform,before);near(f.gas.charge,1);near(f.torch.charge,.25);eq(f.v.synced,0)
+  eq(f.chr.items[f.torch.id],f.torch)
+ end)
+end
+test('native turning wait completes before client crafting starts',function()
+ local f=fixture();local a=clientAction(f);f.chr.turning=true
+ eq(a:waitToStart(),true);eq(a.logic,nil);eq(f.v.facingArea,'VLSRoofPropaneService')
+ f.chr.turning=false;eq(a:waitToStart(),false);a:start();eq(a.items:get(1),f.gas)
 end)
-test('cancelled action does not consume gas',function()
- local f=fixture();local a=VLSRefillBlowTorchFromVehicleAction:new(f.chr,f.v,f.part,f.torch);a:start();a:update();a:stop()
- unchanged(f);near(f.torch.job,0);eq(a.didStop,true)
+for _,arrives in ipairs({true,false})do
+ test('path arrival with delayed server coordinates: arrives='..tostring(arrives),function()
+  local f=fixture();local a=action(f);local finished=0;local before=nativePerform
+  a.netAction={forceComplete=function()finished=finished+1 end}
+  -- Native path has completed locally; server still has the last nearby position.
+  f.v.area=false;a:serverStart();eq(finished,0);eq(a.items:get(1),f.gas)
+  eq(nativePerform,before);eq(a:isValid(),false)
+  f.v.area=arrives;eq(a:complete(),true)
+  eq(nativePerform,before+(arrives and 1 or 0));eq(f.v.synced,arrives and 1 or 0)
+  if not arrives then
+   eq(f.chr.items[f.torch.id],f.torch);near(f.gas.charge,1)
+   f.v.area=true;eq(a:complete(),true);eq(nativePerform,before)
+  end
+ end)
+end
+test('native client forceStop is retained on invalid input',function()
+ local f=fixture();local a=clientAction(f);local stopped=0
+ a.action.forceStop=function()stopped=stopped+1 end
+ f.part.it=nil;a:start();eq(stopped,1)
 end)
-test('source replaced during action cancels before submission',function()
- local f=fixture();local a=VLSRefillBlowTorchFromVehicleAction:new(f.chr,f.v,f.part,f.torch)
- f.part.it=item('Base.PropaneTank',1);requests={};isMPClient=true;a:perform();isMPClient=false
- eq(#requests,0);unchanged(f)
+test('native completion creates output and destroys old torch once',function()
+ local f=fixture();local a=action(f);a:serverStart();local before=nativePerform
+ a:complete();eq(nativePerform,before+1);eq(f.chr.items[f.torch.id],nil);eq(f.v.synced,1)
+ a:complete();eq(nativePerform,before+1)
 end)
-test('source replaced after MP send rejected by server',function()
- local f=fixture();requests={};isMPClient=true
- VLSRefillBlowTorchFromVehicleAction:new(f.chr,f.v,f.part,f.torch):perform();isMPClient=false
- local q=requests[1];f.part.it=item('Base.PropaneTank',1);handlers[1](q.module,q.command,q.chr,q.args);unchanged(f)
+test('cancel never invokes recipe or consumes mounted input',function()
+ local f=fixture();local a=clientAction(f);a:start();local before=nativePerform;a:stop()
+ eq(nativePerform,before);eq(f.chr.items[f.torch.id],f.torch);near(f.gas.charge,1)
 end)
-test('moved torch found recursively and submitted by identity',function()
- local f=fixture();local subbag={f.torch};f.chr.items={}
- function f.chr:getInventory() return {getItemWithIDRecursiv=function(_,id) return subbag[1].id==id and subbag[1] or nil end} end
- eq(refill(f),true)
+test('replacement during action blocks native completion',function()
+ local f=fixture();local a=action(f);a:serverStart();f.part.it=item('Base.PropaneTank',1)
+ local before=nativePerform;a:complete();eq(nativePerform,before)
 end)
-test('propane UI remaining percentage covers roof and KI5',function()
- for _,f in ipairs({fixture(),fixture('Base.Trailer87Scamp13','DAMNPropaneTankOne')}) do
-  local p=VLS.providers.vehiclePropane;eq(p.matches(f.part),true);near(p.remaining(f.part),1)
+test('native constructor-name MP roundtrip preserves all identities',function()
+ local f=fixture();local a=action(f)
+ local roundtrip=dofile(roundtripPath)
+ local server=roundtrip(Action,base..'shared/VLS_PropaneRefillAction.lua',a)
+ eq(server.vehicleId,f.v.id);eq(server.partId,f.part.id);eq(server.torchId,f.torch.id);eq(server.tankId,f.gas.id)
+ server:serverStart();eq(server.items:get(1),f.gas)
+end)
+require 'VLS_KI5Campers_Config'
+for _,name in ipairs({'Base.Trailer87Scamp13','Base.Trailer87Scamp16','Base.Trailer61Bambi16',
+ 'Base.Trailer54FlyingCloud22','Base.Trailer61Airflyte','Base.Trailer61Astrodome'}) do
+ test('KI5 native propane input '..name,function()eq(valid(fixture(name,'DAMNPropaneTankOne')),true)end)
+end
+test('sandbox disables roof refill but preserves KI5 tank',function()
+ SandboxVars={VehicleLivingSlots={EnableRoofPropaneShortcut=false}}
+ eq(valid(fixture()),false);eq(valid(fixture('Base.Trailer61Airflyte','DAMNPropaneTankOne')),true)
+ SandboxVars=nil
+end)
+test('legacy custom command is no longer registered',function()require 'VLS_PropaneServer';eq(#handlers,0)end)
+-- Exercise the real inventory hook with real profiles and mounted-item resolver.
+for _,module in ipairs({'Definitions/ContainerButtonIcons','ISUI/ISInventoryPaneContextMenu',
+ 'Vehicles/ISUI/ISVehicleMenu','Vehicles/ISUI/ISVehicleMechanics',
+ 'Vehicles/TimedActions/ISPathFindAction','TimedActions/ISTimedActionQueue',
+ 'VLS_VehicleMechanicsIcons'}) do package.loaded[module]=true end
+VLS.registerMechanicsUIProvider=noop
+local nearby,current
+ISVehicleMenu={getVehicleToInteractWith=function()return nearby end}
+getSpecificPlayer=function()return current end
+getCell=function()return nil end
+require 'VLS_PropaneRefill'
+local function menuCount(f)
+ nearby,current=f.v,f.chr
+ local count=0
+ local context={addOption=function(_,name)eq(name,'RefillBlowTorch');count=count+1 end}
+ for _,hook in ipairs(menuHooks)do hook(0,context,{f.torch})end
+ return count
+end
+for name in pairs(VLSRoofCargo.vehicleScripts) do
+ test('roof equipment only, menu and action '..name,function()
+  for _,partId in ipairs({'VLSRoofPropane1','VLSRoofPropane2'})do
+   local f=fixture(name,partId)
+   eq(menuCount(f),1);eq(valid(f),true)
+   f.part.it=nil;eq(menuCount(f),0);eq(valid(f),false)
+   f.part.it=item('Base.PetrolCan',1);eq(menuCount(f),0);eq(valid(f),false)
+   f.part.it=f.gas;f.gas.charge=0;eq(menuCount(f),0);eq(valid(f),false)
+   f.gas.charge=1;f.v.parts[partId]=nil;eq(menuCount(f),0);eq(valid(f),false)
+  end
+ end)
+end
+for name,profile in pairs(VLS.vehicleProfiles)do
+ for _,partId in ipairs(profile.propaneTankParts or {})do
+  test('KI5 actual installed tank menu '..name..' '..partId,function()
+   local f=fixture(name,partId);eq(menuCount(f),1);eq(valid(f),true)
+   f.part.it=nil;eq(menuCount(f),0);eq(valid(f),false)
+  end)
  end
+end
+test('VanSeats has no artificial interior profile',function()
+ eq(VLS.getVehicleProfile(vehicle('Base.VanSeats')),nil)
 end)
-print(string.format('RESULT tests=%d failures=%d',total,failures))
-if failures>0 then error('vehicle propane regression failures') end
+-- One real menu callback queues native walking followed by one recipe action.
+dofile(native..'/client/Vehicles/TimedActions/ISPathFindAction.lua')
+for _,case in ipairs({{'Base.StepVan','VLSRoofPropane1'},{'Base.VanSeats','VLSRoofPropane1'},
+ {'Base.Trailer61Airflyte','DAMNPropaneTankOne'}})do
+ test('one click walk then original refill '..case[1],function()
+  local f=fixture(case[1],case[2]);nearby,current=f.v,f.chr;local queued={};local option
+  ISTimedActionQueue={add=function(a)queued[#queued+1]=a end}
+  local context={addOption=function(_,label,target,callback,...)option={target=target,callback=callback,args={...}}end}
+  for _,hook in ipairs(menuHooks)do hook(0,context,{f.torch})end
+  f.v.area=false;option.callback(option.target,unpack(option.args))
+  eq(#queued,2);eq(queued[1].goal[1],'VehicleArea');eq(queued[1].goal[3],f.part:getArea())
+  f.chr.getPathFindBehavior2=function()return {cancel=noop}end;f.chr.setPath2=noop
+  queued[1]:perform();f.v.area=true;f.chr.turning=true
+  local client=queued[2];client.action={setOverrideHandModelsObject=noop}
+  eq(client:waitToStart(),true);f.chr.turning=false;eq(client:waitToStart(),false);client:start()
+  local server=action(f);server.netAction={forceComplete=function()error('stale path position rejected')end}
+  f.v.area=false;server:serverStart();f.v.area=true
+  local count=nativePerform;server:complete();eq(nativePerform,count+1);server:complete();eq(nativePerform,count+1)
+ end)
+end
+print('RESULT propane-native tests='..total..' failures='..failures)
+assert(failures==0)

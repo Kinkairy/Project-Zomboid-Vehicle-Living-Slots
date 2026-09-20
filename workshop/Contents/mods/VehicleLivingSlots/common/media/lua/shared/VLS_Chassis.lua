@@ -1,4 +1,4 @@
--- VLS 3.8.5 accepted release: fitted chassis replacement. Each peer derives a
+-- VLS 3.8.6: inherited accepted chassis behavior: fitted chassis replacement. Each peer derives a
 -- percentage-based mass reduction from the current vehicle-script baseline;
 -- no replicated part modData is required to activate vehicle physics.
 require "VLS_RoofCargo"
@@ -25,6 +25,7 @@ C.REDUCTION_RATE={
 C.LEGACY_REDUCTION={StepVan=500,Van=300,VanSeats=300,SUV=200,PickUpVan=200}
 local registered=setmetatable({}, {__mode="k"})
 local cache=setmetatable({}, {__mode="k"})
+local warnedScripts={}
 local function finite(n) return type(n)=="number" and n==n and n>-math.huge and n<math.huge end
 local function same(a,b) return finite(a) and finite(b) and math.abs(a-b)<0.01 end
 local function host() return not isClient() end
@@ -115,13 +116,15 @@ function C.canDismantle(chr,part)
     return parked(chr,part) and C.hasJack(chr)
 end
 
-local function warn(part,message)
-    local old=cache[part] or {}
-    if old.warning~=message then
-        print("[VLS chassis] "..message)
-        old.warning=message
-        cache[part]=old
-    end
+local function warn(vehicle,part,current,t)
+    -- Unmodified vehicles need no chassis warning. One diagnostic per model
+    -- per session also avoids repeats when streamed vehicle objects are replaced.
+    if not installedItem(part) then return end
+    local name=vehicle:getScript():getFullName()
+    if warnedScripts[name] then return end
+    warnedScripts[name]=true
+    print("[VLS chassis] "..name..": unexpected initial mass "..tostring(current)
+        .." (script "..tostring(t.base).."); chassis adjustment skipped")
 end
 
 function C.sync(vehicle,part)
@@ -131,7 +134,7 @@ function C.sync(vehicle,part)
     if not t then return false end
     local current=vehicle:getInitialMass()
     if not acceptedInitial(current,t) then
-        warn(part,"another mass modifier changed this vehicle; no mass write")
+        warn(vehicle,part,current,t)
         return false
     end
 

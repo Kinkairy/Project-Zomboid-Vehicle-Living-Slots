@@ -9,7 +9,7 @@ if not D.mechanicsHooksApplied then
         class.complete=function(self)
             local part=self[field]
             local vehicle=part and part:getVehicle()
-            local tracked=not isClient() and vehicle and D.IsSource(part)
+            local tracked=not isClient() and vehicle and D.supportsVehicle(vehicle) and D.IsSource(part)
             if tracked then D.Update(vehicle) end
             local result=original(self)
             if tracked then D.RebaseSource(part) end

@@ -157,7 +157,8 @@ if Events and Events.OnTick and not A.tickHooked then Events.OnTick.Add(onTick);
 local R=VLSRoofCargo
 local function supported(part)
     local vehicle=part and part:getVehicle()
-    return vehicle and vehicle:getScript() and A.IsPart(part)
+    local script=vehicle and vehicle:getScript()
+    return script and R.vehicleScripts[script:getFullName()]==true and A.IsPart(part)
 end
 for id in pairs(A.parts) do
     local bumper=string.find(id,"Bumper",1,true)~=nil

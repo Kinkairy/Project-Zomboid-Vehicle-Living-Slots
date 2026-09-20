@@ -4,7 +4,7 @@ require "VLS_Propane"
 if VLS.ki5CampersAdapterApplied then return VLS end
 VLS.ki5CampersAdapterApplied = true
 
-VLS.KI5_VERSION = "3.8.5"
+VLS.KI5_VERSION = "3.8.6"
 print("[VehicleLivingSlotsKI5Campers] Adapter version " .. VLS.KI5_VERSION)
 
 local SLOT_IDS = {
@@ -46,24 +46,25 @@ for _, partId in ipairs(WATER_TANK_IDS) do
     VLS.WATER_TANK_PART_IDS[partId] = true
 end
 
-local function livingAssignments(count)
+local function livingAssignments(positions)
     local result = {}
-    for index = 1, count do
+    for index, position in ipairs(positions) do
         result[index] = {
             part = SLOT_IDS[index],
             passenger = "VLSKI5Space" .. tostring(index),
+            nameKey = "IGUI_VLSKI5Space" .. position,
         }
     end
     return result
 end
 
-local function registerProfile(scriptName, count)
+local function registerProfile(scriptName, positions)
     local slotIds = {}
-    for index = 1, count do slotIds[index] = SLOT_IDS[index] end
+    for index = 1, #positions do slotIds[index] = SLOT_IDS[index] end
     VLS.vehicleProfiles["Base." .. scriptName] = {
         kind = "ki5Camper",
         universalParts = slotIds,
-        spacePassengers = livingAssignments(count),
+        spacePassengers = livingAssignments(positions),
         waterTankParts = WATER_TANK_IDS,
         propaneTankParts = PROPANE_TANK_IDS,
         containerIconOverrides = CONTAINER_ICON_OVERRIDES,
@@ -72,10 +73,14 @@ local function registerProfile(scriptName, count)
     }
 end
 
-registerProfile("Trailer87Scamp13", 2)
-registerProfile("Trailer87Scamp16", 3)
-registerProfile("Trailer61Bambi16", 3)
-registerProfile("Trailer54FlyingCloud22", 4)
+-- Follow KI5's position + part naming style. Positions describe the living
+-- spaces from front to rear within each layout; part/passenger IDs stay stable.
+registerProfile("Trailer87Scamp13", {"FrontLeft", "RearLeft"})
+registerProfile("Trailer87Scamp16", {"Front", "Middle", "Rear"})
+registerProfile("Trailer61Bambi16", {"Front", "Middle", "Rear"})
+registerProfile("Trailer54FlyingCloud22", {"FrontLeft", "FrontRight", "MiddleRight", "RearLeft"})
+registerProfile("Trailer61Airflyte", {"FrontLeft", "MiddleLeft", "RearLeft"})
+registerProfile("Trailer61Astrodome", {"FrontLeft", "MiddleLeft", "RearLeft"})
 
 local originalGetAuxBatteryPart = VLS.getAuxBatteryPart
 function VLS.getAuxBatteryPart(vehicle)
@@ -102,7 +107,7 @@ function VLS.getPartDisplayName(part, fallback)
     local assignment = profile and profile.kind == "ki5Camper"
         and VLS.getSpaceAssignmentForPart(vehicle, part) or nil
     if assignment and not part:getInventoryItem() then
-        return getText("IGUI_VehiclePart" .. part:getId())
+        return getText(assignment.nameKey)
     end
     return originalGetPartDisplayName(part, fallback)
 end

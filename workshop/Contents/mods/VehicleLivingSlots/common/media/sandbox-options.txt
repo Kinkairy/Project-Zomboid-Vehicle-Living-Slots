@@ -84,3 +84,27 @@ option VehicleLivingSlots.EnableRoofRack = {
     translation = VehicleLivingSlots_EnableRoofRack,
 }
 
+option VehicleLivingSlots.EnableWaterTankShortcut = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableWaterTankShortcut,
+}
+
+option VehicleLivingSlots.EnableRoofGeneratorShortcut = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableRoofGeneratorShortcut,
+}
+
+option VehicleLivingSlots.EnableRoofPetrolShortcut = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableRoofPetrolShortcut,
+}
+
+option VehicleLivingSlots.EnableRoofPropaneShortcut = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableRoofPropaneShortcut,
+}
+

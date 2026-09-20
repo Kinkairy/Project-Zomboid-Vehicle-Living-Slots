@@ -71,7 +71,19 @@ R.allowed = {
     VLSRoofSmallChest={ ["Base.Mov_SmallChest"]=true },
     VLSRoofTent={ ["Base.CampingTentKit2_Packed"]=true },
 }
-for i=1,3 do R.allowed["VLSRoofPetrol"..i]={["Base.PetrolCan"]=true} end
+for i=1,3 do R.allowed["VLSRoofPetrol"..i]={["Base.PetrolCan"]=true,["Base.JerryCan"]=true} end
+function R.SyncPetrolVisual(vehicle,part)
+    local index=part:getId():match("^VLSRoofPetrol([123])$")
+    if not index then return end
+    local item=part:getInventoryItem()
+    local kind=item and item:getFullType()
+    part:setModelVisible("PetrolCan"..index,kind=="Base.PetrolCan")
+    part:setModelVisible("JerryCan"..index,kind=="Base.JerryCan")
+end
+function R.UninstallPetrolComplete(vehicle,part,item)
+    Vehicles.UninstallComplete.Default(vehicle,part,item)
+    R.SyncPetrolVisual(vehicle,part)
+end
 for i=1,2 do
     R.allowed["VLSRoofPropane"..i]={["Base.PropaneTank"]=true}
     R.allowed["VLSRoofSpare"..i]={} -- allowed types belong to the native script part list
@@ -240,16 +252,6 @@ function R.validateInstall(chr,part,item,position)
     return accepted and chr:getInventory():contains(item)
 end
 -- Dedicated servers have no ISVehicleMechanics or inventory-page globals.
--- Native UI moves kept tools into carried inventory before queueing an action.
--- Cargo removal still needs a wrench; generator installation skips it below.
-function R.serverCargoToolsReady(chr,part)
-    if not chr or chr:isDead() then return false end
-    if R.legacy[part:getId()] or chr:isMechanicsCheat() then return true end
-    for _,entry in ipairs(R.inventoryEntries(chr)) do
-        if entry.item:getCondition()>0 and entry.item:hasTag(ItemTag.WRENCH) then return true end
-    end
-    return false
-end
 function R.NeverInstall() return false end
 function R.InstallTest(vehicle,part,chr)
     if not VLS.isInstallationEnabled(part) then return false end
@@ -263,16 +265,22 @@ function R.InstallTest(vehicle,part,chr)
     if not R.allowed[part:getId()] or not R.fixed(vehicle) or not R.lampOrderReady(part) then return false end
     if isServer() then
         if not chr or chr:isDead() or part:getVehicle()~=vehicle then return false end
-        -- Only installation is tool-free. UninstallTest still checks the wrench.
-        if part:getId()=="VLSRoofGenerator" then return true end
-        return R.serverCargoToolsReady(chr,part)
+        -- Roof attachments use native actions without a carried tool.
+        return true
     end
     return Vehicles.InstallTest.Default(vehicle,part,chr)
 end
 function R.UninstallTest(vehicle,part,chr)
+    if part and part:getId()=="VLSRoofGenerator" and part:getInventoryItem() then
+        local state=part:getInventoryItem():getModData().vlsGenerator
+        if state and state.dock then
+            local object=VLS.Generator and VLS.Generator.object(vehicle)
+            if not object or object:isConnected() or object:isActivated() then return false end
+        end
+    end
     if not R.isActionPart(part) or R.fabricationSpec(part) or not R.empty(part) then return false end
     if not part:getInventoryItem() or part:getVehicle()~=vehicle then return false end
-    if isServer() then return R.serverCargoToolsReady(chr,part) end
+    if isServer() then return chr ~= nil and not chr:isDead() end
     return Vehicles.UninstallTest.Default(vehicle,part,chr)
 end
 -- Disassembly is independent of installation switches and never returns a rack.
@@ -401,6 +409,7 @@ function R.InstallComplete(vehicle,part)
         part:doInventoryItemStats(item,part:getMechanicSkillInstaller())
     end
     Vehicles.InstallComplete.Default(vehicle,part)
+    R.SyncPetrolVisual(vehicle,part)
 end
 function R.installFixed(chr,part)
     if isClient() or not R.validateInstall(chr,part,nil,true) then return false end

@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.8.5"
-VLS.BUILD_ID = "release-3.8.5-accepted-water-actionfix-20260918"
+VLS.VERSION = "3.8.6"
+VLS.BUILD_ID = "candidate-3.8.6-service-positions-options-20260920"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
@@ -572,6 +572,11 @@ function VLS.getInstallationOption(part, itemOrType)
     end
     return profile and VLS.installationOptions[profile.capability] or nil
 end
+function VLS.isWaterTankShortcutEnabled()
+    local settings = SandboxVars and SandboxVars.VehicleLivingSlots
+    return not settings or settings.EnableWaterTankShortcut ~= false
+end
+
 function VLS.isInstallationEnabled(part, itemOrType)
     local option = VLS.getInstallationOption(part, itemOrType)
     local settings = SandboxVars and SandboxVars.VehicleLivingSlots
@@ -1308,6 +1313,20 @@ function VLS.getFoodRotSpeed()
     return ({ 1.7, 1.4, 1.0, 0.7, 0.4 })[value] or 1.0
 end
 
+-- B42.20 Food.updateFreezing/updateAge constants, verified against the pinned
+-- game class. Vehicle containers lack the world-object power endpoint those
+-- native methods require. This single pure bridge serves authoritative updates
+-- and bounded client projection; client predictions never update their baseline.
+function VLS.getPoweredFoodProgress(item,age,freezing,hours,freezer)
+    if freezer and item:canBeFrozen() then
+        freezing=math.min(100,freezing+hours/4*100)
+    elseif freezing>0 then
+        freezing=math.max(0,freezing-hours/3*100)
+    end
+    local factor=freezing>=100 and 0 or VLS.getFridgeAgeFactor()
+    return age+hours*VLS.getFoodRotSpeed()/24*factor,freezing
+end
+
 -- Preserve the temperature trajectory a Food item has already reached while a
 -- VLS refrigerator/freezer is genuinely powered. This rejects a stale item
 -- synchronization that jumps heat upward, but does not snap newly inserted hot
@@ -1429,10 +1448,15 @@ function VLS.consumeAuxBattery(vehicle, amount)
     local part = VLS.getAuxBatteryPart(vehicle)
     local item = part and part:getInventoryItem()
     if not item then return false end
+    if type(amount) ~= "number" or amount ~= amount or amount < 0
+            or amount == math.huge then return false end
     local charge = item:getCurrentUsesFloat()
     local sufficient = charge >= amount
-    item:setUsedDelta(sufficient and math.max(0, charge - amount) or 0)
-    vehicle:transmitPartUsedDelta(part)
+    local remaining = sufficient and math.max(0, charge - amount) or 0
+    if remaining ~= charge then
+        item:setUsedDelta(remaining)
+        vehicle:transmitPartUsedDelta(part)
+    end
     return sufficient
 end
 

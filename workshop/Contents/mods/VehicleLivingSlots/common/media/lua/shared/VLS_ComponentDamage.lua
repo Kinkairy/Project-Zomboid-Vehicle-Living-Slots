@@ -45,8 +45,14 @@ local function sampleSources(state, vehicle, ids)
     return greatest
 end
 
+function D.supportsVehicle(vehicle)
+    local script = vehicle and vehicle:getScript()
+    return script and (VLS.vehicleProfiles and VLS.vehicleProfiles[script:getFullName()]
+        or VLSRoofCargo.vehicleScripts[script:getFullName()]) ~= nil
+end
+
 function D.Init(vehicle)
-    if isClient and isClient() then
+    if not D.supportsVehicle(vehicle) or (isClient and isClient()) then
         return nil
     end
     local state = samples[vehicle]

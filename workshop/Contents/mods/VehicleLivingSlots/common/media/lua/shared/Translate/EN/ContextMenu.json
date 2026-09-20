@@ -1,4 +1,6 @@
 {
-    "ContextMenu_VLSNoAuxPower": "The auxiliary battery has no power",
-    "ContextMenu_VLSFillWaterTank": "Fill Water Tank"
+  "ContextMenu_VLSFillWaterTank": "Fill Water Tank",
+  "ContextMenu_VLSNoAuxPower": "The auxiliary battery has no power",
+  "ContextMenu_VLSGeneratorConnect": "Connect generator to building power",
+  "ContextMenu_VLSGeneratorDisconnect": "Disconnect and stow generator"
 }

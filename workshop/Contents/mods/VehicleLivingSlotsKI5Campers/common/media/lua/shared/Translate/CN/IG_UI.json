@@ -1,10 +1,18 @@
 {
-    "IGUI_VehiclePartCatVLSLiving": "生活设备",
-    "IGUI_VehiclePartVLSKI5CamperSlot1": "生活空间 1",
-    "IGUI_VehiclePartVLSKI5CamperSlot2": "生活空间 2",
-    "IGUI_VehiclePartVLSKI5CamperSlot3": "生活空间 3",
-    "IGUI_VehiclePartVLSKI5CamperSlot4": "生活空间 4",
-    "IGUI_VehiclePartVLSKI5CamperWaterTank1": "水箱",
-    "IGUI_VehiclePartVLSKI5CamperWaterTank2": "副水箱",
-    "IGUI_VLSKI5RefillBlowTorch": "为喷枪充气"
+  "IGUI_VehiclePartCatVLSLiving": "生活设备",
+  "IGUI_VehiclePartVLSKI5CamperSlot1": "空间",
+  "IGUI_VehiclePartVLSKI5CamperSlot2": "空间",
+  "IGUI_VehiclePartVLSKI5CamperSlot3": "空间",
+  "IGUI_VehiclePartVLSKI5CamperSlot4": "空间",
+  "IGUI_VehiclePartVLSKI5CamperWaterTank1": "水箱",
+  "IGUI_VehiclePartVLSKI5CamperWaterTank2": "副水箱",
+  "IGUI_VLSKI5RefillBlowTorch": "为喷枪充气",
+  "IGUI_VLSKI5SpaceFront": "前部空间",
+  "IGUI_VLSKI5SpaceMiddle": "中部空间",
+  "IGUI_VLSKI5SpaceRear": "后部空间",
+  "IGUI_VLSKI5SpaceFrontLeft": "左前空间",
+  "IGUI_VLSKI5SpaceMiddleLeft": "左中空间",
+  "IGUI_VLSKI5SpaceRearLeft": "左后空间",
+  "IGUI_VLSKI5SpaceFrontRight": "右前空间",
+  "IGUI_VLSKI5SpaceMiddleRight": "右中空间"
 }

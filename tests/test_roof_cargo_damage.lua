@@ -91,9 +91,9 @@ for _,name in ipairs({'Base.StepVan','Base.Van','Base.VanSeats','Base.SUV','Base
     test(name..' rack takes greatest front/rear loss; contents retained',function()
         local v=newVehicle(name);local rack=v:add(R.fixedId);local original=rack.item
         D.Init(v);impact(v,12,8)
-        same(rack:getCondition(),88);same(rack.damageCalls,1)
+        same(rack:getCondition(),91);same(rack.damageCalls,1)
         same(rack.item,original);same(#rack.item.contents,1);same(rack.removalCalls,0)
-        D.Update(v);same(rack:getCondition(),88)
+        D.Update(v);same(rack:getCondition(),91)
     end)
 end
 test('zero-condition rack stays installed and retains stored contents',function()
@@ -112,9 +112,9 @@ test('cargo exclusion precedes broad managed-part fallback',function()
     overlyBroadManaged=false
     noMutation(p,original)
 end)
-test('non-roof managed component keeps previous rear-damage behavior',function()
+test('interior fixture has no forwarded collision damage',function()
     local v=newVehicle();local p=v:add('ManagedInteriorFixture')
-    D.Init(v);impact(v,20,10);same(p:getCondition(),90)
+    D.Init(v);impact(v,20,10);same(p:getCondition(),100)
 end)
 test('armor remains outside this cargo change',function()
     local v=newVehicle();local p=v:add('VLSBumperFront');local original=p.item
@@ -128,7 +128,7 @@ end)
 test('late installed rack starts after pending impact',function()
     local v=newVehicle();local p=v:add(R.fixedId);p.item=nil
     D.Init(v);p.item=makeItem();impact(v,20,0);same(p:getCondition(),100)
-    impact(v,10,0);same(p:getCondition(),90)
+    impact(v,10,0);same(p:getCondition(),92)
 end)
 test('source rebase prevents maintenance loss being forwarded',function()
     local v=newVehicle();local p=v:add(R.fixedId);D.Init(v)

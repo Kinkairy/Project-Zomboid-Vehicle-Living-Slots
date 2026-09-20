@@ -18,7 +18,7 @@ local function integer(value)
 end
 
 function W.resolve(character,vehicleId,partId,tankId,requirePosition)
-    if not character or character:isDead() or character:getVehicle()
+    if not VLS.isWaterTankShortcutEnabled() or not character or character:isDead() or character:getVehicle()
             or not integer(vehicleId) or not integer(tankId)
             or type(partId)~="string" or partId=="" then return nil end
     local vehicle=getVehicleById(vehicleId)
@@ -93,6 +93,23 @@ local function sinkFor(action,budget)
     return sink
 end
 
+-- Only the pre-effect reservation is reversible. Once vanilla has touched
+-- soap, clothing or the character, seal the action even on an exception: a
+-- refund/retry could otherwise create free cleaning or duplicate bandages.
+local function reserveWater(fluid,amount)
+    local snapshot=FluidContainer.CreateContainer()
+    snapshot:setCapacity(fluid:getCapacity())
+    snapshot:copyFluidsFrom(fluid)
+    local before=fluid:getAmount()
+    local ok=pcall(function()
+        fluid:removeFluid(amount)
+        assert(math.abs(before-fluid:getAmount()-amount)<=0.0001,"water debit mismatch")
+    end)
+    if not ok then fluid:copyFluidsFrom(snapshot) end
+    FluidContainer.DisposeContainer(snapshot)
+    return ok
+end
+
 local function completeWash(action,nativeComplete,body)
     if isClient() or action.vlsCommitted then return false end
     local vehicle,part,tank,fluid=resolveAction(action)
@@ -102,11 +119,9 @@ local function completeWash(action,nativeComplete,body)
     local required=body and math.min(ISWashYourself.GetRequiredWater(action.character),
         math.floor(fluid:getAmount())) or ISWashClothing.GetRequiredWater(action.item)
     if required<=0 or required>fluid:getAmount() then return false end
-    local before=fluid:getAmount()
-    fluid:removeFluid(required)
-    if math.abs(before-fluid:getAmount()-required)>0.0001 then
+    if not reserveWater(fluid,required) then
         syncTank(vehicle,part,tank)
-        print("[VLS 3.8.5] wash rejected: native water debit mismatch")
+        print("[VLS 3.8.6] wash rejected: native water debit mismatch")
         return false
     end
     action.vlsCommitted=true
@@ -117,7 +132,7 @@ local function completeWash(action,nativeComplete,body)
     action.sink=oldSink
     syncTank(vehicle,part,tank)
     if not ok then
-        print("[VLS 3.8.5] native wash failed after water debit: "..tostring(result))
+        print("[VLS 3.8.6] native wash failed after water debit: "..tostring(result))
         return false
     end
     return result==true
@@ -277,7 +292,7 @@ function VLSTakeWaterFromTank:new(character,vehicleId,partId,tankId,item)
     local vehicle,_,_,fluid=W.resolve(character,vehicleId,partId,tankId,true)
     if not vehicle then o.maxTime=1;o.waterUnit=0;return o end
     o.waterObject=vehicle
-    o.waterTaintedCL=false
+    o.waterTaintedCL=fluid:contains(Fluid.TaintedWater)
     local available=fluid:getAmount()
     if item and item:getFluidContainer() then
         o.startUsedAmount=item:getFluidContainer():getAmount()
@@ -325,18 +340,21 @@ function VLSCleanBandageFromTank:complete()
     if isClient() or self.vlsCommitted then return false end
     local vehicle,part,tank,fluid=resolveAction(self)
     if not vehicle or fluid:getAmount()<1 or self.item:getContainer()~=self.character:getInventory() then return false end
+    if not reserveWater(fluid,1) then
+        syncTank(vehicle,part,tank)
+        return false
+    end
     self.vlsCommitted=true
-    local primary=self.character:isPrimaryHandItem(self.item)
-    local secondary=self.character:isSecondaryHandItem(self.item)
-    self.character:getInventory():Remove(self.item)
-    local item=self.character:getInventory():AddItem(self.result)
-    sendReplaceItemInContainer(self.character:getInventory(),self.item,item)
-    if primary then self.character:setPrimaryHandItem(item) end
-    if secondary then self.character:setSecondaryHandItem(item) end
-    sendEquip(self.character)
-    fluid:removeFluid(1)
+    local original=self.waterObject
+    self.waterObject=sinkFor(self,1)
+    local ok,result=pcall(ISCleanBandage.complete,self)
+    self.waterObject=original
     syncTank(vehicle,part,tank)
-    return true
+    if not ok then
+        print("[VLS] native bandage completion failed after reserved water: "..tostring(result))
+        return false
+    end
+    return result==true
 end
 function VLSCleanBandageFromTank:new(character,vehicleId,partId,tankId,item,recipe)
     local o=ISBaseTimedAction.new(self,character)

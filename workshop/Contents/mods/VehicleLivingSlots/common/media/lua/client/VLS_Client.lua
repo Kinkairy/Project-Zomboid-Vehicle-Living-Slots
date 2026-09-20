@@ -227,18 +227,20 @@ end
 -- Both context-menu presentation and execution create HandcraftLogic. Bind the
 -- surface at creation for tooltips; only the execution path needs a proxy for
 -- the original function's explicit findCraftSurface call. Restore even on error.
-local function withVLSHandcraftLogic(callback, useProxy, ...)
+local function withVLSHandcraftLogic(callback, useProxy, playerObj, ...)
     local realClass = HandcraftLogic
     HandcraftLogic = setmetatable({
         new = function(character, craftBench, isoObject)
             local logic = realClass.new(character, craftBench, isoObject)
+            if character ~= playerObj then return logic end
+            local surface
             if not craftBench and not isoObject then
-                local surface = VLS.getVehicleGenericCraftSurface(character)
+                surface = VLS.getVehicleGenericCraftSurface(character)
                 if surface then
                     logic:setIsoObject(logic:findCraftSurface(character, 2) or surface)
                 end
             end
-            return useProxy and makeVLSHandcraftLogicProxy(logic) or logic
+            return useProxy and surface and makeVLSHandcraftLogicProxy(logic) or logic
         end,
     }, { __index = realClass })
     local results = { pcall(callback, ...) }
@@ -328,7 +330,7 @@ local function installGenericCraftSurfaceClientHooks()
                     all, eatPercentage)
             end
 
-            return withVLSHandcraftLogic(previousOnNewCraft, true,
+            return withVLSHandcraftLogic(previousOnNewCraft, true, playerObj,
                 selectedItem, recipe, playerNum, all, eatPercentage)
         end
 
@@ -349,7 +351,7 @@ local function installGenericCraftSurfaceClientHooks()
             end
             local containers = ISInventoryPaneContextMenu.getContainers(playerObj)
             local recipes = getVLSContextRecipes(selectedItem, playerObj, recipeList, containers)
-            return withVLSHandcraftLogic(previous, false,
+            return withVLSHandcraftLogic(previous, false, playerObj,
                 selectedItem, context, recipes, playerNum, containerList)
         end
         ISInventoryPaneContextMenu.addNewCraftingDynamicalContextMenu =
@@ -641,7 +643,7 @@ local function onVLSMicrowaveJoypadDown(ui, button, joypadData)
         -- Re-evaluate power before invoking the SAME callback as the mouse.
         -- Never force-enable the button and never dispatch through the knob.
         if ui.updateButtons then ui:updateButtons() end
-        print("[VLS 6ceb908-fix1] microwave A received; enabled="
+        print("[VLS 3.8.6] microwave A received; enabled="
             .. tostring(ui.ok and ui.ok.enable))
         if ui.ok then ui.ok:forceClick() end
         return
@@ -758,7 +760,7 @@ local function openMicrowaveSettings(playerObj, vehicle, part)
     ui.close.onclick = onVLSMicrowaveClick
     ui.onJoypadDown = onVLSMicrowaveJoypadDown
     ui:addToUIManager()
-    print("[VLS 6ceb908-fix1] microwave window uses direct A/B dispatch")
+    print("[VLS 3.8.6] microwave window uses direct A/B dispatch")
 
     if JoypadState.players[playerNum + 1] then
         ui.prevFocus = JoypadState.players[playerNum + 1].focus
@@ -875,77 +877,29 @@ end
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
 
-local fluidRequestSequence = 0
-local FLUID_REQUEST_TIMEOUT_MS = 15000
-
-local function finishVLSFluidRequest(ui, status)
-    ui.vlsVehicleRequest = nil
-    ui.panelLeft:setPanelLocked(false)
-    ui.panelRight:setPanelLocked(false)
-    -- Let vanilla re-evaluate available amounts; do not force-enable TRANSFER.
-    ui.disableTransfer = false
-    ui.disableSwap = false
-    ui:validatePanel()
-    if status and status ~= "ok" then
-        HaloTextHelper.addBadText(ui.player, getText(status == "timeout"
-            and "IGUI_VLSFluidRequestTimeout" or "IGUI_VLSFluidRequestFailed"))
-    end
-end
-
-local function onVLSFluidTransferResult(args)
-    if type(args) ~= "table" or type(args.requestId) ~= "string" then return end
-    for playerNum = 0, 3 do
-        local state = ISFluidTransferUI.players[playerNum]
-        local ui = state and state.instance
-        local pending = ui and ui.vlsVehicleRequest
-        if pending and pending.id == args.requestId
-                and pending.vehicle == args.vehicle then
-            if args.status ~= "ok" then
-                print("[VLS 6ceb908-fix1] water rejected: " .. tostring(args.reason or args.status))
-            end
-            finishVLSFluidRequest(ui, args.status)
-            return
-        end
-    end
-end
-
-VLS.onFluidTransferResult = onVLSFluidTransferResult
-
 local function onVLSFluidTransferClick(ui, button)
-    if button.internal ~= "TRANSFER" then
+    if button.internal ~= "TRANSFER" then return vanillaFluidOnButton(ui, button) end
+    local source, target = ui.panelLeft.container, ui.panelRight.container
+    if not source or not target then return end
+    if not source.vlsVehicleFluidEndpoint and not target.vlsVehicleFluidEndpoint then
         return vanillaFluidOnButton(ui, button)
     end
-    local leftFluid = ui.panelLeft:getContainer()
-    local rightFluid = ui.panelRight:getContainer()
-    if ui.disableTransfer or not leftFluid or not rightFluid
-            or not FluidContainer.CanTransfer(leftFluid, rightFluid) then return end
-
-    local leftIsVehicle = ui.panelLeft.container.vlsVehicleFluidEndpoint == true
-    local rightIsVehicle = ui.panelRight.container.vlsVehicleFluidEndpoint == true
-    if not leftIsVehicle and not rightIsVehicle then
-        -- Two carried containers are a wholly vanilla operation.
-        return vanillaFluidOnButton(ui, button)
-    end
-
-    local args = VLS.makeVehicleFluidTransferRequest(ui.player,
-        ui.panelLeft.container, ui.panelRight.container, ui.info.transferring)
-    if not args then return end
-
-    if ui.vlsVehicleRequest then return end
-    fluidRequestSequence = fluidRequestSequence + 1
-    args.requestId = tostring(getTimestampMs()) .. ":"
-        .. tostring(ui.player:getPlayerNum()) .. ":" .. tostring(fluidRequestSequence)
-    ui.vlsVehicleRequest = { id = args.requestId, vehicle = args.vehicle,
-        started = getTimestampMs() }
+    if ui.disableTransfer then return end
+    local request = VLS.makeVehicleFluidTransferRequest(ui.player, source,
+        target, ui.info.transferring)
+    if not request then return end
+    local action = VLSVehicleFluidTransferAction:new(ui.player, request.vehicle,
+        request.source.part or "", request.source.item,
+        request.target.part or "", request.target.item, request.amount)
+    if not action:isValid() then return end
+    -- The existing panel already tracks native actions, progress and unlocks
+    -- on completion/cancel. No second request/ACK/timeout state machine.
+    ui.action = action
+    ISTimedActionQueue.add(action)
     ui.slider:setCurrentValue(0)
     ui.disableTransfer = true
-    ui.disableSwap = true
-    ui.btnTransfer:setEnable(false)
-    ui.btnSwap:setEnable(false)
     ui.panelLeft:setPanelLocked(true)
     ui.panelRight:setPanelLocked(true)
-    -- Lock BEFORE dispatch: single-player can reply synchronously.
-    sendApplianceCommand(ui.player, "transferWater", args)
 end
 
 local function refreshVLSFluidPanelEndpoint(ui, panel)
@@ -965,20 +919,7 @@ local function updateVLSFluidTransfer(ui)
     refreshVLSFluidPanelEndpoint(ui, ui.panelLeft)
     refreshVLSFluidPanelEndpoint(ui, ui.panelRight)
     vanillaFluidUpdate(ui)
-    local request = ui.vlsVehicleRequest
-    if not request then return end
-    local elapsed = getTimestampMs() - request.started
-    if elapsed < 0 or elapsed >= FLUID_REQUEST_TIMEOUT_MS then
-        -- No automatic replay: a timed-out transfer may already have executed.
-        finishVLSFluidRequest(ui, "timeout")
-        return
-    end
-    ui.disableTransfer = true
-    ui.disableSwap = true
-    ui.btnTransfer:setEnable(false)
-    ui.btnSwap:setEnable(false)
-    ui.panelLeft:setPanelLocked(true)
-    ui.panelRight:setPanelLocked(true)
+
 end
 
 local function refreshVLSFluidEndpointCatalog(ui)
@@ -1233,15 +1174,9 @@ local function protectCooledFood(item, currentHours, vehicleId, containerId,
         locallyCooledFood[itemId] = state
     end
     local elapsed = math.min(1 / 60, math.max(0, currentHours - state.lastHours))
-    local freezing = state.freezing
-    if freezer and item:canBeFrozen() then
-        freezing = math.min(100, freezing + elapsed / 4 * 100)
-    elseif freezing > 0 then
-        freezing = math.max(0, freezing - elapsed / 3 * 100)
-    end
-    -- Preserve the existing fully-frozen ageFactor=0 balance in this bugfix.
-    local ageFactor = freezing >= 100 and 0 or VLS.getFridgeAgeFactor()
-    item:setAge(state.age + elapsed * VLS.getFoodRotSpeed() / 24 * ageFactor)
+    local age,freezing=VLS.getPoweredFoodProgress(item,state.age,
+        state.freezing,elapsed,freezer)
+    item:setAge(age)
     VLS.preservePoweredFoodHeat(item, state, freezer and 0.1 or 0.2)
     item:setFreezingTime(freezing)
     item:setLastAged(currentHours)
@@ -1504,7 +1439,7 @@ end
 
 local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
         source)
-    if not playerObj or playerObj:getVehicle() or not source
+    if not VLS.isWaterTankShortcutEnabled() or not playerObj or playerObj:getVehicle() or not source
             or VLS.getInstalledWaterTank(vehicle,
                 tankPart:getId()) ~= tank then return end
     if VLS.getWaterTankFillAmount(vehicle, tank, source) <= 0 then return end
@@ -1520,6 +1455,7 @@ local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
 end
 
 local function getFillableWaterInteraction(vehicle, playerObj)
+    if not VLS.isWaterTankShortcutEnabled() then return end
     if not vehicle or vehicle:isEngineStarted() or not vehicle:isStopped()
             or playerObj:DistToProper(vehicle) >= 4 then return nil end
     local tank, part = VLS.getFillableWaterTank(vehicle)
@@ -1579,9 +1515,10 @@ local function showRadialMenuWithVLSSlices(vanillaShowRadialMenu, playerObj)
         return
     end
 
-    local vanillaAddToUIManager = ISRadialMenu.addToUIManager
+    local rawAddToUIManager = rawget(menu, "addToUIManager")
+    local vanillaAddToUIManager = menu.addToUIManager
     local injected = false
-    ISRadialMenu.addToUIManager = function(self, ...)
+    menu.addToUIManager = function(self, ...)
         if self == menu and not injected then
             injected = true
             local sliceOK, sliceErr = pcall(addVLSSlices, self, playerObj)
@@ -1593,7 +1530,7 @@ local function showRadialMenuWithVLSSlices(vanillaShowRadialMenu, playerObj)
     end
 
     local ok, err = pcall(vanillaShowRadialMenu, playerObj)
-    ISRadialMenu.addToUIManager = vanillaAddToUIManager
+    menu.addToUIManager = rawAddToUIManager
     if not ok then error(err) end
 end
 
@@ -1891,4 +1828,4 @@ Events.OnGameStart.Add(RuntimeHookRefresh.onGameStart)
 Events.OnCreatePlayer.Add(RuntimeHookRefresh.onCreatePlayer)
 installVLSRuntimeHooks()
 
-print("[VLS 6ceb908-fix1] client loaded; current commands only")
+print("[VLS 3.8.6] client loaded; current commands only")

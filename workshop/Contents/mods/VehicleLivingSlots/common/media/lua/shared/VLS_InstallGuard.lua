@@ -10,138 +10,44 @@ local function isVLSTelevision(part, item)
         and item:getDeviceData() ~= nil
 end
 
--- Vanilla vehicle-part installation creates DeviceData on the destination for
--- every Radio item. A television is a Radio in B42, so using the vanilla
--- completion unchanged makes the rear television appear as an extra speaker
--- in the untouched front-seat radial menu. These two actions retain vanilla
--- mechanics success, failure, XP, inventory, sound and transmission behavior,
--- but keep television DeviceData exclusively on VLS's itemless companion part.
+-- B42.20 treats every Radio item (including TVs) as a vehicle speaker.
+-- Delegate the whole transaction to vanilla and skip only that one type branch
+-- for this exact TV. The one-shot predicate restores itself BEFORE part callbacks
+-- run, so TV companion setup and every other instanceof call stay native.
+-- The outer pcall also restores it if vanilla fails before reaching the branch.
+local function completeTelevision(action,item,nativeComplete)
+    local original=instanceof
+    local skipSpeaker
+    skipSpeaker=function(object,kind)
+        if object==item and kind=="Radio" then
+            instanceof=original
+            return false
+        end
+        return original(object,kind)
+    end
+    instanceof=skipSpeaker
+    local ok,result=pcall(nativeComplete,action)
+    if instanceof==skipSpeaker then instanceof=original end
+    if not ok then error(result,0) end
+    return result
+end
+
 VLSTelevisionInstallVehiclePart =
     ISInstallVehiclePart:derive("VLSTelevisionInstallVehiclePart")
-
 function VLSTelevisionInstallVehiclePart:complete()
-    if not VLS.isInstallationEnabled(self.part, self.item) then return false end
-    if self.item == nil then return false end
-    if not self.vehicle then
-        print("no such vehicle id=", self.vehicle)
-        return false
-    end
-    if not self.part then
-        print("no such part ", self.part)
-        return false
-    end
-
-    self.item:setJobDelta(0)
-    self.character:removeFromHands(self.item)
-    self.character:getInventory():DoRemoveItem(self.item)
-    sendRemoveItemFromContainer(self.character:getInventory(), self.item)
-
-    local perksTable = VehicleUtils.getPerksTableForChr(
-        self.part:getTable("install").skills, self.character)
-    local keyvalues = self.part:getTable("install")
-    local success, failure = VehicleUtils.calculateInstallationSuccess(
-        keyvalues.skills, self.character, perksTable)
-    if not instanceof(self.item, "InventoryItem") then
-        print("item is nil")
-        return false
-    end
-
-    if ZombRand(100) < success then
-        self.part:setInventoryItem(self.item,
-            self.character:getPerkLevel(Perks.Mechanics))
-        local tbl = self.part:getTable("install")
-        if tbl and tbl.complete then
-            VehicleUtils.callLua(tbl.complete, self.vehicle, self.part)
-        end
-        self.vehicle:transmitPartItem(self.part)
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = true })
-        self.character:addMechanicsItem(
-            self.item:getID() .. self.vehicle:getMechanicalID() .. "1",
-            self.part, getGameTime():getCalender():getTimeInMillis())
-    elseif ZombRand(100) < failure then
-        self.item:setCondition(self.item:getCondition() - ZombRand(5, 10))
-        self.character:getInventory():AddItem(self.item)
-        sendAddItemToContainer(self.character:getInventory(), self.item)
-        playServerSound("PZ_MetalSnap", self.character:getCurrentSquare())
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = false })
-        addXp(self.character, Perks.Mechanics, 1)
-    else
-        self.character:getInventory():AddItem(self.item)
-        sendAddItemToContainer(self.character:getInventory(), self.item)
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = false })
-        addXp(self.character, Perks.Mechanics, 1)
-    end
-    return true
+    if not isVLSTelevision(self.part,self.item)
+            or not VLS.isInstallationEnabled(self.part,self.item) then return false end
+    return completeTelevision(self,self.item,ISInstallVehiclePart.complete)
 end
 
 VLSTelevisionUninstallVehiclePart =
     ISUninstallVehiclePart:derive("VLSTelevisionUninstallVehiclePart")
-
 function VLSTelevisionUninstallVehiclePart:complete()
-    if not self.vehicle then
-        print("no such vehicle id=", self.vehicle)
-        return false
-    end
-    if not self.part then
-        print("no such part " .. tostring(self.part))
-        return false
-    end
-
-    local perksTable = VehicleUtils.getPerksTableForChr(
-        self.part:getTable("install").skills, self.character)
-    local keyvalues = self.part:getTable("install")
-    local success, failure = VehicleUtils.calculateInstallationSuccess(
-        keyvalues.skills, self.character, perksTable)
-    local item = self.part:getInventoryItem()
-    if not item then
-        print("part already uninstalled ", self.part)
-        return false
-    end
-
-    -- Copy the live companion state back to the portable TV. Never create or
-    -- read DeviceData on the universal living-space part.
-    VLS.copyTelevisionStateToItem(self.part, item)
-
-    if ZombRand(100) < success then
-        item:setItemCapacity(self.part:getContainerContentAmount())
-        self.part:setInventoryItem(nil)
-        local tbl = self.part:getTable("uninstall")
-        if tbl and tbl.complete then
-            VehicleUtils.callLua(tbl.complete, self.vehicle, self.part, item)
-        end
-        self.vehicle:transmitPartItem(self.part)
-        if self.character:getInventory():hasRoomFor(self.character, item) then
-            self.character:getInventory():AddItem(item)
-            sendAddItemToContainer(self.character:getInventory(), item)
-        else
-            local square = self.character:getCurrentSquare()
-            local dropX, dropY, dropZ = ISTransferAction.GetDropItemOffset(
-                self.character, square, item)
-            self.character:getCurrentSquare():AddWorldInventoryItem(
-                item, dropX, dropY, dropZ)
-            if not isServer() then ISInventoryPage.renderDirty = true end
-        end
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = true })
-        self.character:addMechanicsItem(
-            item:getID() .. self.vehicle:getMechanicalID() .. "0",
-            self.part, getGameTime():getCalender():getTimeInMillis())
-    elseif ZombRand(100) < failure then
-        self.part:setCondition(self.part:getCondition() - ZombRand(5, 10))
-        self.vehicle:transmitPartCondition(self.part)
-        playServerSound("PZ_MetalSnap", self.character:getCurrentSquare())
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = false })
-        addXp(self.character, Perks.Mechanics, 1)
-    else
-        self.character:sendObjectChange(IsoObjectChange.MECHANIC_ACTION_DONE,
-            { success = false })
-        addXp(self.character, Perks.Mechanics, 1)
-    end
-    return true
+    local item=self.part and self.part:getInventoryItem()
+    if not isVLSTelevision(self.part,item)
+            or not VLS.canUninstallManagedPart(self.part) then return false end
+    VLS.copyTelevisionStateToItem(self.part,item)
+    return completeTelevision(self,item,ISUninstallVehiclePart.complete)
 end
 
 if not VLS.installGuardApplied then

@@ -1,4 +1,4 @@
--- lua5.1 tests/test_roof_capacity.lua [repo root]
+-- lua5.1 ../../tests/vehicle-living-slots/test_roof_capacity.lua [repo root]
 -- Loads actual VLS Lua and scripts. Native engine objects below are mocks.
 local root=arg[1] or "."
 local base=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/"
@@ -137,6 +137,26 @@ test("all native template capacities agree with Lua targets; small chests unchan
         eq(tonumber(extract(text,"part VLSRoofSmallChest%s*{"):match("capacity%s*=%s*(%d+)")),10)
     end
     assert(read(base.."scripts/VLS_RoofRackItem.txt"):find("MaxCapacity%s*=%s*400"))
+end)
+test("red and green roof cans share installation gates with distinct native models",function()
+    VLS.isInstallationEnabled=function()return true end
+    VLS.resolveEquipmentType=function(item)return item:getFullType()end
+    for i=1,3 do
+        local vehicle=fixture("Base.StepVan",400)
+        local installed,visible=nil,{}
+        local part={getId=function()return "VLSRoofPetrol"..i end,getVehicle=function()return vehicle end,
+            getInventoryItem=function()return installed end,setModelVisible=function(_,id,value)visible[id]=value end}
+        local player={getInventory=function()return {contains=function()return true end}end}
+        for _,kind in ipairs({"Base.PetrolCan","Base.JerryCan","Base.WaterBottle"})do
+            local item={getFullType=function()return kind end}
+            eq(not not R.validateInstall(player,part,item,false),kind~="Base.WaterBottle")
+            installed=item;R.SyncPetrolVisual(vehicle,part)
+            eq(visible["PetrolCan"..i],kind=="Base.PetrolCan")
+            eq(visible["JerryCan"..i],kind=="Base.JerryCan")
+            installed=nil
+        end
+        R.SyncPetrolVisual(vehicle,part);eq(visible["PetrolCan"..i],false);eq(visible["JerryCan"..i],false)
+    end
 end)
 print(string.format("RESULT roof-capacity tests=%d failures=%d variants=%d (mocked native objects)",n,fail,variants))
 if fail>0 then os.exit(1) end

@@ -43,7 +43,7 @@ function WaterSourceAdapter:setPipedFuelAmount(units)
 end
 
 function VLSFillVehicleWaterTankAction:isValid()
-    if not self.character or self.character:getVehicle()
+    if not VLS.isWaterTankShortcutEnabled() or not self.character or self.character:getVehicle()
             or not self.vehicle or not self.vehicle:isStopped()
             or not self.source or not self.source:getSquare() then return false end
     local tank, part = VLS.getInstalledWaterTank(self.vehicle,
@@ -57,11 +57,16 @@ function VLSFillVehicleWaterTankAction:isValid()
 end
 
 VLSFillVehicleWaterTankAction.waitToStart = ISRefuelFromGasPump.waitToStart
-VLSFillVehicleWaterTankAction.update = ISRefuelFromGasPump.update
+function VLSFillVehicleWaterTankAction:update()
+    if VLS.isWaterTankShortcutEnabled() then return ISRefuelFromGasPump.update(self) end
+end
 VLSFillVehicleWaterTankAction.start = ISRefuelFromGasPump.start
-VLSFillVehicleWaterTankAction.serverStop = ISRefuelFromGasPump.serverStop
+function VLSFillVehicleWaterTankAction:serverStop()
+    if VLS.isWaterTankShortcutEnabled() then return ISRefuelFromGasPump.serverStop(self) end
+end
 
 function VLSFillVehicleWaterTankAction:complete()
+    if not VLS.isWaterTankShortcutEnabled() then return false end
     self.fuelStation:transferTo(self.fuelStation.available)
     return ISRefuelFromGasPump.complete(self)
 end

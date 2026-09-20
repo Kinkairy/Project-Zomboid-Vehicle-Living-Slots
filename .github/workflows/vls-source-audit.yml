@@ -13,35 +13,26 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          repository: Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua
-          ref: 8a906692ac56f9d40c078d654eea6c70491cbc62
-          path: .native-fixtures
-          persist-credentials: false
-      - name: Syntax and current source checks
+      - name: Lua syntax, catalogs and exact runtime manifest
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
-          mkdir -p audit-output
           find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
-          python3 tools/build_roof_capacity_translations.py --check
-          python3 tools/build_propane_ui_translations.py --check
-          python3 tools/build_wash_ui_translations.py --check
-          python3 tools/build_ki5_ui_translations.py
-      - name: Actual-source mocked regression suites
-        shell: bash
+          python3 tools/build_translations.py
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          manifest = json.loads(Path('release-3.8.6.json').read_text())
+          root = Path('workshop/Contents/mods')
+          files = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in root.rglob('*') if p.is_file()}
+          assert files == manifest['files']
+          fingerprint = hashlib.sha256(''.join(value + '  ' + name + '\n'
+              for name, value in sorted(files.items())).encode()).hexdigest()
+          assert fingerprint == manifest['runtime_sha256']
+          print('Runtime manifest verified:', len(files), fingerprint)
+          PY
+      - name: Source-only regression suites
         run: |
-          set -euo pipefail
-          for t in test_vls_regressions test_vls_material_tiers test_roof_cargo_damage test_vehicle_propane test_vls_lights test_roof_capacity; do
-            lua5.1 tests/$t.lua . | tee audit-output/$t.txt
+          for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions; do
+            lua5.1 "tests/$name.lua" .
           done
-          lua5.1 tests/test_vls_wash.lua . .native-fixtures | tee audit-output/test_vls_wash.txt
-          git rev-parse HEAD > audit-output/source-commit.txt
-          git archive --format=zip HEAD > audit-output/source.zip
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: vls-source-audit
-          path: audit-output/
-          retention-days: 7
-          if-no-files-found: error

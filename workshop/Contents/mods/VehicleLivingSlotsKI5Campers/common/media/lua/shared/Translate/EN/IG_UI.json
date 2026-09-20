@@ -1,10 +1,18 @@
 {
-    "IGUI_VehiclePartCatVLSLiving": "Living Equipment",
-    "IGUI_VehiclePartVLSKI5CamperSlot1": "Living Space 1",
-    "IGUI_VehiclePartVLSKI5CamperSlot2": "Living Space 2",
-    "IGUI_VehiclePartVLSKI5CamperSlot3": "Living Space 3",
-    "IGUI_VehiclePartVLSKI5CamperSlot4": "Living Space 4",
-    "IGUI_VehiclePartVLSKI5CamperWaterTank1": "Water Tank",
-    "IGUI_VehiclePartVLSKI5CamperWaterTank2": "Auxiliary Water Tank",
-    "IGUI_VLSKI5RefillBlowTorch": "Refill blowtorch"
+  "IGUI_VehiclePartCatVLSLiving": "Living Equipment",
+  "IGUI_VehiclePartVLSKI5CamperSlot1": "Space",
+  "IGUI_VehiclePartVLSKI5CamperSlot2": "Space",
+  "IGUI_VehiclePartVLSKI5CamperSlot3": "Space",
+  "IGUI_VehiclePartVLSKI5CamperSlot4": "Space",
+  "IGUI_VehiclePartVLSKI5CamperWaterTank1": "Water Tank",
+  "IGUI_VehiclePartVLSKI5CamperWaterTank2": "Auxiliary Water Tank",
+  "IGUI_VLSKI5RefillBlowTorch": "Refill blowtorch",
+  "IGUI_VLSKI5SpaceFront": "Front Space",
+  "IGUI_VLSKI5SpaceMiddle": "Middle Space",
+  "IGUI_VLSKI5SpaceRear": "Rear Space",
+  "IGUI_VLSKI5SpaceFrontLeft": "Front Left Space",
+  "IGUI_VLSKI5SpaceMiddleLeft": "Middle Left Space",
+  "IGUI_VLSKI5SpaceRearLeft": "Rear Left Space",
+  "IGUI_VLSKI5SpaceFrontRight": "Front Right Space",
+  "IGUI_VLSKI5SpaceMiddleRight": "Middle Right Space"
 }

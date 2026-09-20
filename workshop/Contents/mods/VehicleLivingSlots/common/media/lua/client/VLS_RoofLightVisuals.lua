@@ -18,4 +18,6 @@ local function onTick()
     ticks=0
     L.RefreshVisuals()
 end
-Events.OnTick.Add(onTick)
+if L.visualTick and Events.OnTick.Remove then Events.OnTick.Remove(L.visualTick) end
+L.visualTick = onTick
+Events.OnTick.Add(L.visualTick)

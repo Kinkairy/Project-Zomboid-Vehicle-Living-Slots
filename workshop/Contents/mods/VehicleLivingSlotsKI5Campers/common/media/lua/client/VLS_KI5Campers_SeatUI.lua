@@ -6,6 +6,8 @@ local KI5_CAMPERS = {
     ["Base.Trailer87Scamp16"] = true,
     ["Base.Trailer61Bambi16"] = true,
     ["Base.Trailer54FlyingCloud22"] = true,
+    ["Base.Trailer61Airflyte"] = true,
+    ["Base.Trailer61Astrodome"] = true,
 }
 
 local FLYING_CLOUD = "Base.Trailer54FlyingCloud22"
@@ -18,6 +20,15 @@ local LIVING_PASSENGER_PREFIX = "VLSKI5Space"
 local FAKE_PASSENGER = "DAMNFakeSeat"
 local SEAT_WIDTH = 41
 local SEAT_HEIGHT = 59
+-- Display coordinates only. The native passenger positions still govern
+-- entering, switching seats and character placement outside this draw call.
+local SHASTA_LAYOUT = {
+    FrontL={0.62,1.225}, FrontR={-0.62,1.225},
+    RearL={0.62,0.47}, RearR={-0.62,0.47},
+    BackL={-0.62,-1.035}, BackR={-0.62,-1.79},
+    FrontTop={0,1.225},
+    VLSKI5Space1={0.62,-0.28}, VLSKI5Space2={0.62,-1.035}, VLSKI5Space3={0.62,-1.79},
+}
 
 local function isLivingPassenger(passenger)
     if not passenger then return false end
@@ -55,6 +66,21 @@ local function restorePositions(saved)
     for index = #saved, 1, -1 do
         local entry = saved[index]
         entry.offset:set(entry.x, entry.y, entry.z)
+    end
+end
+
+local function fakeSeat(panel,seat)
+    local vehicle=panel.vehicle
+    if not vehicle or not KI5_CAMPERS[vehicle:getScriptName()] or seat==nil then return false end
+    local passenger=vehicle:getScript():getPassenger(seat)
+    return passenger and passenger:getId()==FAKE_PASSENGER or false
+end
+local function sanitizeSelection(panel)
+    if fakeSeat(panel,panel.mouseOverSeat) then panel.mouseOverSeat=nil end
+    if panel.joypadSeat and fakeSeat(panel,panel.joypadSeat-1) then
+        for seat=0,panel.vehicle:getMaxPassengers()-1 do
+            if not fakeSeat(panel,seat) then panel.joypadSeat=seat+1;break end
+        end
     end
 end
 
@@ -162,15 +188,54 @@ if not VLS.ki5CampersSeatUIHookApplied then
         local script = vehicle:getScript()
         local savedPositions = scriptName == FLYING_CLOUD and
             shiftFlyingCloudNativePositions(script) or {}
+        if scriptName=="Base.Trailer61Airflyte" or scriptName=="Base.Trailer61Astrodome" then
+            local scale=self.height*0.7/script:getExtents():z()
+            for id,point in pairs(SHASTA_LAYOUT) do
+                local passenger=getPassengerById(script,id)
+                local position=passenger and passenger:getPositionById("inside")
+                local offset=position and position:getOffset()
+                if offset then
+                    savedPositions[#savedPositions+1]={offset=offset,x=offset:get(0),y=offset:get(1),z=offset:get(2)}
+                    offset:set(point[1],offset:get(1),point[2]+(SeatOffsetY[scriptName] or 0)/scale)
+                end
+            end
+        end
+        -- DAMN's engine placeholder overlaps a real seat. Move only its UI
+        -- position outside the panel while the native renderer runs; restore
+        -- the shared script before any game action can use it.
+        local fake=getPassengerById(script,FAKE_PASSENGER)
+        local position=fake and fake:getPositionById("inside")
+        local offset=position and position:getOffset()
+        if offset then
+            savedPositions[#savedPositions+1]={offset=offset,x=offset:get(0),y=offset:get(1),z=offset:get(2)}
+            offset:set(10000,offset:get(1),10000)
+        end
 
         -- Both drawing and hit-testing borrow the temporary script offsets.
         -- Restore them even when another UI hook makes hit-testing throw.
         local ok, err = pcall(function()
+            sanitizeSelection(self)
             vanillaRender(self)
             preferNativeSeatHit(self, script, scriptName)
+            sanitizeSelection(self)
         end)
         restorePositions(savedPositions)
         if not ok then error(err) end
+    end
+end
+
+if not VLS.ki5FakeSeatUIApplied then
+    VLS.ki5FakeSeatUIApplied=true
+    for _,method in ipairs({"prerender","setVehicle","onJoypadDirUp","onJoypadDirDown","onJoypadDirLeft","onJoypadDirRight"}) do
+        local native=ISVehicleSeatUI[method]
+        if native then
+            ISVehicleSeatUI[method]=function(self,...)
+                if method=="prerender" then sanitizeSelection(self) end
+                local result=native(self,...)
+                sanitizeSelection(self)
+                return result
+            end
+        end
     end
 end
 
@@ -179,6 +244,7 @@ if not VLS.ki5CampersUseSeatDiagnosticApplied then
     local originalUseSeat = ISVehicleSeatUI.useSeat
 
     function ISVehicleSeatUI:useSeat(seat)
+        if fakeSeat(self,seat) then return end
         local vehicle = self.vehicle
         local scriptName = vehicle and vehicle:getScriptName() or nil
         if scriptName and KI5_CAMPERS[scriptName] then

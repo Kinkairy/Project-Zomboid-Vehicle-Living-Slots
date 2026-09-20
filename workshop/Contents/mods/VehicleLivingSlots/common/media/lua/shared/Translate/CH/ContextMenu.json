@@ -1,4 +1,6 @@
 {
-    "ContextMenu_VLSNoAuxPower": "副電瓶沒有電",
-    "ContextMenu_VLSFillWaterTank": "給水箱加水"
+  "ContextMenu_VLSFillWaterTank": "給水箱加水",
+  "ContextMenu_VLSNoAuxPower": "副電瓶沒有電",
+  "ContextMenu_VLSGeneratorConnect": "連接發電機向建築供電",
+  "ContextMenu_VLSGeneratorDisconnect": "斷開供電並收回發電機"
 }

@@ -4,10 +4,9 @@ require "ISUI/ISInventoryPaneContextMenu"
 require "Vehicles/ISUI/ISVehicleMenu"
 require "Vehicles/ISUI/ISVehicleMechanics"
 require "Vehicles/TimedActions/ISPathFindAction"
-require "TimedActions/ISBaseTimedAction"
+require "VLS_PropaneRefillAction"
 require "TimedActions/ISTimedActionQueue"
 
-local REFILL_MOD_ID = VLS.MOD_ID
 
 require "VLS_VehicleMechanicsIcons"
 VLS.registerMechanicsUIProvider("vehiclePropane", {
@@ -36,7 +35,8 @@ local function findNearbyPropaneSource(playerObj)
     if not playerObj or playerObj:getVehicle() then return nil end
     local seen = {}
     local function resolve(vehicle)
-        if not vehicle or seen[vehicle] or not VLS.isSupportedVehicle(vehicle)
+        -- Installed-input resolver covers roof-only vehicles as well as KI5 tanks.
+        if not vehicle or seen[vehicle]
                 or not vehicle:isStopped()
                 or playerObj:DistToProper(vehicle) >= 4 then return nil end
         seen[vehicle] = true
@@ -63,82 +63,6 @@ local function findNearbyPropaneSource(playerObj)
     return nil
 end
 
-VLSRefillBlowTorchFromVehicleAction = ISBaseTimedAction:derive(
-    "VLSRefillBlowTorchFromVehicleAction")
-
-function VLSRefillBlowTorchFromVehicleAction:isValid()
-    local inventory = self.character and self.character:getInventory()
-    local torch = inventory and inventory:getItemWithIDRecursiv(self.torchId)
-    local source, part = VLS.getInstalledPropaneSource(
-        self.vehicle, self.partId, self.tankId)
-    return torch and torch:getFullType() == "Base.BlowTorch"
-        and instanceof(torch, "DrainableComboItem")
-        and torch:getCurrentUsesFloat() < 1 and source and part
-        and not self.character:getVehicle() and self.vehicle:isStopped()
-        and self.character:DistToProper(self.vehicle) < 4
-        and self.vehicle:isInArea(part:getArea(), self.character)
-end
-
-function VLSRefillBlowTorchFromVehicleAction:update()
-    self.character:faceThisObject(self.vehicle)
-    self.character:setMetabolicTarget(Metabolics.LightWork)
-    local torch = self.character:getInventory():getItemWithIDRecursiv(self.torchId)
-    if torch then torch:setJobDelta(self:getJobDelta()) end
-end
-
-function VLSRefillBlowTorchFromVehicleAction:start()
-    self:setActionAnim("Welding")
-    self:setOverrideHandModels("Base.CraftingWeldingTorch",
-        "Base.CraftingWeldingPipe")
-    self.sound = self.character:playSound("CraftWelding")
-end
-
-function VLSRefillBlowTorchFromVehicleAction:stop()
-    local torch = self.character:getInventory():getItemWithIDRecursiv(self.torchId)
-    if torch then torch:setJobDelta(0) end
-    if self.sound and self.character:getEmitter():isPlaying(self.sound) then
-        self.character:stopOrTriggerSound(self.sound)
-    end
-    ISBaseTimedAction.stop(self)
-end
-
-local function submitRefill(character, vehicle, partId, torchId, tankId)
-    local args = { vehicle = vehicle:getId(), part = partId,
-        torch = torchId, tank = tankId }
-    if isClient() then
-        sendClientCommand(character, REFILL_MOD_ID, "refillBlowTorch", args)
-    elseif VLS.PropaneServer and VLS.PropaneServer.refillBlowTorch then
-        VLS.PropaneServer.refillBlowTorch(character, args)
-    end
-end
-
-function VLSRefillBlowTorchFromVehicleAction:perform()
-    local torch = self.character:getInventory():getItemWithIDRecursiv(self.torchId)
-    if torch then torch:setJobDelta(0) end
-    if self.sound and self.character:getEmitter():isPlaying(self.sound) then
-        self.character:stopOrTriggerSound(self.sound)
-    end
-    if self:isValid() then
-        submitRefill(self.character, self.vehicle, self.partId, self.torchId, self.tankId)
-    end
-    ISBaseTimedAction.perform(self)
-end
-
-function VLSRefillBlowTorchFromVehicleAction:new(character, vehicle, part,
-        torch)
-    local o = ISBaseTimedAction.new(self, character)
-    o.vehicle = vehicle
-    o.partId = part:getId()
-    local source = part:getInventoryItem()
-    o.tankId = source and source:getID() or -1
-    o.torchId = torch:getID()
-    o.stopOnWalk = true
-    o.stopOnRun = true
-    o.maxTime = 50
-    o.jobType = getText("IGUI_VLSRefillBlowTorch")
-    return o
-end
-
 local function queueVehicleRefill(playerObj, vehicle, part, torch)
     local path = ISPathFindAction:pathToVehicleArea(playerObj, vehicle,
         part:getArea())
@@ -148,7 +72,8 @@ local function queueVehicleRefill(playerObj, vehicle, part, torch)
     end, playerObj)
     ISTimedActionQueue.add(path)
     ISTimedActionQueue.add(VLSRefillBlowTorchFromVehicleAction:new(
-        playerObj, vehicle, part, torch))
+        playerObj, vehicle:getId(), part:getId(), torch:getID(),
+        part:getInventoryItem():getID()))
 end
 
 local function addVehiclePropaneRefillOption(playerNum, context, items)
@@ -157,7 +82,7 @@ local function addVehiclePropaneRefillOption(playerNum, context, items)
     if not torch then return end
     local vehicle, _, part = findNearbyPropaneSource(playerObj)
     if not part then return end
-    context:addOption(getText("IGUI_VLSRefillBlowTorch"), playerObj,
+    context:addOption(Translator.getRecipeName("RefillBlowTorch"), playerObj,
         queueVehicleRefill, vehicle, part, torch)
 end
 

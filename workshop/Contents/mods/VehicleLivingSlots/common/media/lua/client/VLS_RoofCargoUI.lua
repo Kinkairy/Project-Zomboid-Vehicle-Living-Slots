@@ -13,6 +13,8 @@ ContainerButtonIcons.VLSRoofSmallChest=VLS.getMechanicsPreviewTexture("Base.Mov_
 local function itemName(part,item)
     if R.lamps[part:getId()] then return getText("IGUI_VehiclePart"..part:getId()) end
     if part:getId()=="VLSRoofSmallChest" then return Translator.getMoveableDisplayName("Small Chest") end
+    -- Native inventory naming includes the fluid container empty/full state.
+    if part:getId():match("^VLSRoofPetrol[123]$") then return item:getName() end
     return getItemName(item:getFullType())
 end
 function R.displayName(part)

@@ -1,4 +1,4 @@
--- Run with Lua 5.1+: lua tests/test_vls_regressions.lua [repository root]
+-- Run with Lua 5.1+: lua ../../tests/vehicle-living-slots/test_vls_regressions.lua [repository root]
 -- Mocks test Lua contracts, not Project Zomboid's Java engine or gameplay.
 local root=arg[1] or "."
 local base=root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/"
@@ -24,55 +24,14 @@ test("profile registration remains 2/3/3/4 slots",function()
     eq(#V.vehicleProfiles["Base.Trailer61Bambi16"].universalParts,3)
     eq(#V.vehicleProfiles["Base.Trailer54FlyingCloud22"].universalParts,4)
 end)
--- Reject malformed commands BEFORE Java-like lookup or any state mutation.
-isClient=function() return false end
-local commandHook
-Events={OnClientCommand={Add=function(fn) commandHook=fn end}}
-instanceof=function(item,name) return name=="DrainableComboItem" and item.drainable end
-local calls=0
-local charge,gas=0.25,10000
-local torch={drainable=true,getFullType=function() return "Base.BlowTorch" end,getMaxUses=function() return 10 end,getCurrentUsesFloat=function() return charge end,setCurrentUsesFloat=function(_,v) charge=v end,syncItemFields=noop}
-local propane={getID=function() return 77 end,getCurrentUses=function() return gas end,setCurrentUses=function(_,v) gas=v end,syncItemFields=noop}
-local part={getId=function() return "DAMNPropaneTankOne" end,getArea=function() return "Tank" end}
-local stopped,atArea,supported,inVehicle,distance=true,true,true,false,1
-local vehicle={isStopped=function() return stopped end,isInArea=function() return atArea end,transmitPartUsedDelta=noop}
-getVehicleById=function(id) calls=calls+1; assert(type(id)=="number" and id==id and id==math.floor(id) and math.abs(id)<math.huge,"invalid Java vehicle ID"); if id==42 then return vehicle end end
-local inventory={getItemWithIDRecursiv=function(_,id) assert(type(id)=="number" and id==id and id==math.floor(id) and math.abs(id)<math.huge,"invalid Java item ID"); if id==7 then return torch end end}
-local player={getVehicle=function() return inVehicle and vehicle or nil end,getInventory=function() return inventory end,DistToProper=function() return distance end}
-V.isSupportedVehicle=function() return supported end
-V.getInstalledPropaneSource=function(_,pid) if pid=="DAMNPropaneTankOne" then return propane,part end end
-dofile(root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_PropaneServer.lua")
-local function valid() return {vehicle=42,part="DAMNPropaneTankOne",torch=7,tank=77} end
-local invalid={false,true,1,"invalid",{}, {vehicle={},part="DAMNPropaneTankOne",torch=7}, {vehicle=42,part={},torch=7}}
-for _,field in ipairs({"vehicle","torch"}) do
-    for _,value in ipairs({true,{},"42",0/0,math.huge,-math.huge,1.5}) do
-        local p=valid();p[field]=value;invalid[#invalid+1]=p
-    end
-end
-local missing=valid();missing.torch=nil;invalid[#invalid+1]=missing
-local empty=valid();empty.part="";invalid[#invalid+1]=empty
-for i,args in ipairs(invalid) do
-    test("invalid refill packet "..i.." has no lookup/debit",function()
-        calls=0;charge=0.25;gas=10000
-        eq(V.PropaneServer.refillBlowTorch(player,args),false)
-        eq(calls,0);eq(charge,0.25);eq(gas,10000)
-    end)
-end
-test("nil refill packet rejected",function() eq(V.PropaneServer.refillBlowTorch(player,nil),false) end)
-test("dispatcher rejects malformed refill without throwing",function() commandHook("VehicleLivingSlots","refillBlowTorch",player,false) end)
-test("valid refill preserves original 70:1 conversion",function()
-    charge=0.25;gas=10000;eq(V.PropaneServer.refillBlowTorch(player,valid()),true);eq(charge,1);eq(gas,9475)
+test("new Shasta profiles retain battery, dual water and three slots",function()
+ for _,name in ipairs({"Trailer61Airflyte","Trailer61Astrodome"})do
+  local p=V.vehicleProfiles["Base."..name]
+  eq(#p.universalParts,3);eq(#p.spacePassengers,3);eq(p.auxBatteryPartId,"Battery")
+  eq(#p.waterTankParts,2);eq(#p.propaneTankParts,2)
+ end
 end)
-test("full torch does not consume propane",function() eq(V.PropaneServer.refillBlowTorch(player,valid()),false);eq(gas,9475) end)
-test("limited propane still partially refills",function() charge=0;gas=70;eq(V.PropaneServer.refillBlowTorch(player,valid()),true);eq(charge,0.1);eq(gas,0) end)
-for _,condition in ipairs({"moving","inside","far","wrong area","unsupported","missing torch","unknown vehicle"}) do
-    test(condition.." rejected",function()
-        stopped=true;inVehicle=false;distance=1;atArea=true;supported=true;charge=0;gas=10000
-        local args=valid()
-        if condition=="moving" then stopped=false elseif condition=="inside" then inVehicle=true elseif condition=="far" then distance=5 elseif condition=="wrong area" then atArea=false elseif condition=="unsupported" then supported=false elseif condition=="missing torch" then args.torch=999 elseif condition=="unknown vehicle" then args.vehicle=999 end
-        eq(V.PropaneServer.refillBlowTorch(player,args),false);eq(charge,0);eq(gas,10000)
-    end)
-end
+-- Refill action network/ownership cases are in test_vehicle_propane.lua.
 -- Seat renderer temporarily changes shared Java script offsets; always unwind.
 local offsets={}
 local function vector(x,y,z)

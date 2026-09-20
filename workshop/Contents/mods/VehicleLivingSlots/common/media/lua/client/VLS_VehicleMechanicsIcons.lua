@@ -21,7 +21,7 @@ end
 function VLS.getMechanicsPartName(part)
     local provider = providerFor(part)
     if provider and provider.name then return provider.name(part) end
-    if part:getInventoryItem() and VLS.isUniversalPart(part) then
+    if VLS.isUniversalPart(part) then
         return VLS.getPartDisplayName(part)
     end
     return getText("IGUI_VehiclePart" .. part:getId())
