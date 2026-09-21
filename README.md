@@ -1,4 +1,4 @@
-# Mobile Living 3.8.8
+# Mobile Living 3.8.10
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -79,7 +79,7 @@ BBCode and publication VDF must agree. Keep `AnimSets/.gitkeep` and
 are required by the native loader.
 
 See [THIN-SHELL-AUDIT.md](THIN-SHELL-AUDIT.md) for native delegation boundaries,
-[release-3.8.8.json](release-3.8.8.json) for exact runtime hashes, and
+[release-3.8.10.json](release-3.8.10.json) for exact runtime hashes, and
 [NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.8 is the selected sole
 rollback version.
 
@@ -89,3 +89,7 @@ singleplayer, controller or multiplayer compatibility certification. An earlier
 session logged six duplicate-item-ID messages without a VLS stack; a subsequent
 clean-login and isolated petrol uninstall/reinstall check did not reproduce them.
 The source of that earlier transient remains unknown.
+
+Version 3.8.10 contains the owner-tested R6 cargo and seat-access fixes.
+The version correction does not change that gameplay logic. NUC deployment
+and Steam Workshop publication are separate steps; this source update does not perform them.
