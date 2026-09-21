@@ -64,7 +64,7 @@ local function isCommandId(value)
 end
 
 local function rejectCommand(command, reason)
-    print("[VLS 3.8.8] rejected " .. command .. ": " .. reason)
+    print("[VLS 3.8.9] rejected " .. command .. ": " .. reason)
     return false
 end
 
@@ -239,7 +239,7 @@ local function syncFluidTransferEndpoint(vehicle, item, part)
         vehicle:transmitPartItem(part)
     end)
     if not ok then
-        print("[VLS 3.8.8] water endpoint sync failed: " .. tostring(err))
+        print("[VLS 3.8.9] water endpoint sync failed: " .. tostring(err))
     end
 end
 
@@ -339,14 +339,14 @@ local function waterTransaction(vehicle, target, sourceFluid, sourceObject, oper
             end)
         end
         if battery then restore("battery", function() battery:setUsedDelta(charge) end) end
-        print("[VLS 3.8.8] water transaction failed: " .. tostring(moved))
+        print("[VLS 3.8.9] water transaction failed: " .. tostring(moved))
         if #failures > 0 then
-            print("[VLS 3.8.8] WATER ROLLBACK FAILED: " .. table.concat(failures, ";"))
+            print("[VLS 3.8.9] WATER ROLLBACK FAILED: " .. table.concat(failures, ";"))
         end
         moved, reason = 0, #failures == 0 and "transaction_rolled_back" or "rollback_failed_see_server_log"
     end
     if not prepared then
-        print("[VLS 3.8.8] water snapshot rejected: " .. tostring(prepareError))
+        print("[VLS 3.8.9] water snapshot rejected: " .. tostring(prepareError))
         moved, reason = 0, "snapshot_failed_before_transfer"
     end
     -- Native object transfer may already have sent an intermediate update.
@@ -357,11 +357,11 @@ local function waterTransaction(vehicle, target, sourceFluid, sourceObject, oper
             entry.object:sync()
             entry.object:transmitModData()
         end)
-        if not synced then print("[VLS 3.8.8] water source sync failed: " .. tostring(err)) end
+        if not synced then print("[VLS 3.8.9] water source sync failed: " .. tostring(err)) end
     end
     if batteryPart then
         local synced, err = pcall(function() vehicle:transmitPartUsedDelta(batteryPart) end)
-        if not synced then print("[VLS 3.8.8] water battery sync failed: " .. tostring(err)) end
+        if not synced then print("[VLS 3.8.9] water battery sync failed: " .. tostring(err)) end
     end
     for _, container in ipairs(temporaries) do FluidContainer.DisposeContainer(container) end
     return moved, reason
@@ -430,7 +430,7 @@ function VLS.Server.runVehicleFluidAction(action, nativeOperation)
     -- Sync final committed/restored state, never a half-purified intermediate.
     for _, endpoint in ipairs({originalSource, originalTarget}) do
         local ok, err = pcall(function() endpoint:sync() end)
-        if not ok then print("[VLS 3.8.8] fluid sync failed: " .. tostring(err)) end
+        if not ok then print("[VLS 3.8.9] fluid sync failed: " .. tostring(err)) end
     end
     return reason == nil
 end
@@ -746,4 +746,4 @@ if not VLS.serverHooksApplied then
     Events.EveryOneMinute.Add(onEveryOneMinute)
 end
 
-print("[VLS 3.8.8] server loaded; current commands only")
+print("[VLS 3.8.9] server loaded; current commands only")

@@ -4,7 +4,7 @@ require "VLS_Propane"
 if VLS.ki5CampersAdapterApplied then return VLS end
 VLS.ki5CampersAdapterApplied = true
 
-VLS.KI5_VERSION = "3.8.8"
+VLS.KI5_VERSION = "3.8.9"
 print("[VehicleLivingSlotsKI5Campers] Adapter version " .. VLS.KI5_VERSION)
 
 local SLOT_IDS = {
