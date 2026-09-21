@@ -60,7 +60,7 @@ def check(repo,upstream):
             for suffix in ('','_guide'):
                 assert (mod/'ui/vehicles/mechanic overlay'/(name.replace('Trailer61','Trailer61shasta')+'_vls_water_tank_'+side+suffix+'.png')).is_file()
         evidence[name]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'slots':3,'native_passengers':len(native),'layout':'no added/native rectangle overlap at native 263x500 panel'}
-    print('KI5_386_OK '+json.dumps(evidence,sort_keys=True))
+    print('KI5_388_OK '+json.dumps(evidence,sort_keys=True))
     return evidence
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--upstream',type=Path,required=True);a=p.parse_args()

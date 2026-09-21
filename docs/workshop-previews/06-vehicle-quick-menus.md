@@ -19,7 +19,7 @@ POWER NEARBY BUILDINGS: Connect while parked. Driving disconnects power.
 COLLECT ROOF FUEL: Fill carried containers. Uses fuel from installed roof cans.
 REFILL YOUR BLOWTORCH: Right-click your blowtorch. Refill from the installed propane tank.
 USE VEHICLE WATER: Wash, drink or fill containers. Uses water from the vehicle tank.
-Footer MOBILE LIVING3.8.6 | B42.20 | MP.
+Footer MOBILE LIVING3.8.8 | B42.20 | MP.
 Translate menus faithfully to Debug, Generator, Generator Info, Connect Generator,
 Natural Water Source, Sit on Ground, Walk to, Collect Fuel, Empty Gas Can,
 Water Tank, Wash, Drink, Fill. Blowtorch context: Equip Primary, Equip Secondary,

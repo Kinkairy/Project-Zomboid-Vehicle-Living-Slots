@@ -1,4 +1,4 @@
-# Mobile Living 3.8.6
+# Mobile Living 3.8.8
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -79,8 +79,8 @@ BBCode and publication VDF must agree. Keep `AnimSets/.gitkeep` and
 are required by the native loader.
 
 See [THIN-SHELL-AUDIT.md](THIN-SHELL-AUDIT.md) for native delegation boundaries,
-[release-3.8.6.json](release-3.8.6.json) for exact runtime hashes, and
-[NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.6 is the selected sole
+[release-3.8.8.json](release-3.8.8.json) for exact runtime hashes, and
+[NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.8 is the selected sole
 rollback version.
 
 The current payload passed 14 Lua suites / 1113 checks and targeted multiplayer

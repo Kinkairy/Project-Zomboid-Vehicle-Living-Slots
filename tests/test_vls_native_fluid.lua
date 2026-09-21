@@ -79,7 +79,7 @@ local function fixture(targetTank)
 end
 getSpecificPlayer=function()return current end
 getPlayer=function()error('server must never use local player fallback')end
-VLS={VERSION='3.8.6',Server={},isSupportedVehicle=function(v)return v and v.id==42 end,
+VLS={VERSION='3.8.8',Server={},isSupportedVehicle=function(v)return v and v.id==42 end,
  getVehicleFluidItem=function(v,id)local p=v.parts[id];return p and p.it,p end,
  isWaterTankPart=function(p)return p and p.water or false end,syncVehicleWaterTank=noop,
  isPureWaterFluid=function(f)return f.amount>0 and (f.kind=='water' or f.kind=='tainted')end,

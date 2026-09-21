@@ -1,4 +1,4 @@
-# 3.8.6 native delegation audit
+# 3.8.8 native delegation audit
 
 This mod uses native menus, actions and resource operations wherever the native
 object contract fits. A thin adapter is not a claim that every feature is native
@@ -39,10 +39,10 @@ calculation; no separate VLS skill gate was introduced.
   fixtures, resource conservation, action cancellation, UI restoration and
   actual supported vehicle profiles. These are not a live-game simulation.
 - Actual B42.20 Kahlua/Java probes verified relevant vector, network-action and
-  fluid contracts during the 3.8.6 repair lineage. Native naming bytecode confirms
+  fluid contracts during the 3.8.8 repair lineage. Native naming bytecode confirms
   delegation to FluidContainer.getUiName().
 - The 224-file runtime payload is identical across source, local client and
-  isolated test server; exact hashes are in release-3.8.6.json.
+  isolated test server; exact hashes are in release-3.8.8.json.
 - Owner tested fuel/propane services and chassis reduction (StepVan 2504 to 2004),
   then completed a targeted petrol-can uninstall/reinstall after a clean login.
   Latest client/server checks found no new errors.
