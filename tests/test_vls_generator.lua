@@ -26,7 +26,8 @@ addSound=function()end
 IsoFireManager={StartFire=function()error("unexpected fire")end,explode=function()error("unexpected explosion")end}
 V.refreshApplianceEnvironment=function()end
 local function list(a)return {size=function()return #a end,get=function(_,i)return a[i+1]end}end
-local square={isFree=function()return true end,objects={},getX=function()return 10 end,getY=function()return 10 end,getZ=function()return 0 end}
+local square={isFree=function()return true end,objects={},chunk={},getX=function()return 10 end,getY=function()return 10 end,getZ=function()return 0 end}
+function square:getChunk()return self.chunk end
 function square:getSpecialObjects()return list(self.objects)end
 local vehicles={}
 getCell=function()return {getGridSquare=function(_,x,y,z)if x==10 and y==10 and z==0 then return square end end,
@@ -76,7 +77,7 @@ local function item(id,kind,fluid)
 end
 local function fixture()
  hours=0;stamp=stamp+10000;random=1;SandboxVars.GeneratorFuelConsumption=1
- G.active={};G.grounded={};G.pending=nil;square.objects={}
+ G.active={};G.grounded={};G.pending=nil;square.objects={};square.chunk={}
  local gen=item(1,"Base.Generator")
  local battery={charge=.8,getFullType=function()return "Base.CarBattery2"end,getCurrentUsesFloat=function(self)return self.charge end,setUsedDelta=function(self,n)self.charge=n end}
  local function part(id,it)
@@ -161,6 +162,12 @@ end)
 test("native fuel consumption owns the only fuel clock",function()
  local v,it,s,b,pl,obj=ground();start(pl,obj);hours=100;G.update(v);near(G.fuel(it),5)
  obj:setFuel(3.125);G.update(v);near(G.fuel(it),3.125)
+end)
+test("streaming unload preserves saved projection without removing detached chunk",function()
+ local v,it,s,b,pl,obj=ground();start(pl,obj);obj:setFuel(2.625);obj:setCondition(84)
+ v.square=nil;square.chunk=nil;callbacks.tick()
+ eq(obj:getObjectIndex(),0);assert(s.dock);eq(G.grounded[obj],nil);eq(G.active[v],nil)
+ near(obj:getFuel(),2.625);eq(obj:getCondition(),84)
 end)
 test("movement removes power and parking does not reconnect",function()
  local v,it,s,b,pl,obj=ground();start(pl,obj);obj:setFuel(2.75);obj:setCondition(88)
