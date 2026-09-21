@@ -13,12 +13,321 @@ require "Vehicles/ISUI/ISVehicleMenu"
 require "Vehicles/ISUI/ISVehicleSeatUI"
 require "TimedActions/ISInventoryTransferAction"
 require "TimedActions/ISTimedActionQueue"
+require "TimedActions/ISInventoryTransferUtil"
+require "Vehicles/TimedActions/ISEnterVehicle"
+require "Vehicles/TimedActions/ISSwitchVehicleSeat"
 require "VLS_VehicleFluidTransferAction"
 require "VLS_FillVehicleWaterTankAction"
 require "VLS_VehicleRestAction"
 require "RadioCom/ISRadioWindow"
 require "RadioCom/ISRadioAction"
 require "TimedActions/ISDeviceBatteryAction"
+
+-- BEGIN VLS_CARGO_R6_CLIENT_20260922
+-- Integrated in the original VLS_Client.lua; no independent Lua loader/mod ID.
+local CargoR6 = VLS.CargoR6
+
+function CargoR6.onInventoryPhase(page, phase)
+    if not page or page.onCharacter or (phase ~= "begin" and phase ~= "end")
+            or type(page.player) ~= "number" then return end
+    local character = getSpecificPlayer(page.player)
+    local vehicle = character and character:getVehicle()
+    if not CargoR6.applies(vehicle) then return end
+    local state = CargoR6.probe(vehicle, character, phase == "begin")
+    if not state or phase ~= "end" then return end
+    local container, shown = state.part:getItemContainer(), false
+    for _, button in ipairs(page.backpacks or {}) do
+        if button.inventory == container then shown = true; break end
+    end
+    local message = "ACCESS_CHECK model=" .. vehicle:getScript():getFullName()
+        .. " seat=" .. tostring(vehicle:getSeat(character))
+        .. " rawSeats=" .. tostring(state.raw)
+        .. " physicalSeats=" .. tostring(state.physical)
+        .. " addedVLSSeats=" .. tostring(state.added)
+        .. " callbackReached=" .. tostring(state.reached)
+        .. " engine=" .. (state.ok and tostring(state.value) or "ERROR")
+        .. " trunkButton=" .. tostring(shown)
+        .. " multiplayer=" .. tostring(isClient())
+    if message ~= state.lastMessage then
+        state.lastMessage = message
+        print("[VLS Cargo R6] " .. message)
+        if not state.ok then print("[VLS Cargo R6] ENGINE_ERROR " .. tostring(state.value)) end
+    end
+end
+
+function CargoR6.safeInventoryPhase(page, phase)
+    local ok, err = pcall(CargoR6.onInventoryPhase, page, phase)
+    if not ok then CargoR6.logOnce("inventoryError", "DIAGNOSTIC_ERROR " .. tostring(err)) end
+end
+
+local function cargoTransferPart(container)
+    if not container then return nil end
+    local root = container:getOutermostContainer()
+    local part = (root and root:getVehiclePart()) or container:getVehiclePart()
+    if part and part:getId() == "TruckBed" and CargoR6.applies(part:getVehicle()) then
+        return part
+    end
+    return nil
+end
+
+function CargoR6.transferObservation(action, phase, result)
+    if (CargoR6.transferLogCount or 0) >= 80 or not action or not action.item then return end
+    local srcPart = cargoTransferPart(action.srcContainer)
+    local dstPart = cargoTransferPart(action.destContainer)
+    local part = srcPart or dstPart
+    if not part or not action.character
+            or action.character:getVehicle() ~= part:getVehicle() then return end
+    local sourceHas = action.srcContainer and action.srcContainer:contains(action.item)
+    local destHas = action.destContainer and action.destContainer:contains(action.item)
+    local transaction = "not_checked"
+    if isClient() and action.transactionId then
+        if isItemTransactionRejected and isItemTransactionRejected(action.transactionId) then
+            transaction = "rejected"
+        elseif isItemTransactionDone and isItemTransactionDone(action.transactionId) then
+            transaction = "done"
+        else transaction = "pending" end
+    end
+    local text = "TRANSFER_OBSERVATION phase=" .. phase
+        .. " direction=" .. (dstPart and "into_trunk" or "out_of_trunk")
+        .. " result=" .. tostring(result) .. " transaction=" .. transaction
+        .. " sourceHasItem=" .. tostring(sourceHas) .. " destHasItem=" .. tostring(destHas)
+    CargoR6.actionStates = CargoR6.actionStates or setmetatable({}, {__mode = "k"})
+    local states = CargoR6.actionStates[action] or {}
+    CargoR6.actionStates[action] = states
+    if states[phase] ~= text then
+        states[phase] = text
+        CargoR6.transferLogCount = (CargoR6.transferLogCount or 0) + 1
+        print("[VLS Cargo R6] " .. text)
+    end
+end
+
+function CargoR6.installClientHooks()
+    local ok, err = pcall(CargoR6.bindAll, "client_runtime_ready")
+    if not ok then CargoR6.logOnce("clientBindError", "BIND_ERROR " .. tostring(err)) end
+    -- Observe only; never re-run isValid(), change its result, move an item,
+    -- invent a transaction, or bypass server validation/checksums.
+    local class = ISInventoryTransferAction
+    if not class then return end
+    if class.isValid ~= CargoR6.isValidWrapper then
+        local previous = class.isValid
+        CargoR6.isValidWrapper = function(self, ...)
+            local result = previous(self, ...)
+            pcall(CargoR6.transferObservation, self, "isValid", result)
+            return result
+        end
+        class.isValid = CargoR6.isValidWrapper
+    end
+    if class.update ~= CargoR6.updateWrapper then
+        local previous = class.update
+        CargoR6.updateWrapper = function(self, ...)
+            local result = previous(self, ...)
+            pcall(CargoR6.transferObservation, self, "update", result)
+            return result
+        end
+        class.update = CargoR6.updateWrapper
+    end
+end
+CargoR6.logOnce("clientLoaded", "CLIENT_LOADED build=" .. CargoR6.BUILD
+    .. " baseDir=" .. CargoR6.directory())
+-- END VLS_CARGO_R6_CLIENT_20260922
+
+-- BEGIN VLS_SEAT_R6_CLIENT_20260922
+-- Integrated adapters: native routing / transfer helpers / timed actions own
+-- their original behavior. No independent mod and no standalone seat loader.
+local SeatR6 = VLS.SeatR6
+
+function SeatR6.log(message)
+    if (SeatR6.logCount or 0) >= 100 then return end
+    SeatR6.logCount = (SeatR6.logCount or 0) + 1
+    print("[VLS Seat R6] " .. message)
+end
+
+function SeatR6.chooseRoute(native, character, vehicle, seat, entering)
+    if not SeatR6.applies(vehicle) then return native(character, vehicle, seat) end
+    if not SeatR6.validSeat(vehicle, seat)
+            or (entering and not SeatR6.mayOccupy(vehicle, seat)) then return nil end
+    local view = CargoR6.queryViews()
+    local filtered = view(vehicle, {
+        isSeatOccupied = function(_, candidate)
+            if not SeatR6.mayOccupy(vehicle, candidate)
+                    or not vehicle:isSeatInstalled(candidate) then return true end
+            -- Native auto-route callers dereference the alternative's door.
+            -- A doorless bed may be entered manually but is not a safe automatic
+            -- enter/exit waypoint. Do not fabricate a door for it.
+            local door = vehicle:getPassengerDoor(candidate)
+            if not door or not door:getDoor() then return true end
+            return vehicle:isSeatOccupied(candidate)
+        end,
+    })
+    local selected = native(character, filtered, seat)
+    if selected ~= nil and not SeatR6.mayOccupy(vehicle, selected) then return nil end
+    SeatR6.log("ROUTE mode=" .. (entering and "enter" or "exit")
+        .. " from=" .. tostring(seat) .. " selected=" .. tostring(selected))
+    return selected
+end
+
+-- Find the actual part by container seat number, never assume that the index
+-- in getAllSeatParts() is the passenger index after VLS appended living slots.
+function SeatR6.partForSeat(vehicle, seat)
+    for index = 0, vehicle:getPartCount() - 1 do
+        local part = vehicle:getPartByIndex(index)
+        if part and part:getItemContainer()
+                and part:getContainerSeatNumber() == seat then return part end
+    end
+    return nil
+end
+
+-- Compose a COMPLETE dry plan first. Every per-item fit decision still calls
+-- the original transferSeatItems(..., testOnly=true). The tiny views account
+-- for reserved capacity and present only the current not-yet-selected item.
+-- No real container is mutated. Execution uses only real native transfer actions.
+function SeatR6.planMoves(nativeTransfer, character, vehicle, seat)
+    if not SeatR6.validSeat(vehicle, seat) or not SeatR6.mayOccupy(vehicle, seat)
+            or VLS.getSpaceAssignmentForSeat(vehicle, seat)
+            or not vehicle:isSeatInstalled(seat) or vehicle:getCharacter(seat) then
+        return nil, "invalid_or_living_source"
+    end
+    local sourcePart = SeatR6.partForSeat(vehicle, seat)
+    local source = sourcePart and sourcePart:getItemContainer()
+    if not source then return nil, "missing_source" end
+    local desired, remaining = source:getCapacity() * 0.25, source:getContentsWeight()
+    local plan = {source=source, entries={}, seat=seat}
+    if not vehicle:isSeatHoldingItems(seat) then return plan, "already_clear" end
+    -- Some engine versions use a boundary different from weight<=25%; do not
+    -- claim a clear seat if the native occupancy query still says it is blocked.
+    if remaining <= desired then return nil, "native_seat_still_blocked" end
+    local destinations, seen = {}, {}
+    local function addDestination(part)
+        local container = part and part:getItemContainer()
+        if not container or container == source or seen[container] then return end
+        seen[container] = true
+        destinations[#destinations+1] = {part=part, container=container, reserved=0}
+    end
+    local trunk = vehicle:getPartById("TruckBed")
+    if trunk and vehicle:canAccessContainer(trunk:getIndex(), character) then addDestination(trunk) end
+    for offset = 1, vehicle:getMaxPassengers() - 1 do
+        local other = (seat + offset) % vehicle:getMaxPassengers()
+        if not VLS.getSpaceAssignmentForSeat(vehicle, other)
+                and vehicle:isSeatInstalled(other) and not vehicle:getCharacter(other)
+                and vehicle:canSwitchSeat(seat, other) then
+            addDestination(SeatR6.partForSeat(vehicle, other))
+        end
+    end
+    local items, chosen = source:getItems(), {}
+    local view = CargoR6.queryViews()
+    for _, destination in ipairs(destinations) do
+        local target = destination.container
+        for index = 0, items:size() - 1 do
+            if remaining <= desired then break end
+            local item = items:get(index)
+            if not chosen[item] and target:isItemAllowed(item)
+                    and target:hasRoomFor(character, item) then
+                local oneItem = {size=function() return 1 end,
+                    get=function(_, i) return i == 0 and item or nil end}
+                local sourceView = view(source, {
+                    isEmpty=function() return false end,
+                    getContentsWeight=function() return remaining end,
+                    getItems=function() return oneItem end,
+                })
+                local targetView = view(target, {
+                    getContentsWeight=function()
+                        return target:getContentsWeight() + destination.reserved
+                    end,
+                })
+                local partView = view(sourcePart, {getItemContainer=function() return sourceView end})
+                local targetPartView = view(destination.part, {getItemContainer=function() return targetView end})
+                local moved = nativeTransfer(character, vehicle, partView, targetPartView, desired, true)
+                if type(moved) == "number" and moved > 0 then
+                    chosen[item] = true
+                    destination.reserved = destination.reserved + moved
+                    remaining = remaining - moved
+                    plan.entries[#plan.entries+1] = {item=item, target=target}
+                end
+            end
+        end
+        if remaining <= desired then break end
+    end
+    if remaining > desired then return nil, "insufficient_space" end
+    return plan, "ready"
+end
+
+function SeatR6.moveItems(nativeTransfer, character, vehicle, seat, moveThem, doEnter)
+    local plan, reason = SeatR6.planMoves(nativeTransfer, character, vehicle, seat)
+    if not plan then
+        if moveThem then SeatR6.log("MOVE_REJECT seat=" .. tostring(seat) .. " reason=" .. reason) end
+        return false
+    end
+    if not moveThem then return true end -- UI tests NEVER enqueue an enter/move.
+    -- Create all native action objects before touching the queue. Native action
+    -- validity/transactions remain in charge if capacity changes while queued.
+    local actions = {}
+    for _, entry in ipairs(plan.entries) do
+        actions[#actions+1] = ISInventoryTransferUtil.newInventoryTransferAction(
+            character, entry.item, plan.source, entry.target, 10)
+    end
+    for _, action in ipairs(actions) do ISTimedActionQueue.add(action) end
+    if doEnter then ISVehicleMenu.processEnter(character, vehicle, seat) end
+    SeatR6.log("MOVE_QUEUED seat=" .. tostring(seat) .. " items=" .. tostring(#actions)
+        .. " enter=" .. tostring(doEnter == true))
+    return true
+end
+
+function SeatR6.installActionGuards()
+    -- Automatic routes instantiate native actions directly. Recheck both at
+    -- validation and immediately before mutation. Reattach after a late class
+    -- replacement without stacking our wrapper on itself on every game start.
+    SeatR6.actionWrappers = SeatR6.actionWrappers or setmetatable({}, {__mode="k"})
+    local function wrap(class, key, build)
+        if not class or not class[key] then return end
+        local state = SeatR6.actionWrappers[class] or {}
+        SeatR6.actionWrappers[class] = state
+        if class[key] == state[key] then return end
+        state[key] = build(class[key])
+        class[key] = state[key]
+    end
+    wrap(ISEnterVehicle, "isValid", function(previous)
+        return function(self)
+            if not self.started and not SeatR6.mayOccupy(self.vehicle, self.seat) then return false end
+            return previous(self)
+        end
+    end)
+    wrap(ISEnterVehicle, "start", function(previous)
+        return function(self)
+            if SeatR6.applies(self.vehicle) and (not SeatR6.mayOccupy(self.vehicle, self.seat)
+                    or not self:isValid()) then
+                SeatR6.log("ENTER_BLOCK seat=" .. tostring(self.seat))
+                self:forceStop()
+                return
+            end
+            return previous(self)
+        end
+    end)
+    wrap(ISSwitchVehicleSeat, "isValid", function(previous)
+        return function(self)
+            local vehicle = self.character and self.character:getVehicle()
+            return SeatR6.mayOccupy(vehicle, self.seatTo) and previous(self)
+        end
+    end)
+    for _, phase in ipairs({"start", "perform"}) do
+        local currentPhase = phase
+        wrap(ISSwitchVehicleSeat, phase, function(previous)
+            return function(self)
+                local vehicle = self.character and self.character:getVehicle()
+                if SeatR6.applies(vehicle) and (not SeatR6.mayOccupy(vehicle, self.seatTo)
+                        or not self:isValid()) then
+                    SeatR6.log("SWITCH_BLOCK phase=" .. currentPhase .. " to=" .. tostring(self.seatTo))
+                    self:forceStop()
+                    return
+                end
+                return previous(self)
+            end
+        end)
+    end
+end
+
+CargoR6.logOnce("seatsLoaded", "SEAT_ADAPTERS_LOADED routing=native transfer=native_actions")
+-- END VLS_SEAT_R6_CLIENT_20260922
+
 
 print("[VehicleLivingSlots] Client version " .. VLS.VERSION)
 print("[VehicleLivingSlots] Countertop context menu fix 1 loaded")
@@ -1535,6 +1844,7 @@ local function showRadialMenuWithVLSSlices(vanillaShowRadialMenu, playerObj)
 end
 
 local function refreshVehicleContainerLabels(page, phase)
+    CargoR6.safeInventoryPhase(page, phase)
     if phase == "end" and page then
         processVisibleAppliances(page)
         return
@@ -1724,22 +2034,22 @@ if not VLS.clientHooksApplied then
     end
 
     ISVehicleMenu.getBestSwitchSeatExit = function(playerObj, vehicle, seatFrom)
-        if not vehicle or not VLS.getSpaceAssignmentForSeat(vehicle, seatFrom) then
-            return vanillaGetBestSwitchSeatExit(playerObj, vehicle, seatFrom)
+        return SeatR6.chooseRoute(vanillaGetBestSwitchSeatExit,
+            playerObj, vehicle, seatFrom, false)
+    end
+    local vanillaGetBestSwitchSeatEnter = ISVehicleMenu.getBestSwitchSeatEnter
+    ISVehicleMenu.getBestSwitchSeatEnter = function(playerObj, vehicle, seat)
+        return SeatR6.chooseRoute(vanillaGetBestSwitchSeatEnter,
+            playerObj, vehicle, seat, true)
+    end
+    local vanillaMoveItemsFromSeat = ISVehicleMenu.moveItemsFromSeat
+    local vanillaTransferSeatItems = ISVehicleMenu.transferSeatItems
+    ISVehicleMenu.moveItemsFromSeat = function(playerObj, vehicle, seat, moveThem, doEnter)
+        if not SeatR6.applies(vehicle) then
+            return vanillaMoveItemsFromSeat(playerObj, vehicle, seat, moveThem, doEnter)
         end
-
-        -- Only added living-space seats need this fallback. Front-cab exits stay
-        -- entirely under the original vehicle-menu implementation.
-        for seatTo = 0, vehicle:getMaxPassengers() - 1 do
-            if seatTo ~= seatFrom
-                    and not VLS.getSpaceAssignmentForSeat(vehicle, seatTo)
-                    and vehicle:canSwitchSeat(seatFrom, seatTo)
-                    and not vehicle:isSeatOccupied(seatTo)
-                    and not vehicle:isExitBlocked(playerObj, seatTo) then
-                return seatTo
-            end
-        end
-        return nil
+        return SeatR6.moveItems(vanillaTransferSeatItems,
+            playerObj, vehicle, seat, moveThem, doEnter)
     end
 
     Events.OnTick.Add(processClientState)
@@ -1808,6 +2118,8 @@ VLS.clientRuntimeHookRefresh = VLS.clientRuntimeHookRefresh or {}
 local RuntimeHookRefresh = VLS.clientRuntimeHookRefresh
 
 local function installVLSRuntimeHooks()
+    CargoR6.installClientHooks()
+    SeatR6.installActionGuards()
     installVLSFoodNameHooks()
     installGenericCraftSurfaceClientHooks()
     installMicrowaveWindowClientHook()
