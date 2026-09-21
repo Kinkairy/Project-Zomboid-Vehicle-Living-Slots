@@ -1,4 +1,4 @@
--- VLS 3.8.6: inherited accepted chassis behavior: fitted chassis replacement. Each peer derives a
+-- VLS 3.8.8: inherited accepted chassis behavior: fitted chassis replacement. Each peer derives a
 -- percentage-based mass reduction from the current vehicle-script baseline;
 -- no replicated part modData is required to activate vehicle physics.
 require "VLS_RoofCargo"

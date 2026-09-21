@@ -121,7 +121,7 @@ local function completeWash(action,nativeComplete,body)
     if required<=0 or required>fluid:getAmount() then return false end
     if not reserveWater(fluid,required) then
         syncTank(vehicle,part,tank)
-        print("[VLS 3.8.6] wash rejected: native water debit mismatch")
+        print("[VLS 3.8.8] wash rejected: native water debit mismatch")
         return false
     end
     action.vlsCommitted=true
@@ -132,7 +132,7 @@ local function completeWash(action,nativeComplete,body)
     action.sink=oldSink
     syncTank(vehicle,part,tank)
     if not ok then
-        print("[VLS 3.8.6] native wash failed after water debit: "..tostring(result))
+        print("[VLS 3.8.8] native wash failed after water debit: "..tostring(result))
         return false
     end
     return result==true

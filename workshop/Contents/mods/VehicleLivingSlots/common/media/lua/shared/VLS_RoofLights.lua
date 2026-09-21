@@ -22,7 +22,7 @@ function L.TrackVisual(part)
     L.visualParts[part]=true
     L.SyncVisual(part)
 end
--- 3.8.3: refresh saved light objects as well as new ones. The two public
+-- Refresh saved light objects as well as new ones. The two public
 -- effective-output getters account for native condition scaling. Calibrate
 -- the lamp without changing the carried Torch's condition/max/battery.
 L.DISTANCE=48

@@ -643,7 +643,7 @@ local function onVLSMicrowaveJoypadDown(ui, button, joypadData)
         -- Re-evaluate power before invoking the SAME callback as the mouse.
         -- Never force-enable the button and never dispatch through the knob.
         if ui.updateButtons then ui:updateButtons() end
-        print("[VLS 3.8.6] microwave A received; enabled="
+        print("[VLS 3.8.8] microwave A received; enabled="
             .. tostring(ui.ok and ui.ok.enable))
         if ui.ok then ui.ok:forceClick() end
         return
@@ -760,7 +760,7 @@ local function openMicrowaveSettings(playerObj, vehicle, part)
     ui.close.onclick = onVLSMicrowaveClick
     ui.onJoypadDown = onVLSMicrowaveJoypadDown
     ui:addToUIManager()
-    print("[VLS 3.8.6] microwave window uses direct A/B dispatch")
+    print("[VLS 3.8.8] microwave window uses direct A/B dispatch")
 
     if JoypadState.players[playerNum + 1] then
         ui.prevFocus = JoypadState.players[playerNum + 1].focus
@@ -1828,4 +1828,4 @@ Events.OnGameStart.Add(RuntimeHookRefresh.onGameStart)
 Events.OnCreatePlayer.Add(RuntimeHookRefresh.onCreatePlayer)
 installVLSRuntimeHooks()
 
-print("[VLS 3.8.6] client loaded; current commands only")
+print("[VLS 3.8.8] client loaded; current commands only")

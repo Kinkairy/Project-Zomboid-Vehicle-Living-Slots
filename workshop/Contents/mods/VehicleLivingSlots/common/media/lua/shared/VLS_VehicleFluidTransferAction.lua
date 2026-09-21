@@ -166,7 +166,7 @@ function VLSVehicleFluidContainer:sync()
     end
     vehicle:transmitPartItem(part)
     end)
-    if not ok then print("[VLS 3.8.6] installed fluid sync failed: " .. tostring(err)) end
+    if not ok then print("[VLS 3.8.8] installed fluid sync failed: " .. tostring(err)) end
 end
 
 VLSVehicleFluidTransferAction = ISFluidTransferAction:derive("VLSVehicleFluidTransferAction")
