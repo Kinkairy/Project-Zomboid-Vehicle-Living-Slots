@@ -31,9 +31,11 @@ local function same(a,b) return finite(a) and finite(b) and math.abs(a-b)<0.01 e
 local function host() return not isClient() end
 
 function C.isPart(part)
-    local vehicle=part and part:getVehicle()
-    local script=vehicle and vehicle:getScript()
-    return part and part:getId()==C.ID and vehicle:getPartById(C.ID)==part
+    if not part then return false end
+    local vehicle=part:getVehicle()
+    if not vehicle then return false end
+    local script=vehicle:getScript()
+    return part:getId()==C.ID and vehicle:getPartById(C.ID)==part
         and script and R.vehicleScripts[script:getFullName()]==true
 end
 
@@ -231,7 +233,7 @@ local function onTick()
     if ticks%30~=0 then return end
     for part in pairs(registered) do
         local vehicle=part:getVehicle()
-        if not C.isPart(part) or vehicle:isRemovedFromWorld() then
+        if not vehicle or not C.isPart(part) or vehicle:isRemovedFromWorld() then
             registered[part]=nil
             cache[part]=nil
         else
