@@ -268,6 +268,15 @@ test("repeated init and tick cannot compound discount",function()
     for i=1,120 do C.init(v,p);C.update(v,p);for _,fn in ipairs(ticks) do fn() end end
     eq(v.mass,2100);eq(v.initial,660);eq(v.recalculations,recalc)
 end)
+test("streamed chassis part with nil vehicle owner is retired safely",function()
+    local p,v,c=setup();assert(install(p,c));p.vehicle=nil
+    eq(C.isPart(p),false)
+    for i=1,30 do
+        for _,fn in ipairs(ticks) do
+            local ok,err=pcall(fn);assert(ok,err)
+        end
+    end
+end)
 test("spawn/load resets initial mass AFTER init; next tick repairs it",function()
     local p,v,c=setup();assert(install(p,c));C.init(v,p)
     v.initial=1160;v:updateTotalMass();eq(v.mass,2600)
