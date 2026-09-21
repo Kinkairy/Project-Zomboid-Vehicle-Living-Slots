@@ -225,6 +225,24 @@ local function getPortableFluidItem(player, itemId)
     return inventory:getItemWithIDRecursiv(numericId)
 end
 
+-- Keep the installed item and vehicle-part mirrors synchronized after a
+-- successful outside-source water-tank transfer.
+local function syncFluidTransferEndpoint(vehicle, item, part)
+    local ok, err = pcall(function()
+        if not item then return end
+        item:syncItemFields()
+        if not part then return end
+        if VLS.isWaterTankPart(part) then
+            VLS.syncVehicleWaterTank(vehicle, part)
+            vehicle:transmitPartModData(part)
+        end
+        vehicle:transmitPartItem(part)
+    end)
+    if not ok then
+        print("[VLS 3.8.8] water endpoint sync failed: " .. tostring(err))
+    end
+end
+
 local function makeNormalizedWater(amount)
     local container = FluidContainer.CreateContainer()
     container:setCapacity(amount)

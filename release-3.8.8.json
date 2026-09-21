@@ -5,7 +5,7 @@
   "status": "tested-release-payload",
   "workshop_item": "3791192579",
   "runtime_sha256_format": "UTF-8 sorted lines: sha256 + two spaces + relative path + LF",
-  "runtime_sha256": "66441481477d741ceba6c8025a8377decaecf9bed2c9bfc5cdb7406539b5de6c",
+  "runtime_sha256": "c7084e1a976c4e7c07cfc77c406106b3ab497572d7458c45d76378fe5de1f720",
   "runtime_file_count": 228,
   "files": {
     "VehicleLivingSlots/42.20/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -25,7 +25,7 @@
     "VehicleLivingSlots/common/media/lua/client/VLS_VehicleMechanicsIcons.lua": "bc828435ae036266d6c85fbb4816a00461ee925e965953a7af427bb1d7be5570",
     "VehicleLivingSlots/common/media/lua/client/VLS_VehicleMechanicsOverlay.lua": "09175663c1718f5bdf28edde849b7248cd7b02bfc4747a2d297070ad8fb792b5",
     "VehicleLivingSlots/common/media/lua/client/VLS_WaterTankWashMenu.lua": "5e826522b70ba419c2424d55758e21265c9cd9421f554f690b86dbb551a8cad4",
-    "VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua": "779c23790da2f64d7c3259173a935a00e2fb8b71e7bb3acc208690c34f46846a",
+    "VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua": "55762e3ceb6860718573117d5c1079b215e77c98be33af7c70419ac03cc4530e",
     "VehicleLivingSlots/common/media/lua/server/VLS_GeneratorServer.lua": "23ae143705b1b63c3e88a3d55dbf1e91a032c543d376ae6b012180ac55efb0cf",
     "VehicleLivingSlots/common/media/lua/server/VLS_PropaneServer.lua": "b7f5a617612cf001a76024b3f8c712391f5470d95922adfd6e54e7727884513b",
     "VehicleLivingSlots/common/media/lua/server/VLS_VehicleDistributions.lua": "d30aa2cf9e30a1bc27095e5554e2634a9515a8019ac91ce73a1b699e050d2480",
