@@ -1,0 +1,113 @@
+name: VLS 3.8.10 version correction
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/vls-3810-version-once.yml']
+permissions:
+  contents: write
+jobs:
+  correct-version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Correct only VLS version metadata and validate exact runtime
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, zipfile
+          P = pathlib.Path
+          repo = os.environ['REPOSITORY']
+          specs = {
+              'Kinkairy/Project-Zomboid-Vehicle-Living-Slots': ('', '0c30ab79404340d25a6a54d195e8273d1c0a59b0'),
+              'Kinkairy/project-zomboid': ('mods/vehicle-living-slots/', '7487d87873997db36a4a20739b910d6d511bfe48'),
+          }
+          prefix, base = specs[repo]
+          helper = '.github/workflows/vls-3810-version-once.yml'
+          def git(*args): return subprocess.check_output(['git', *args])
+          def sha(data): return hashlib.sha256(data).hexdigest()
+          def blob(data): return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+          head = git('rev-parse','HEAD').decode().strip()
+          subprocess.run(['git','merge-base','--is-ancestor',base,head],check=True)
+          assert git('diff','--name-only',base,head).decode().splitlines() == [helper], 'Concurrent changes: stop without publishing'
+          root = P(prefix or '.')
+          runtime_rel = 'workshop/Contents/mods/'
+          old_manifest = json.loads(git('cat-file','blob',head+':'+prefix+'release-3.8.9.json'))
+          assert old_manifest['version']=='3.8.9'
+          assert old_manifest['runtime_sha256']=='7d27667958d062cfab67b888116b5da9bef0d185f1eb410fad7793d47704f4d3'
+          old_bytes = {}
+          for name, expected in old_manifest['files'].items():
+              data = git('cat-file','blob',head+':'+prefix+runtime_rel+name)
+              assert sha(data)==expected, name
+              old_bytes[name]=data
+          assert len(old_bytes)==228
+          updates = {}
+          replacements = {
+              runtime_rel+'VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua': [
+                  (b'VLS.VERSION = "3.8.9"', b'VLS.VERSION = "3.8.10"'),
+                  (b'VLS.BUILD_ID = "release-3.8.9-water-tank-sync-20260921"', b'VLS.BUILD_ID = "release-3.8.10-access-r6-20260922"')],
+              runtime_rel+'VehicleLivingSlotsKI5Campers/common/media/lua/shared/VLS_KI5Campers_Config.lua': [
+                  (b'VLS.KI5_VERSION = "3.8.9"', b'VLS.KI5_VERSION = "3.8.10"')],
+          }
+          for mod in ['VehicleLivingSlots','VehicleLivingSlotsKI5Campers']:
+              for sub in ['', '42.20/']:
+                  replacements[runtime_rel+mod+'/'+sub+'mod.info']=[(b'modversion=3.8.9',b'modversion=3.8.10')]
+          for rel, pairs in replacements.items():
+              data = git('cat-file','blob',head+':'+prefix+rel)
+              for before, after in pairs:
+                  assert data.count(before)==1, (rel, before)
+                  data=data.replace(before,after,1)
+              updates[rel]=data
+          for rel in ['README.md','.github/workflows/vls-source-audit.yml']:
+              data=git('cat-file','blob',head+':'+prefix+rel)
+              if b'3.8.9' in data: updates[rel]=data.replace(b'3.8.9',b'3.8.10')
+          new_bytes={name:updates.get(runtime_rel+name,data) for name,data in old_bytes.items()}
+          hashes={name:sha(data) for name,data in sorted(new_bytes.items())}
+          fingerprint=sha(''.join(value+'  '+name+'\n' for name,value in sorted(hashes.items())).encode())
+          manifest=dict(old_manifest)
+          manifest.update(version='3.8.10',build='release-3.8.10-access-r6',status='awaiting-nuc-validation',files=hashes,runtime_sha256=fingerprint)
+          manifest['previous_release_verification']=manifest.pop('verification',{})
+          manifest['verification']={'owner_r6_gameplay':'Owner reported all targeted cargo and seat tests passed before version correction.','nuc_3_8_10':'pending','workshop_uploaded':False,'version_only_runtime_changes':len(replacements)}
+          updates['release-3.8.10.json']=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()
+          records=[]
+          for rel,data in sorted(updates.items()):
+              path=root/rel
+              before=path.read_bytes() if path.exists() else None
+              path.parent.mkdir(parents=True,exist_ok=True)
+              path.write_bytes(data)
+              records.append({'path':rel,'sha256':sha(data),'blob':blob(data),'before_sha256':sha(before) if before is not None else None})
+          # The approved R6 client and all other functional runtime bytes stay exact.
+          assert new_bytes['VehicleLivingSlots/common/media/lua/client/VLS_Client.lua']==old_bytes['VehicleLivingSlots/common/media/lua/client/VLS_Client.lua']
+          assert sum(new_bytes[n]!=old_bytes[n] for n in old_bytes)==6
+          P(helper).unlink()
+          approved=[prefix+r for r in updates]+[helper]
+          subprocess.run(['git','add','--',*approved],check=True)
+          assert set(git('diff','--cached','--name-only').decode().splitlines())==set(approved)
+          subprocess.run(['git','-c','user.name=Kinkairy','-c','user.email=55714586+Kinkairy@users.noreply.github.com','commit','-m','chore(vls): correct release version to 3.8.10; preserve tested R6 behavior'],check=True)
+          remote=git('ls-remote','origin','refs/heads/main').decode().split()[0]
+          assert remote==head, 'Remote moved: do not overwrite it'
+          subprocess.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+          commit=git('rev-parse','HEAD').decode().strip()
+          out=P('vls-3810-export');out.mkdir()
+          descriptor={'repository':repo,'prefix':prefix,'base_commit':base,'commit':commit,'version':'3.8.10','runtime_sha256':fingerprint,'runtime_file_count':228,'source_files':records,'workshop_uploaded':False}
+          (out/'PIN.json').write_text(json.dumps(descriptor,indent=2)+'\n')
+          (out/'release-3.8.10.json').write_bytes(updates['release-3.8.10.json'])
+          with zipfile.ZipFile(out/'runtime.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name,data in sorted(new_bytes.items()): z.writestr(name,data)
+          # Include the exact R6 pair too, since the failed NUC sync did not install it.
+          source=dict(updates)
+          for rel in ['release-3.8.9.json',runtime_rel+'VehicleLivingSlots/common/media/lua/client/VLS_Client.lua']:
+              source[rel]=git('cat-file','blob',commit+':'+prefix+rel)
+          with zipfile.ZipFile(out/'source-update.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for rel,data in sorted(source.items()): z.writestr(rel,data)
+          print('VLS_VERSION_CORRECTED',repo,commit,fingerprint)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vls-3810-verified-source
+          path: vls-3810-export/
+          retention-days: 7
+          if-no-files-found: error
