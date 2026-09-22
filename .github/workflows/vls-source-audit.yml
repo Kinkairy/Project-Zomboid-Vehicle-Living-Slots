@@ -21,7 +21,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json
           from pathlib import Path
-          manifest = json.loads(Path('release-3.8.10.json').read_text())
+          manifest = json.loads(Path('release-3.8.11.json').read_text())
           root = Path('workshop/Contents/mods')
           files = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                    for p in root.rglob('*') if p.is_file()}
@@ -36,3 +36,14 @@ jobs:
           for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions; do
             lua5.1 "tests/$name.lua" .
           done
+      - name: Native cargo callback contract regression
+        run: |
+          python3 - <<'PY'
+          import hashlib, pathlib, urllib.request
+          url = 'https://raw.githubusercontent.com/Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua/15300b1307e8b27d01ef86f42aea5d9ac0196e99/server/Vehicles/Vehicles.lua'
+          with urllib.request.urlopen(url, timeout=45) as response:
+              data = response.read()
+          assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == '220ef31821e210dd74cb84b214f10d4b514b1238'
+          pathlib.Path('/tmp/vls-native-vehicles.lua').write_bytes(data)
+          PY
+          lua5.1 tests/test_native_cargo_3811.lua . /tmp/vls-native-vehicles.lua
