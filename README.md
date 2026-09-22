@@ -1,4 +1,4 @@
-# Mobile Living 3.8.10
+# Mobile Living 3.8.11
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -79,7 +79,7 @@ BBCode and publication VDF must agree. Keep `AnimSets/.gitkeep` and
 are required by the native loader.
 
 See [THIN-SHELL-AUDIT.md](THIN-SHELL-AUDIT.md) for native delegation boundaries,
-[release-3.8.10.json](release-3.8.10.json) for exact runtime hashes, and
+[release-3.8.11.json](release-3.8.11.json) for exact runtime hashes, and
 [NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.8 is the selected sole
 rollback version.
 
@@ -93,3 +93,9 @@ The source of that earlier transient remains unknown.
 Version 3.8.10 contains the owner-tested R6 cargo and seat-access fixes.
 The version correction does not change that gameplay logic. NUC deployment
 and Steam Workshop publication are separate steps; this source update does not perform them.
+
+## 3.8.11 native cargo access
+
+Cargo adaptation follows the vehicle's existing native inside-access callback, not a Van/StepVan model allowlist. Original seat indices and areas remain unchanged; only VLS-added positions are excluded from the passenger-count query. An installed living bed delegates cargo-area access to the same native callback using existing original passenger areas. Outside-only cargo and original front/rear restrictions remain intact.
+
+The 97 VLS profiles are each tested under all three native cargo callback contracts, not asserted to use the same policy. The tests cover all installed bed types, original seats and exterior states. Runtime scripts are not rebound. This is source-level validation, not a live PZ/Kahlua or multiplayer certification.

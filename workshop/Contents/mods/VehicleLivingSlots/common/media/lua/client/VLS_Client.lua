@@ -50,8 +50,8 @@ function CargoR6.onInventoryPhase(page, phase)
         .. " multiplayer=" .. tostring(isClient())
     if message ~= state.lastMessage then
         state.lastMessage = message
-        print("[VLS Cargo R6] " .. message)
-        if not state.ok then print("[VLS Cargo R6] ENGINE_ERROR " .. tostring(state.value)) end
+        print("[VLS Cargo 3.8.11] " .. message)
+        if not state.ok then print("[VLS Cargo 3.8.11] ENGINE_ERROR " .. tostring(state.value)) end
     end
 end
 
@@ -97,12 +97,12 @@ function CargoR6.transferObservation(action, phase, result)
     if states[phase] ~= text then
         states[phase] = text
         CargoR6.transferLogCount = (CargoR6.transferLogCount or 0) + 1
-        print("[VLS Cargo R6] " .. text)
+        print("[VLS Cargo 3.8.11] " .. text)
     end
 end
 
 function CargoR6.installClientHooks()
-    local ok, err = pcall(CargoR6.bindAll, "client_runtime_ready")
+    local ok, err = pcall(CargoR6.installNativeHook)
     if not ok then CargoR6.logOnce("clientBindError", "BIND_ERROR " .. tostring(err)) end
     -- Observe only; never re-run isValid(), change its result, move an item,
     -- invent a transaction, or bypass server validation/checksums.
