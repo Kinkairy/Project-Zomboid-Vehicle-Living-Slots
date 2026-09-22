@@ -1,0 +1,65 @@
+name: Apply approved VLS bed cargo HF1
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/vls-bed-cargo-hf1-once.yml]
+permissions:
+  contents: write
+jobs:
+  apply-hf1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Patch only VLS Config and its runtime manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, os, urllib.request
+          repo=os.environ['REPOSITORY']; parent=os.environ['EXPECTED_HEAD']
+          prefix={'Kinkairy/Project-Zomboid-Vehicle-Living-Slots':'','Kinkairy/project-zomboid':'mods/vehicle-living-slots/'}[repo]
+          api='https://api.github.com/repos/'+repo
+          def call(path,data=None,method=None):
+              req=urllib.request.Request(api+path,data=None if data is None else json.dumps(data).encode(),method=method,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','User-Agent':'vls-hf1-scoped-update'})
+              with urllib.request.urlopen(req,timeout=45) as r: return json.load(r)
+          def sha(b): return hashlib.sha256(b).hexdigest()
+          def read(path):
+              obj=call('/contents/'+prefix+path+'?ref='+parent)
+              assert obj['encoding']=='base64'
+              return base64.b64decode(obj['content'])
+          assert call('/git/ref/heads/main')['object']['sha']==parent,'main moved; stop'
+          path='workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua'
+          before=read(path)
+          assert sha(before)=='d9ed1359813841495b1a644895ae7aea9c25418df9da2e20657211b34b65b752','unreviewed Config baseline'
+          old='            or seat ~= math.floor(seat)\n            or VLS.getSpaceAssignmentForSeat(vehicle, seat) then return raw end\n    return physical\n'
+          new='            or seat ~= math.floor(seat) then return raw end\n    -- A living position is usable from inside only when THIS position has an\n    -- installed bed. R6 excluded every added position, including valid beds.\n    -- Keep empty slots and non-bed equipment on the unmodified native path.\n    if VLS.getSpaceAssignmentForSeat(vehicle, seat)\n            and not VLS.getInstalledBedPartForSeat(vehicle, seat) then return raw end\n    return physical\n'
+          assert before.count(old.encode())==1
+          after=before.replace(old.encode(),new.encode(),1)
+          old_build=b'CargoR6.BUILD = "access-thinshell-r6-20260922"'
+          assert after.count(old_build)==1
+          after=after.replace(old_build,b'CargoR6.BUILD = "access-thinshell-r6-bed-cargo-hf1-20260922"',1)
+          assert sha(after)=='d3cd8b2bc7363d4dfe8555ac5cb7e58a8d5c7fc53bc11825d08c103502d71bd6','HF1 differs from approved package'
+          manifest=json.loads(read('release-3.8.10.json'))
+          assert manifest['version']=='3.8.10' and manifest['runtime_file_count']==len(manifest['files'])==228
+          fingerprint=lambda f: sha(''.join(h+'  '+p+'\n' for p,h in sorted(f.items())).encode())
+          assert fingerprint(manifest['files'])==manifest['runtime_sha256']=='6477b40528dfd6f1f386dcc1eeef4d3d61ee14cf625b0cb77dea94c726a17c1a'
+          runtime_path='VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua'
+          assert manifest['files'][runtime_path]==sha(before)
+          manifest['files'][runtime_path]=sha(after)
+          manifest['runtime_sha256']=fingerprint(manifest['files'])
+          assert manifest['runtime_sha256']=='fc6718db06a3e84e7a121cfd2e5d6f74664aa640eb87f6d0fb7d571008beff2d'
+          manifest['build']='release-3.8.10-bed-cargo-hf1'
+          manifest['status']='hf1-source-ready-publication-requested'
+          manifest['hotfix']={'id':'VLS_3810_BED_CARGO_HF1','date':'2026-09-22','scope':'Base.Van and Base.StepVan installed living beds; existing native thin-shell callback retained','runtime_files_changed':1,'other_runtime_files_unchanged':227,'gameplay_validation':'No HF1 live-game test result was reported before the owner requested direct publication.','nuc_source_sync':'Separate device-side script; not executed by this Git commit.','workshop_upload':'Separate device-side script; not executed by this Git commit.'}
+          updated=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()
+          commit=call('/git/commits/'+parent)
+          tree=call('/git/trees',{'base_tree':commit['tree']['sha'],'tree':[{'path':prefix+path,'mode':'100644','type':'blob','content':after.decode()},{'path':prefix+'release-3.8.10.json','mode':'100644','type':'blob','content':updated.decode()}]})['sha']
+          result=call('/git/commits',{'message':'fix(vls): allow installed living beds to access cargo through native thin shell (3.8.10 HF1)','tree':tree,'parents':[parent]})['sha']
+          assert call('/git/ref/heads/main')['object']['sha']==parent,'main moved; no branch update'
+          call('/git/refs/heads/main',{'sha':result,'force':False},'PATCH')
+          assert call('/git/ref/heads/main')['object']['sha']==result
+          print('HF1_COMMITTED',repo,result)
+          print('RUNTIME_SHA256',manifest['runtime_sha256'],'FILES',228,'CHANGED',1)
+          PY
