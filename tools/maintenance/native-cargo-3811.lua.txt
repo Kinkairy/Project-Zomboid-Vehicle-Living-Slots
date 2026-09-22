@@ -1,0 +1,193 @@
+-- BEGIN VLS_NATIVE_CARGO_3811
+-- Hook the original inside-access callback, not a list of vehicle names.
+-- Vehicle scripts keep their existing container.test; outside-only cargo stays
+-- outside-only. No script Load/rebinding, real seat count, or item mutation.
+require "Vehicles/Vehicles"
+VLS.CargoR6 = VLS.CargoR6 or {}
+local CargoR6 = VLS.CargoR6
+CargoR6.BUILD = "native-cargo-3.8.11-20260922"
+CargoR6.calls = CargoR6.calls or setmetatable({}, {__mode = "k"})
+CargoR6.states = CargoR6.states or setmetatable({}, {__mode = "k"})
+CargoR6.logged = CargoR6.logged or {}
+
+function CargoR6.logOnce(key, message)
+    if CargoR6.logged[key] == message then return end
+    CargoR6.logged[key] = message
+    print("[VLS Cargo 3.8.11] " .. message)
+end
+
+function CargoR6.directory()
+    local ok, result = pcall(function()
+        local info = getModInfoByID and getModInfoByID("VehicleLivingSlots")
+        return info and info:getDir() or "unresolved"
+    end)
+    return ok and tostring(result) or "unresolved"
+end
+
+function CargoR6.applies(vehicle)
+    local profile = vehicle and VLS.getVehicleProfile(vehicle)
+    return profile ~= nil and profile.spacePassengers ~= nil
+        and #profile.spacePassengers > 0
+end
+
+function CargoR6.layout(vehicle)
+    local raw = vehicle:getMaxPassengers()
+    if not CargoR6.applies(vehicle) then return raw, raw, 0 end
+    local script = vehicle:getScript()
+    if not script or raw ~= script:getPassengerCount() then return raw, raw, 0 end
+    local physical, added = 0, 0
+    for seat = 0, raw - 1 do
+        if VLS.getSpaceAssignmentForSeat(vehicle, seat) then
+            added = added + 1
+        else
+            physical = physical + 1
+        end
+    end
+    return raw, physical, added
+end
+
+function CargoR6.passengerCount(vehicle, character)
+    local raw, physical, added = CargoR6.layout(vehicle)
+    if physical < 1 or added == 0 or not character
+            or character:getVehicle() ~= vehicle then return raw end
+    local seat = vehicle:getSeat(character)
+    if type(seat) ~= "number" or seat < 0 or seat >= raw
+            or seat ~= math.floor(seat) then return raw end
+    if VLS.getSpaceAssignmentForSeat(vehicle, seat)
+            and not VLS.getInstalledBedPartForSeat(vehicle, seat) then return raw end
+    return physical
+end
+
+-- Query-only adapters also used by the unchanged seat-routing/moving fix.
+-- Rebind Java methods to their real receiver; unwrap view arguments at the
+-- Java boundary. Never change global Java methods or real script objects.
+function CargoR6.queryViews()
+    local realByView = {}
+    local function unwrap(value) return realByView[value] or value end
+    local function view(real, overrides)
+        local proxy, methods = {}, {}
+        realByView[proxy] = real
+        return setmetatable(proxy, {
+            __index = function(_, key)
+                if overrides and overrides[key] ~= nil then return overrides[key] end
+                if methods[key] then return methods[key] end
+                if type(key) ~= "string" or not (key:match("^get")
+                        or key:match("^is") or key:match("^has")
+                        or key:match("^can")) then
+                    error("VLS query view refuses non-query member: " .. tostring(key), 2)
+                end
+                local method = real[key]
+                if method == nil then return nil end
+                local bound = function(_, ...)
+                    local n, args = select("#", ...), {...}
+                    for i = 1, n do args[i] = unwrap(args[i]) end
+                    return method(real, unpack(args, 1, n))
+                end
+                methods[key] = bound
+                return bound
+            end,
+            __newindex = function() error("VLS query view is read-only", 2) end,
+        })
+    end
+    return view
+end
+
+function CargoR6.nativeInside(native, vehicle, part, character)
+    if not vehicle or not character or not CargoR6.applies(vehicle) then
+        return native(vehicle, part, character)
+    end
+    CargoR6.calls[vehicle] = (CargoR6.calls[vehicle] or 0) + 1
+    -- Native code owns exterior access, doors, ranges and non-VLS containers.
+    if character:getVehicle() ~= vehicle or not part
+            or part:getVehicle() ~= vehicle
+            or vehicle:getPartById(part:getId()) ~= part then
+        return native(vehicle, part, character)
+    end
+    local raw = vehicle:getMaxPassengers()
+    local count = CargoR6.passengerCount(vehicle, character)
+    if count == raw then return native(vehicle, part, character) end
+    local seat = vehicle:getSeat(character)
+    local living = VLS.getSpaceAssignmentForSeat(vehicle, seat) ~= nil
+    local areaOverride = nil
+    local view = CargoR6.queryViews()
+    local vehicleView = view(vehicle, {
+        getMaxPassengers = function() return count end,
+        getPassengerArea = function(_, index)
+            if index == seat and areaOverride ~= nil then return areaOverride end
+            return vehicle:getPassengerArea(index)
+        end,
+    })
+    local characterView = view(character, {
+        getVehicle = function()
+            local actual = character:getVehicle()
+            return actual == vehicle and vehicleView or actual
+        end,
+    })
+    -- Every original seat keeps its actual index and area. In particular a
+    -- four-seat SUV/PickUpVan never masquerades as a two-seat cargo van.
+    local result = native(vehicleView, part, characterView)
+    if result or not living then return result end
+    -- A legitimate bed in the cargo area uses an EXISTING original passenger
+    -- area's inside-access semantics. Ask the original function; do not invent
+    -- a SeatRear string or grant access when the original denies every area.
+    -- getSeat, real position, installed parts and all real state remain intact.
+    for original = 0, raw - 1 do
+        if not VLS.getSpaceAssignmentForSeat(vehicle, original) then
+            areaOverride = vehicle:getPassengerArea(original)
+            if areaOverride ~= nil then
+                result = native(vehicleView, part, characterView)
+                if result then return result end
+            end
+        end
+    end
+    return result
+end
+
+function CargoR6.installNativeHook()
+    local access = Vehicles and Vehicles.ContainerAccess
+    if not access or not access.TruckBedOpenInside then return false end
+    -- Install during shared loading, before world container queries are cached.
+    -- A later wrapper in the same table is not wrapped repeatedly or replaced.
+    if CargoR6.nativeTable == access then return true end
+    local native = access.TruckBedOpenInside
+    local wrapper = function(vehicle, part, character)
+        return CargoR6.nativeInside(native, vehicle, part, character)
+    end
+    CargoR6.nativeTable, CargoR6.nativeWrapper = access, wrapper
+    access.TruckBedOpenInside = wrapper
+    CargoR6.logOnce("nativeHook", "NATIVE_CALLBACK_WRAPPED name=TruckBedOpenInside"
+        .. " scripts_rebound=0 model_whitelist=none")
+    return true
+end
+
+function CargoR6.probe(vehicle, character)
+    if not CargoR6.applies(vehicle) or not character then return nil end
+    local part = vehicle:getPartById("TruckBed")
+    if not part or not part:getItemContainer() then return nil end
+    local state = CargoR6.states[vehicle]
+    if not state then state = {}; CargoR6.states[vehicle] = state end
+    local before = CargoR6.calls[vehicle] or 0
+    local ok, value = pcall(function()
+        return vehicle:canAccessContainer(part:getIndex(), character)
+    end)
+    state.ok, state.value = ok, value
+    state.reached = (CargoR6.calls[vehicle] or 0) > before
+    state.raw, state.physical, state.added = CargoR6.layout(vehicle)
+    state.part = part
+    -- Diagnostic only: false may be the correct original outside-only policy.
+    -- Never rewrite a vehicle script to make this probe reach our callback.
+    return state
+end
+
+CargoR6.installNativeHook()
+if not CargoR6.nativeEventsRegistered then
+    CargoR6.nativeEventsRegistered = true
+    for _, eventName in ipairs({"OnGameBoot", "OnInitGlobalModData",
+            "OnInitWorld", "OnServerStarted"}) do
+        local event = Events and Events[eventName]
+        if event and event.Add then event.Add(CargoR6.installNativeHook) end
+    end
+end
+CargoR6.logOnce("sharedLoaded", "SHARED_LOADED build=" .. CargoR6.BUILD
+    .. " baseDir=" .. CargoR6.directory())
+-- END VLS_NATIVE_CARGO_3811
