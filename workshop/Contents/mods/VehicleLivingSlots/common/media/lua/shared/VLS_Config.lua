@@ -1973,7 +1973,7 @@ VLS.installGenericCraftSurfaceActionHooks()
 -- No passenger, item, door, capacity, save or network state is rewritten.
 VLS.CargoR6 = VLS.CargoR6 or {}
 local CargoR6 = VLS.CargoR6
-CargoR6.BUILD = "access-thinshell-r6-20260922"
+CargoR6.BUILD = "access-thinshell-r6-bed-cargo-hf1-20260922"
 CargoR6.targets = { ["Base.Van"] = true, ["Base.StepVan"] = true }
 CargoR6.calls = CargoR6.calls or setmetatable({}, {__mode = "k"})
 CargoR6.states = CargoR6.states or setmetatable({}, {__mode = "k"})
@@ -2022,8 +2022,12 @@ function CargoR6.passengerCount(vehicle, character)
             or character:getVehicle() ~= vehicle then return raw end
     local seat = vehicle:getSeat(character)
     if type(seat) ~= "number" or seat < 0 or seat >= raw
-            or seat ~= math.floor(seat)
-            or VLS.getSpaceAssignmentForSeat(vehicle, seat) then return raw end
+            or seat ~= math.floor(seat) then return raw end
+    -- A living position is usable from inside only when THIS position has an
+    -- installed bed. R6 excluded every added position, including valid beds.
+    -- Keep empty slots and non-bed equipment on the unmodified native path.
+    if VLS.getSpaceAssignmentForSeat(vehicle, seat)
+            and not VLS.getInstalledBedPartForSeat(vehicle, seat) then return raw end
     return physical
 end
 
