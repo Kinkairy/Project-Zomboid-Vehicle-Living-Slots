@@ -33,8 +33,10 @@ jobs:
           PY
       - name: Source-only regression suites
         run: |
+          # These existing fixtures provide their own engine stubs. The separate
+          # cargo suite below loads and checks the actual pinned native callback.
           for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions; do
-            lua5.1 "tests/$name.lua" .
+            lua5.1 -e 'package.loaded["Vehicles/Vehicles"] = true' "tests/$name.lua" .
           done
       - name: Native cargo callback contract regression
         run: |
