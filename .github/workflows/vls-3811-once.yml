@@ -1,0 +1,114 @@
+name: Apply VLS 3.8.11 native cargo correction
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/vls-3811-once.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Lua for source checks
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+      - name: Apply only approved VLS paths and verify complete runtime
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import hashlib as H,json,os,pathlib as P,re,subprocess as S,urllib.request as U,zipfile
+          repo=os.environ['REPOSITORY']
+          prefix={'Kinkairy/Project-Zomboid-Vehicle-Living-Slots':'','Kinkairy/project-zomboid':'mods/vehicle-living-slots/'}[repo]
+          root=P.Path(prefix or '.')
+          def git(*a):return S.check_output(['git',*a])
+          def sha(b):return H.sha256(b).hexdigest()
+          def blob(b):return H.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          def remote(path,expected):
+              url='https://raw.githubusercontent.com/Kinkairy/Project-Zomboid-Vehicle-Living-Slots/713a30cf2d4352c8ce794e496b8ac9d8c2ef2ee5/'+path
+              with U.urlopen(url,timeout=45) as r:b=r.read()
+              assert sha(b)==expected, path
+              return b
+          head=git('rev-parse','HEAD').decode().strip()
+          rt='workshop/Contents/mods/'
+          files={p.relative_to(root/rt).as_posix():p.read_bytes() for p in (root/rt).rglob('*') if p.is_file()}
+          assert len(files)==228
+          config='VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua'
+          client='VehicleLivingSlots/common/media/lua/client/VLS_Client.lua'
+          assert sha(files[config])=='d3cd8b2bc7363d4dfe8555ac5cb7e58a8d5c7fc53bc11825d08c103502d71bd6'
+          assert sha(files[client])=='038d97ccc44c77ae89650fd35492f38aac0a6dcc42cde341d9410c07b5ab5ffa'
+          block=remote('tools/maintenance/native-cargo-3811.lua.txt','c9ff1456fc26309eae97c2183f6713f27e0eca478ca3c825dddf9dfaff6db029').decode().rstrip()
+          test=remote('tests/test_native_cargo_3811.lua','246527f5220ad21a950919245f3dacd3739704831375832f1888f134ced6f2d6')
+          s=files[config].decode()
+          start='-- BEGIN VLS_CARGO_R6_DIRECT_20260922';end='-- END VLS_CARGO_R6_DIRECT_20260922'
+          assert s.count(start)==s.count(end)==1
+          a=s.index(start);b=s.index(end)+len(end)
+          s=s[:a]+block+s[b:]
+          def once(s,a,b):
+              assert s.count(a)==1,a
+              return s.replace(a,b,1)
+          s=once(s,'VLS.VERSION = "3.8.10"','VLS.VERSION = "3.8.11"')
+          s=once(s,'VLS.BUILD_ID = "release-3.8.10-access-r6-20260922"','VLS.BUILD_ID = "release-3.8.11-native-cargo-20260922"')
+          updates={rt+config:s.encode()}
+          s=once(files[client].decode(),'pcall(CargoR6.bindAll, "client_runtime_ready")','pcall(CargoR6.installNativeHook)')
+          updates[rt+client]=s.replace('[VLS Cargo R6]','[VLS Cargo 3.8.11]').encode()
+          ki='VehicleLivingSlotsKI5Campers/common/media/lua/shared/VLS_KI5Campers_Config.lua'
+          updates[rt+ki]=once(files[ki].decode(),'VLS.KI5_VERSION = "3.8.10"','VLS.KI5_VERSION = "3.8.11"').encode()
+          for mod in ['VehicleLivingSlots','VehicleLivingSlotsKI5Campers']:
+              for sub in ['','42.20/']:
+                  rel=mod+'/'+sub+'mod.info'
+                  assert b'poster=icon.png' in files[rel], 'Preserve the separately approved cover setting'
+                  updates[rt+rel]=once(files[rel].decode(),'modversion=3.8.10','modversion=3.8.11').encode()
+          new={n:updates.get(rt+n,b) for n,b in files.items()}
+          assert sum(new[n]!=files[n] for n in files)==7
+          hashes={n:sha(b) for n,b in sorted(new.items())}
+          fp=sha(''.join(h+'  '+n+'\n' for n,h in sorted(hashes.items())).encode())
+          assert fp=='81cd6ba6a461d53b9abdb62d5da6b8d5099663871a9d766d8f9e874e26e7f479', 'Unexpected whole-runtime bytes; no commit'
+          manifest={'schema':2,'version':'3.8.11','build':'release-3.8.11-native-cargo','status':'source-verified-publication-requested','workshop_item':'3791192579','runtime_sha256_format':'UTF-8 sorted lines: sha256 + two spaces + relative path + LF','runtime_sha256':fp,'runtime_file_count':len(hashes),'files':hashes,'verification':{'runtime_logic':'Native inside-access callback adapter; no model allowlist or vehicle-script rebinding.','gameplay':'Not yet verified in a running PZ/Kahlua session for 3.8.11.','nuc_source_sync':'Separate device-side script; not performed by source commit.','workshop_upload':'Separate device-side script; not performed by source commit.'}}
+          updates['release-3.8.11.json']=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()
+          readme=(root/'README.md').read_text()
+          readme,n=re.subn(r'^# Mobile Living 3\.8\.[0-9]+','# Mobile Living 3.8.11',readme,count=1);assert n==1
+          readme=readme.replace('[release-3.8.10.json](release-3.8.10.json)','[release-3.8.11.json](release-3.8.11.json)')
+          readme+='\n## 3.8.11 native cargo access\n\nCargo adaptation follows the vehicle\'s existing native inside-access callback, not a Van/StepVan model allowlist. Original seat indices and areas remain unchanged; only VLS-added positions are excluded from the passenger-count query. An installed living bed delegates cargo-area access to the same native callback using existing original passenger areas. Outside-only cargo and original front/rear restrictions remain intact.\n\nThe 97 VLS profiles are each tested under all three native cargo callback contracts, not asserted to use the same policy. The tests cover all installed bed types, original seats and exterior states. Runtime scripts are not rebound. This is source-level validation, not a live PZ/Kahlua or multiplayer certification.\n'
+          updates['README.md']=readme.encode()
+          updates['tests/test_native_cargo_3811.lua']=test
+          updates['docs/release-3.8.11.md']=b'# 3.8.11\n\nRemove the two-model cargo binding and delegate through the original inside-access callback. Keep original seat restrictions; adapt installed VLS beds without enabling outside-only trunks. SUV, PickUpVan, Van and StepVan variants follow the callback actually assigned by their scripts. Seven runtime files change: two cargo integration files, KI5 version, and four mod.info versions. The remaining 221 runtime files are unchanged, including seat-moving and blocked-door guard implementation. Existing cover declarations are preserved.\n\nNo server start/stop, installed runtime deployment, source-repository alignment or Workshop action is performed by this commit. Live PZ/Kahlua and multiplayer verification is still required.\n'
+          if prefix:
+              audit=root/'.github/workflows/vls-source-audit.yml'
+              if audit.exists():updates['.github/workflows/vls-source-audit.yml']=audit.read_bytes().replace(b'release-3.8.10.json',b'release-3.8.11.json')
+          for rel,b in updates.items():
+              p=root/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b)
+          for p in (root/rt).rglob('*.lua'):S.run(['luac5.1','-p',str(p)],check=True)
+          url='https://raw.githubusercontent.com/Project-Zomboid-Community-Modding/ProjectZomboid-Vanilla-Lua/15300b1307e8b27d01ef86f42aea5d9ac0196e99/server/Vehicles/Vehicles.lua'
+          with U.urlopen(url,timeout=45) as r:native=r.read()
+          assert blob(native)== '220ef31821e210dd74cb84b214f10d4b514b1238'
+          P.Path('/tmp/vls-vanilla-vehicles.lua').write_bytes(native)
+          result=S.run(['lua5.1',str(root/'tests/test_native_cargo_3811.lua'),str(root),'/tmp/vls-vanilla-vehicles.lua'],check=True,stdout=S.PIPE,text=True)
+          print(result.stdout)
+          approved=[prefix+r for r in updates]
+          S.run(['git','add','--',*approved],check=True)
+          changed=git('diff','--cached','--name-only').decode().splitlines()
+          assert set(changed)<=set(approved) and rt+config in [p[len(prefix):] for p in changed]
+          S.run(['git','-c','user.name=Kinkairy','-c','user.email=55714586+Kinkairy@users.noreply.github.com','commit','-m','fix(vls): release 3.8.11 native cargo access across supported vehicle profiles'],check=True)
+          assert git('ls-remote','origin','refs/heads/main').decode().split()[0]==head, 'main moved; do not overwrite'
+          S.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+          commit=git('rev-parse','HEAD').decode().strip()
+          out=P.Path('vls-3811-export');out.mkdir()
+          (out/'PIN.json').write_text(json.dumps({'repository':repo,'commit':commit,'runtime_sha256':fp,'source_paths':list(updates)},indent=2)+'\n')
+          (out/'TEST_RESULTS.txt').write_text(result.stdout)
+          (out/'release-3.8.11.json').write_bytes(updates['release-3.8.11.json'])
+          with zipfile.ZipFile(out/'source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for raw in git('ls-tree','-r','--name-only',commit,'--',prefix or '.').decode().splitlines():
+                  if prefix and not raw.startswith(prefix):continue
+                  z.writestr(raw[len(prefix):],git('cat-file','blob',commit+':'+raw))
+          print('VLS_3811_COMMITTED',repo,commit,fp)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vls-3811-verified-source
+          path: vls-3811-export/
+          if-no-files-found: error
+          retention-days: 7
