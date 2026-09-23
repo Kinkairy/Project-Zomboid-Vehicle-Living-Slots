@@ -2,10 +2,10 @@
   "schema": 2,
   "version": "3.8.12",
   "build": "release-3.8.12-small-appliances",
-  "status": "owner-accepted-publication-authorized",
+  "status": "mp-install-hotfix-offline-verified-publication-authorized",
   "workshop_item": "3791192579",
   "runtime_sha256_format": "UTF-8 sorted lines: sha256 + two spaces + relative path + LF",
-  "runtime_sha256": "958b542c591fe17b60d40e26c084ed84bd6041fdc748cba8950369b4cb366f2e",
+  "runtime_sha256": "1b35e2a63bea1b3646dba9b8fdbe7af7f474f9eb3988a39b15eca249356da38a",
   "runtime_file_count": 235,
   "files": {
     "VehicleLivingSlots/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
@@ -51,7 +51,7 @@
     "VehicleLivingSlots/common/media/lua/shared/VLS_RoofLights.lua": "e681d6aef7fd2a6bb79d12e2513dcedb4880ea161cc5221b7854bc864b4d429a",
     "VehicleLivingSlots/common/media/lua/shared/VLS_VehicleFluidTransferAction.lua": "05288adda19d3d3b041ec2db2b17720cc63def9dd6dee396612ccbd9ced01dac",
     "VehicleLivingSlots/common/media/lua/shared/VLS_WaterTankWash.lua": "9025cf179a6f6ea5d74ca22621f2c5dcd71712d6234433304789817e7dd88512",
-    "VehicleLivingSlots/common/media/lua/shared/VLS_Pantry.lua": "1598f59ec03ce9bcf172db9791ccc86e54145fdb102be25d77a455cbcaec0b54",
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Pantry.lua": "77b3317aba4a04c66120f5e1827d84cadba97eda6999380a287599de228c530d",
     "VehicleLivingSlots/common/media/lua/shared/VLS_PantryCraftAction.lua": "aee33366f837aa93b0aff6f9d03bbb1037d6694646c8a8a40f7fc8f54b336363",
     "VehicleLivingSlots/common/media/lua/shared/Translate/CH/ContextMenu.json": "c71dd7698e8b0afac6df3582217c9a4ac733a36e98e112d366ebada755dab183",
     "VehicleLivingSlots/common/media/lua/shared/Translate/CH/Fluids.json": "4696dfd9d412308509a63946abeee892ddcc6ec0ba365dad7d043c12cce5db27",
@@ -245,8 +245,10 @@
     "VehicleLivingSlotsKI5Campers/common/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "verification": {
-    "gameplay": "Owner accepted test7 on 2026-09-24; release behavior unchanged.",
-    "coffee": "Both native recipes and two entry paths covered offline; original native workbench component probe passed.",
-    "limits": "No exhaustive coffee-maker/controller/multiplayer gameplay claim."
-  }
+    "gameplay": "Prior test7 accepted; this MP installation hotfix still awaits in-game multiplayer acceptance.",
+    "installation": "Old failure reproduced using native B42.20 scripts; eight server-environment checks pass with mocked host objects.",
+    "regressions": "50 pantry crafting checks and 7 adapter regressions pass; 43 runtime Lua files parse; 134 trilingual keys across 18 files validate.",
+    "limits": "Offline native-Lua transactions do not replace live server gameplay acceptance."
+  },
+  "revision": "mp-install-native-completion-20260924"
 }

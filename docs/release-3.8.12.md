@@ -1,7 +1,7 @@
 # 3.8.12
 
-3.8.12：新增车载小电器位，支持咖啡机和烤面包机。 / Added a vehicle small-appliance slot supporting coffee makers and toasters.
+3.8.12：修复联机兼容问题。 / Fixed multiplayer compatibility issues.
 
-Promotes the owner-accepted pantry test7 behavior. Coffee maker and toaster share the existing vehicle slot, one native workbench adapter and native crafting completion. Release preparation changes version/build identifiers and publication metadata only.
+Removes the small-appliance-specific installation completion override. Coffee makers and toasters now use the same shared installation guard and native completion transaction as existing vehicle parts. This avoids invoking the client mechanics UI check on a dedicated server. The package version remains 3.8.12.
 
-Coffee verification covers both native recipes, both UI entry paths, repeated crafting, completion, power debit and failure guards, plus real original CraftBench/entity components. Installed Windows recipe/action files match the inspected native source. Offline tests do not substitute for exhaustive in-game coffee or multiplayer acceptance.
+Validation: actual B42.20 Lua installation and removal transactions, with host objects mocked and no client mechanics UI; both appliances install, uninstall and reinstall. Existing crafting and adapter regressions pass. These checks do not replace live multiplayer gameplay acceptance.

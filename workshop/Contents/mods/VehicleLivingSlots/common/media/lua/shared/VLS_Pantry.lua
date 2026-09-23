@@ -138,14 +138,6 @@ if not P.installHooksApplied then
     VLS.allowedItems[P.PART_ID] = { ["Base.Mov_CoffeeMaker"] = true, ["Base.Mov_Toaster"] = true }
     VLS.allowedItems[P.LEGACY_ID] = {}
     VLS.mechanicsDisplayProviders.pantry = P.isPart
-    local install = ISInstallVehiclePart.complete
-    function ISInstallVehiclePart:complete()
-        if self.part and P.slots[self.part:getId()] then
-            if not P.canInstall(self.part, self.item) or self.part:getInventoryItem()
-                    or not self:isValid() then return false end
-        end
-        return install(self)
-    end
 end
 
 return P

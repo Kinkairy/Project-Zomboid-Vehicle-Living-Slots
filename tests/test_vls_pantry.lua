@@ -26,6 +26,7 @@ V.consumeAuxBattery=function(v,n)v.charge=v.charge-n;v.debits=(v.debits or 0)+1 
 VLS=V;package.loaded["VLS_Config"]=V;package.loaded["VLS_InstallGuard"]=true
 ISInstallVehiclePart={complete=function(a)a.nativeInstalled=true;return true end}
 local base=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/"
+local sharedInstallComplete = ISInstallVehiclePart.complete
 local P=dofile(base.."shared/VLS_Pantry.lua")
 package.loaded["VLS_Pantry"]=P
 local recipes={}
@@ -88,12 +89,8 @@ test("missing broken swapped and unpowered denied",function()
  assert(P.reason(character,vehicle,part.id,999))
  vehicle.charge=0;assert(P.reason(character,vehicle,part.id));vehicle.charge=1
 end)
-test("server install completion rechecks slot",function()
- local part=vehicle.parts.VLSPantryCoffee;part.item=nil
- local a={part=part,item=item("Base.Wood",nil,44),isValid=function()return true end}
- eq(ISInstallVehiclePart.complete(a),false);assert(not a.nativeInstalled)
- a.item=coffee;assert(ISInstallVehiclePart.complete(a));assert(a.nativeInstalled);part.item=coffee
- eq(ISInstallVehiclePart.complete(a),false)
+test("pantry preserves the shared installation completion function",function()
+ eq(ISInstallVehiclePart.complete,sharedInstallComplete)
 end)
 
 -- Load the actual game action rather than a copy of its transaction.
