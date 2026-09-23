@@ -5,13 +5,13 @@
   "status": "source-verified-publication-requested",
   "workshop_item": "3791192579",
   "runtime_sha256_format": "UTF-8 sorted lines: sha256 + two spaces + relative path + LF",
-  "runtime_sha256": "81cd6ba6a461d53b9abdb62d5da6b8d5099663871a9d766d8f9e874e26e7f479",
+  "runtime_sha256": "f4fe66f167c81d1e6418585ee9a97350510e01148299fb46d84add2c35ea34d1",
   "runtime_file_count": 228,
   "files": {
     "VehicleLivingSlots/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
     "VehicleLivingSlots/42.20/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlots/42.20/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "VehicleLivingSlots/42.20/mod.info": "eab995f5ac4d2d1d98b42b2351f838c123eb97e1a2518d435ce90e500b83eef6",
+    "VehicleLivingSlots/42.20/mod.info": "92f1ee5cf65f89355f0d93af83664198fdd6fed39608618a9ae4967ab0764cca",
     "VehicleLivingSlots/common/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlots/common/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlots/common/media/lua/client/VLS_Client.lua": "bd63688797663077354e59dc1d19da256ea0c4672da2bb56b283b5913cfb9fdf",
@@ -194,11 +194,11 @@
     "VehicleLivingSlots/common/media/ui/vehicles/vls_water_fill.png": "a5592e834349395bd5a93a12622b42a119e3da7660c1810bc07046ee8314a310",
     "VehicleLivingSlots/common/media/ui/vehicles/vls_water_transfer.png": "8998ebd2025c27070c4319ea35cdf906cbeaa05ed2b80eefc2dde076aebc8b2d",
     "VehicleLivingSlots/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
-    "VehicleLivingSlots/mod.info": "eab995f5ac4d2d1d98b42b2351f838c123eb97e1a2518d435ce90e500b83eef6",
+    "VehicleLivingSlots/mod.info": "92f1ee5cf65f89355f0d93af83664198fdd6fed39608618a9ae4967ab0764cca",
     "VehicleLivingSlotsKI5Campers/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
     "VehicleLivingSlotsKI5Campers/42.20/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlotsKI5Campers/42.20/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "VehicleLivingSlotsKI5Campers/42.20/mod.info": "ae42fed7805e98dc5f7b0ba84fc70e15c904c84d5116f2ec648bf31b209cb6a5",
+    "VehicleLivingSlotsKI5Campers/42.20/mod.info": "e2b404f28d32c6f2521789c862e00f1e4da78b59c394cd4262f9db7c3eaa9a72",
     "VehicleLivingSlotsKI5Campers/common/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlotsKI5Campers/common/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlotsKI5Campers/common/media/lua/client/VLS_KI5Campers_Overlay.lua": "9b3b862ad24406a8c48fb12a20206f520bbec7d3d70f806f1433fd0a00afe257",
@@ -235,7 +235,7 @@
     "VehicleLivingSlotsKI5Campers/common/media/ui/vehicles/mechanic overlay/Trailer87Scamp16_vls_water_tank_right.png": "4f47fc32efff12186fb24176e270ea1c402c6bbc97bbd6dfeb25cd01d577e61a",
     "VehicleLivingSlotsKI5Campers/common/media/ui/vehicles/mechanic overlay/Trailer87Scamp16_vls_water_tank_right_guide.png": "bde2716bba1a6a6b735a0a8481ce914a72ce634e156984a8d61df59988091640",
     "VehicleLivingSlotsKI5Campers/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
-    "VehicleLivingSlotsKI5Campers/mod.info": "ebfb1d99a79267665177a7c2cc05978be58de5c5f100a47a396547032f9476f4"
+    "VehicleLivingSlotsKI5Campers/mod.info": "f42c7e1f60b49bc3b5f3af34a058cefd9cc25417a60c6221bee0ea41321e2187"
   },
   "verification": {
     "runtime_logic": "Native inside-access callback adapter; no model allowlist or vehicle-script rebinding.",
