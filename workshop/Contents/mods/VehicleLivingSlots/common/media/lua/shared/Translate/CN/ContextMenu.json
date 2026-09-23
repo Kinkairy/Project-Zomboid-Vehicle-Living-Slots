@@ -2,5 +2,14 @@
   "ContextMenu_VLSFillWaterTank": "给水箱加水",
   "ContextMenu_VLSNoAuxPower": "副电瓶没有电",
   "ContextMenu_VLSGeneratorConnect": "连接发电机向建筑供电",
-  "ContextMenu_VLSGeneratorDisconnect": "断开供电并收回发电机"
+  "ContextMenu_VLSGeneratorDisconnect": "断开供电并收回发电机",
+  "ContextMenu_VLSPantryCoffeeMug": "泡咖啡（马克杯）",
+  "ContextMenu_VLSPantryCoffeeCup": "泡咖啡（茶杯）",
+  "ContextMenu_VLSPantryToast": "烤吐司",
+  "ContextMenu_VLSPantryInside": "请在设备所在车辆内使用",
+  "ContextMenu_VLSPantryPark": "请先停车",
+  "ContextMenu_VLSPantryMissing": "请先安装对应的小电器",
+  "ContextMenu_VLSPantryBroken": "已安装的小电器已损坏",
+  "ContextMenu_VLSPantryIngredients": "请随身携带原版配方需要的材料",
+  "ContextMenu_VLSPantryMenuUnavailable": "暂时无法打开电器制作菜单"
 }

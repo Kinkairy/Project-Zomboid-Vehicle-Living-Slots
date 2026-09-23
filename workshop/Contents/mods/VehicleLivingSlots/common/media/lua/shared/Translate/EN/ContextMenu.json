@@ -2,5 +2,14 @@
   "ContextMenu_VLSFillWaterTank": "Fill Water Tank",
   "ContextMenu_VLSNoAuxPower": "The auxiliary battery has no power",
   "ContextMenu_VLSGeneratorConnect": "Connect generator to building power",
-  "ContextMenu_VLSGeneratorDisconnect": "Disconnect and stow generator"
+  "ContextMenu_VLSGeneratorDisconnect": "Disconnect and stow generator",
+  "ContextMenu_VLSPantryCoffeeMug": "Make Coffee (Mug)",
+  "ContextMenu_VLSPantryCoffeeCup": "Make Coffee (Teacup)",
+  "ContextMenu_VLSPantryToast": "Make Toast",
+  "ContextMenu_VLSPantryInside": "Use this appliance from inside its vehicle",
+  "ContextMenu_VLSPantryPark": "Stop the vehicle first",
+  "ContextMenu_VLSPantryMissing": "Install the matching appliance first",
+  "ContextMenu_VLSPantryBroken": "The installed appliance is broken",
+  "ContextMenu_VLSPantryIngredients": "Carry the ingredients required by the original recipe",
+  "ContextMenu_VLSPantryMenuUnavailable": "The appliance crafting menu is unavailable"
 }

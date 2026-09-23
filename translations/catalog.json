@@ -986,6 +986,102 @@
       "ch": "允許在車外使用水箱加水、飲水、取水和洗滌快捷選單。不影響水箱安裝與拆卸，也不改變車內設備功能。",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "IGUI_VehiclePartCatVLSPantry",
+      "en": "Small Appliances",
+      "cn": "小电器",
+      "ch": "小電器",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSPantryCoffee",
+      "en": "Small Appliance",
+      "cn": "小电器",
+      "ch": "小電器",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSPantryToaster",
+      "en": "Previous Test Appliance (Remove)",
+      "cn": "旧测试电器（可拆回）",
+      "ch": "舊測試電器（可拆回）",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryCoffeeMug",
+      "en": "Make Coffee (Mug)",
+      "cn": "泡咖啡（马克杯）",
+      "ch": "泡咖啡（馬克杯）",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryCoffeeCup",
+      "en": "Make Coffee (Teacup)",
+      "cn": "泡咖啡（茶杯）",
+      "ch": "泡咖啡（茶杯）",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryToast",
+      "en": "Make Toast",
+      "cn": "烤吐司",
+      "ch": "烤吐司",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryInside",
+      "en": "Use this appliance from inside its vehicle",
+      "cn": "请在设备所在车辆内使用",
+      "ch": "請在設備所在車輛內使用",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryPark",
+      "en": "Stop the vehicle first",
+      "cn": "请先停车",
+      "ch": "請先停車",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryMissing",
+      "en": "Install the matching appliance first",
+      "cn": "请先安装对应的小电器",
+      "ch": "請先安裝對應的小電器",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryBroken",
+      "en": "The installed appliance is broken",
+      "cn": "已安装的小电器已损坏",
+      "ch": "已安裝的小電器已損壞",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryIngredients",
+      "en": "Carry the ingredients required by the original recipe",
+      "cn": "请随身携带原版配方需要的材料",
+      "ch": "請隨身攜帶原版配方需要的材料",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSPantryMenuUnavailable",
+      "en": "The appliance crafting menu is unavailable",
+      "cn": "暂时无法打开电器制作菜单",
+      "ch": "暫時無法開啟電器製作選單",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
     }
   ]
 }

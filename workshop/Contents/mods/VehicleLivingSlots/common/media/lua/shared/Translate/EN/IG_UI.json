@@ -59,5 +59,8 @@
   "IGUI_VLSChassisReduction": "Net vehicle weight reduction: %1. Cargo weight is unchanged.",
   "IGUI_VLSChassisProjected": "Projected total weight: %1 (with current cargo).",
   "IGUI_VLSChassisConflict": "Chassis mass baseline is unavailable or changed by another mod.",
-  "IGUI_VLSTankSource": "Water tank source"
+  "IGUI_VLSTankSource": "Water tank source",
+  "IGUI_VehiclePartCatVLSPantry": "Small Appliances",
+  "IGUI_VehiclePartVLSPantryCoffee": "Small Appliance",
+  "IGUI_VehiclePartVLSPantryToaster": "Previous Test Appliance (Remove)"
 }

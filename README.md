@@ -1,4 +1,4 @@
-# Mobile Living 3.8.11
+# Mobile Living 3.8.12
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -79,7 +79,7 @@ BBCode and publication VDF must agree. Keep `AnimSets/.gitkeep` and
 are required by the native loader.
 
 See [THIN-SHELL-AUDIT.md](THIN-SHELL-AUDIT.md) for native delegation boundaries,
-[release-3.8.11.json](release-3.8.11.json) for exact runtime hashes, and
+[release-3.8.12.json](release-3.8.12.json) for exact runtime hashes, and
 [NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.8 is the selected sole
 rollback version.
 
@@ -99,3 +99,18 @@ and Steam Workshop publication are separate steps; this source update does not p
 Cargo adaptation follows the vehicle's existing native inside-access callback, not a Van/StepVan model allowlist. Original seat indices and areas remain unchanged; only VLS-added positions are excluded from the passenger-count query. An installed living bed delegates cargo-area access to the same native callback using existing original passenger areas. Outside-only cargo and original front/rear restrictions remain intact.
 
 The 97 VLS profiles are each tested under all three native cargo callback contracts, not asserted to use the same policy. The tests cover all installed bed types, original seats and exterior states. Runtime scripts are not rebound. This is source-level validation, not a live PZ/Kahlua or multiplayer certification.
+
+## 3.8.12 small appliances
+
+The interchangeable small-appliance slot accepts a native coffee maker or toaster.
+It uses auxiliary battery power. Installed devices keep their native item names;
+an empty slot contributes no radial entry. The shared lightning shortcut and
+inventory-item Craft menu use one native workbench adapter, original recipes and
+completion callbacks. No separate addon is required.
+
+Owner-tested local crafting was accepted before publication. Both native coffee
+recipes passed the two-entry completion/power checks; real native workbench
+components were verified against the matching installed game definitions. This
+release does not claim exhaustive coffee-maker, controller or multiplayer testing.
+
+3.8.12：新增车载小电器位，支持咖啡机和烤面包机。 / Added a vehicle small-appliance slot supporting coffee makers and toasters.

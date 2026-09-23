@@ -59,5 +59,8 @@
   "IGUI_VLSChassisReduction": "车辆净减重：%1。货物重量不变。",
   "IGUI_VLSChassisProjected": "预计整车重量：%1（保持当前货物）。",
   "IGUI_VLSChassisConflict": "无法取得底盘原始重量，或重量已被其他模组修改。",
-  "IGUI_VLSTankSource": "水箱水源"
+  "IGUI_VLSTankSource": "水箱水源",
+  "IGUI_VehiclePartCatVLSPantry": "小电器",
+  "IGUI_VehiclePartVLSPantryCoffee": "小电器",
+  "IGUI_VehiclePartVLSPantryToaster": "旧测试电器（可拆回）"
 }

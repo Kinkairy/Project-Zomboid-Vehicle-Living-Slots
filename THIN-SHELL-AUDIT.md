@@ -55,3 +55,12 @@ calculation; no separate VLS skill gate was introduced.
 Full singleplayer/controller, every vehicle variant and all mod combinations
 have not been exhaustively retested. No speculative cooling or fluid-dispatch
 rewrite is included merely to reduce the amount of custom Lua.
+
+## 3.8.12 small-appliance adapter
+
+Radial and item-context crafting enter the same OpenHandcraftWindow adapter. A
+detached original CraftBench supplies UI identity; it never becomes a world or
+network-owned object. The native ISHandcraftAction owns recipe execution and
+completion; the shared derived action validates installed vehicle/part/item and
+auxiliary power, keeping output idempotence separate from native UI notification.
+Native recipe definitions and ingredient/output callbacks remain unchanged.
