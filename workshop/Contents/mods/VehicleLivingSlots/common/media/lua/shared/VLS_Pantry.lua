@@ -56,7 +56,6 @@ end
 function P.reason(character, vehicle, partId, itemId)
     if not character or not vehicle or character:getVehicle() ~= vehicle
             or not VLS.isSupportedVehicle(vehicle) then return "ContextMenu_VLSPantryInside" end
-    if not vehicle:isStopped() then return "ContextMenu_VLSPantryPark" end
     local part = vehicle:getPartById(partId)
     local item = part and part:getInventoryItem()
     if not P.accepts(part, item) or (itemId ~= nil and item:getID() ~= itemId) then

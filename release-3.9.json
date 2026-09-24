@@ -3,7 +3,7 @@
   "game_version": "B42.20",
   "workshop_id": "3791192579",
   "accepted_rollback_version": "3.9",
-  "runtime_sha256": "1870ead6b6385abd60c556ea3bec25a66c5b7561b2c117aeed3575101152c95c",
+  "runtime_sha256": "285c0aa327cc38b9453e7fde2ccb3ea7571bcec88ab77a28eaffcf0098dd1687",
   "file_count": 235,
   "files": {
     "VehicleLivingSlots/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
@@ -54,7 +54,7 @@
     "VehicleLivingSlots/common/media/lua/shared/VLS_Generator.lua": "426083606e66d849e9229821fc54074782aed53c87526fca5728cae33cedcec5",
     "VehicleLivingSlots/common/media/lua/shared/VLS_GeneratorOwnership.lua": "707cb5f392d0b6ce1e7d3b656ce324592463ae43c358fda43db6aaf26317668e",
     "VehicleLivingSlots/common/media/lua/shared/VLS_InstallGuard.lua": "6702c5412ffb1d7cf3acaf9bc0b7175ce1b492f2882f3c0626bd83a212f69817",
-    "VehicleLivingSlots/common/media/lua/shared/VLS_Pantry.lua": "4f7ae2a51c8715b2bfe368548bfa2988a270cd2a679f64d6e1e267b692887584",
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Pantry.lua": "cb9415345504cb449ce203ce63b28c4021f0520c7e9298fab96e7d11bdebadf8",
     "VehicleLivingSlots/common/media/lua/shared/VLS_PantryCraftAction.lua": "f94ee77517662ed34ae2cb272f6ce710ebea21b003104f52b73f1cadf0b62ee4",
     "VehicleLivingSlots/common/media/lua/shared/VLS_Propane.lua": "91a17f831add1b743a676e6767593dd4161800fbb3a761d59fc855326d2ac22b",
     "VehicleLivingSlots/common/media/lua/shared/VLS_PropaneRefillAction.lua": "a848310fc543a13f6ac6da299f3c5884297f7a7ae7f4c24e76f109a4d6bde321",
