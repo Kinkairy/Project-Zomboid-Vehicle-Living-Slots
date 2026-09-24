@@ -18,7 +18,7 @@ VLS={isUniversalPart=function(p)return p and p.managed end,
  getEquipmentCapability=function(i)return i and i.tv and "television" or nil end,
  isInstallationEnabled=function(p)return not p.disabled end,
  canUninstallManagedPart=function(p)return not p.disabled end,
- copyTelevisionStateToItem=function(p,i)i.copied=true end,allowedItems={}}
+ copyTelevisionStateToItem=function(p,i)i.copied=true;i:getDeviceData():cloneDevicePresets(p.currentTVPresets) end,allowedItems={}}
 package.loaded.VLS_Config=VLS
 instanceof=function(obj,kind)return obj and (kind=="InventoryItem" or kind=="Radio" and obj.radio) or false end
 local nativeInstance=instanceof
@@ -35,7 +35,10 @@ ISTransferAction={GetDropItemOffset=function()return 0,0,0 end}
 local function setup(tv)
  local i={tv=tv,radio=true,condition=100,id=5}
  i.setJobDelta=noop;i.setItemCapacity=noop
- function i:getDeviceData()return {getDevicePresets=function()return {}end,cloneDevicePresets=noop}end
+ local itemDevice={presets={name="original TV presets"}}
+ function itemDevice:getDevicePresets()return self.presets end
+ function itemDevice:cloneDevicePresets(presets)self.presets=presets end
+ function i:getDeviceData()return itemDevice end
  function i:getID()return self.id end
  function i:getCondition()return self.condition end
  function i:setCondition(c)self.condition=c end
@@ -47,14 +50,19 @@ local function setup(tv)
  local c={getInventory=function()return inv end,removeFromHands=noop,getPerkLevel=function()return 5 end,
  getCurrentSquare=function()return square end,sendObjectChange=noop,addMechanicsItem=noop}
  local v={transmitPartItem=noop,transmitPartCondition=noop,getMechanicalID=function()return 9 end}
- local p={managed=tv,item=nil,condition=100,signals=0,getVehicle=function()return v end}
+ local p={managed=tv,item=nil,condition=100,signals=0,currentTVPresets={name="latest companion TV presets"},getVehicle=function()return v end}
  function p:getInventoryItem()return self.item end
  function p:setInventoryItem(it)self.item=it end
  function p:getContainerContentAmount()return 0 end
  function p:getCondition()return self.condition end
  function p:setCondition(x)self.condition=x end
  function p:getDeviceData()return self.device end
- function p:createSignalDevice()self.signals=self.signals+1;self.device={cloneDevicePresets=noop,getDevicePresets=function()return {}end};return self.device end
+ function p:createSignalDevice()
+  self.signals=self.signals+1;self.device={presets={name="default radio presets"}}
+  function self.device:getDevicePresets()return self.presets end
+  function self.device:cloneDevicePresets(presets)self.presets=presets end
+  return self.device
+ end
  function p:getTable()return {skills={},complete=function()
    eq(instanceof,nativeInstance);eq(instanceof(i,"Radio"),true)
    if p.throwCallback then error("callback fault")end
@@ -63,16 +71,16 @@ local function setup(tv)
 end
 dofile(media.."shared/VLS_InstallGuard.lua")
 for _,mode in ipairs({"success","failure"})do
- test("native TV install "..mode.." preserves outcome and skips speaker",function()
+ test("native TV install "..mode.." preserves the complete original transaction",function()
   outcome=mode;local a,inv=setup(true)
-  eq(VLSTelevisionInstallVehiclePart.complete(a),true);eq(a.part.signals,0);eq(instanceof,nativeInstance)
+  eq(ISInstallVehiclePart.complete(a),true);eq(a.part.signals,1);eq(instanceof,nativeInstance)
   if mode=="success"then eq(a.part.item,a.item);eq(#inv.items,0)
   else eq(a.part.item,nil);eq(#inv.items,1);eq(a.item.condition,93);eq(a.character.xp,1)end
  end)
  for _,room in ipairs({true,false})do
   test("native TV uninstall "..mode.." room="..tostring(room),function()
    outcome=mode;local a,inv=setup(true);a.part.item=a.item;inv.items={};inv.room=room
-   eq(VLSTelevisionUninstallVehiclePart.complete(a),true);eq(a.part.signals,0);eq(a.item.copied,true);eq(instanceof,nativeInstance)
+   eq(VLSTelevisionUninstallVehiclePart.complete(a),true);eq(a.part.signals,1);eq(a.item.copied,true);eq(a.item:getDeviceData():getDevicePresets(),a.part.currentTVPresets);eq(instanceof,nativeInstance)
    if mode=="success"then eq(a.part.item,nil);eq(room and inv.items[1] or inv.dropped,a.item)
    else eq(a.part.item,a.item);eq(a.part.condition,93);eq(a.character.xp,1)end
   end)
@@ -81,16 +89,16 @@ end
 test("ordinary radio still creates native speaker",function()
  outcome="success";local a=setup(false);eq(ISInstallVehiclePart.complete(a),true);eq(a.part.signals,1)
 end)
-test("TV early native exception restores global predicate",function()
+test("TV early native exception never replaces global predicate",function()
  local a=setup(true);a.character.removeFromHands=function()error("pre-branch fault")end
- eq(pcall(VLSTelevisionInstallVehiclePart.complete,a),false);eq(instanceof,nativeInstance)
+ eq(pcall(ISInstallVehiclePart.complete,a),false);eq(instanceof,nativeInstance)
 end)
-test("TV callback exception sees restored predicate",function()
+test("TV callback exception preserves global predicate",function()
  outcome="success";local a=setup(true);a.part.throwCallback=true
- eq(pcall(VLSTelevisionInstallVehiclePart.complete,a),false);eq(instanceof,nativeInstance)
+ eq(pcall(ISInstallVehiclePart.complete,a),false);eq(instanceof,nativeInstance)
 end)
 test("disabled TV install consumes nothing",function()
- local a,inv=setup(true);a.part.disabled=true;eq(VLSTelevisionInstallVehiclePart.complete(a),false);eq(#inv.items,1)
+ local a,inv=setup(true);a.part.disabled=true;eq(ISInstallVehiclePart.complete(a),false);eq(#inv.items,1)
 end)
 -- Render the actual native seat UI, including mouse and joypad overlays.
 ISPanelJoypad=Base;ISPanelJoypad.render=noop

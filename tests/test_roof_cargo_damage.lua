@@ -14,7 +14,8 @@ isClient=function() return client end
 isServer=function() return not client end
 VLS={equipmentProfiles={},supportedMoveableSprites={},installationOptionProviders={}}
 package.loaded.VLS_Config=VLS
-Events={OnTick={Add=function() end}}
+local ticks={}
+Events={OnTick={Add=function(fn)ticks[#ticks+1]=fn end}}
 dofile(luaRoot..'shared/VLS_RoofCargo.lua')
 package.loaded.VLS_RoofCargo=VLSRoofCargo
 local A=dofile(luaRoot..'shared/VLS_BodyArmor.lua')
@@ -36,6 +37,9 @@ local function makeItem(maximum)
 end
 local function newVehicle(name)
     local v={name=name or 'Base.StepVan',parts={},byId={},transmissions={},god=false,stats=0}
+    function v:getSquare()return {} end
+    function v:transmitPartCondition()end
+    function v:transmitPartWindow()end
     function v:getScript() return {getFullName=function() return self.name end} end
     function v:getPartById(id) return self.byId[id] end
     function v:getPartCount() return #self.parts end
@@ -49,6 +53,8 @@ local function newVehicle(name)
         function p:getId() return self.id end
         function p:getVehicle() return self.vehicle end
         function p:getInventoryItem() return self.item end
+        function p:setCondition(value)self.item.condition=value end
+        function p:setModelVisible()end
         function p:getCondition() return self.item and self.item.condition or 0 end
         function p:getModData() return self.data end
         function p:damage(n)
@@ -149,6 +155,63 @@ test('old cargo damage remainder does not reactivate collision forwarding',funct
     p.data.VLSComponentDamage={itemID=original.id,remainder=0.99}
     D.Init(v);impact(v,20,20);noMutation(p,original)
     same(p.data.VLSComponentDamage.remainder,0.99)
+end)
+-- Real mechanics wrapper with a bounded stand-in for a native action result:
+-- a failed repair may lower condition without being a collision.
+package.loaded.VLS_ComponentDamage=D
+package.loaded.VLS_InstallGuard=true
+package.loaded["TimedActions/ISFixVehiclePartAction"]=true
+local function nativeComplete(self)
+    self.nativeCalls=(self.nativeCalls or 0)+1
+    local p=self.part or self.vehiclePart
+    p:setCondition(self.after)
+    if self.fail then error("native maintenance fault") end
+    return true
+end
+ISInstallVehiclePart={complete=nativeComplete}
+ISUninstallVehiclePart={complete=nativeComplete}
+ISFixVehiclePartAction={complete=nativeComplete}
+dofile(luaRoot.."shared/VLS_DamageMechanics.lua")
+local function armorVehicle(sourceId,armorId)
+    local v=newVehicle();local source=v.byId[sourceId] or v:add(sourceId)
+    local armor=v:add(armorId);local rack=v:add(R.fixedId)
+    A.Init(v,armor);D.Init(v)
+    return v,source,armor,rack
+end
+local function advanceArmor()for _=1,6 do for _,fn in ipairs(ticks)do fn()end end end
+for _,case in ipairs({{"EngineDoor","VLSBumperFront"},{"WindowFrontLeft","VLSArmorWindowFrontLeft"}})do
+ test("maintenance loss must not be absorbed by armor: "..case[1],function()
+    local v,source,armor,rack=armorVehicle(case[1],case[2])
+    local action={vehiclePart=source,after=80}
+    ISFixVehiclePartAction.complete(action);advanceArmor()
+    same(source:getCondition(),80);same(armor:getCondition(),100)
+    same(rack:getCondition(),100);same(action.nativeCalls,1)
+ end)
+end
+test("one real impact is settled once across tick, rack and mechanics entries",function()
+    local v,source,armor,rack=armorVehicle("EngineDoor","VLSBumperFront")
+    source:setCondition(90)
+    local action={vehiclePart=source,after=95}
+    ISFixVehiclePartAction.complete(action);advanceArmor();D.Update(v);D.Update(v)
+    same(source:getCondition(),95);same(armor:getCondition(),90)
+    same(rack:getCondition(),92);same(armor.damageCalls,1);same(rack.damageCalls,1)
+end)
+test("native maintenance exception still rebases damage before rethrow",function()
+    local v,source,armor,rack=armorVehicle("EngineDoor","VLSBumperFront")
+    local action={part=source,after=80,fail=true}
+    same(pcall(ISInstallVehiclePart.complete,action),false);advanceArmor();D.Update(v)
+    same(source:getCondition(),80);same(armor:getCondition(),100);same(rack:getCondition(),100)
+end)
+test("destroyed native window is not resurrected by armor",function()
+    local v,source,armor=armorVehicle("WindowFrontLeft","VLSArmorWindowFrontLeft")
+    source:setCondition(0);D.Update(v);advanceArmor()
+    same(source:getCondition(),0);same(armor:getCondition(),100)
+end)
+test("god-mode protection rebases both consumers without deferred damage",function()
+    local v,source,armor,rack=armorVehicle("EngineDoor","VLSBumperFront")
+    v.god=true;source:setCondition(90);D.Update(v)
+    v.god=false;advanceArmor();D.Update(v)
+    same(source:getCondition(),90);same(armor:getCondition(),100);same(rack:getCondition(),100)
 end)
 local failures=0
 for _,r in ipairs(results) do if not r.ok then failures=failures+1 end end

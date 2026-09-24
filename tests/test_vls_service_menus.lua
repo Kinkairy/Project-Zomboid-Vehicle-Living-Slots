@@ -11,6 +11,8 @@ local function list(items)
 end
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
 package.loaded["TimedActions/ISDeviceBatteryAction"]=true
+-- Cargo access is exercised against native Vehicles.lua in its own suite.
+package.loaded["Vehicles/Vehicles"]=true
 require "VLS_Config"
 require "VLS_RoofCargo"
 for _,name in ipairs({"TimedActions/ISBaseTimedAction","TimedActions/ISTimedActionQueue",

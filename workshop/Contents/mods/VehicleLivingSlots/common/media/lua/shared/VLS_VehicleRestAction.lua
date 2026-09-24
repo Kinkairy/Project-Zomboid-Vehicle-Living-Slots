@@ -15,10 +15,8 @@ function ISVLSVehicleRestAction:waitToStart()
 end
 
 function ISVLSVehicleRestAction:start()
-    self.character:setVariable("ExerciseStarted", false)
-    self.character:setVariable("ExerciseEnded", true)
-    self.character:setIsResting(true)
-    self.character:setBed(nil)
+    -- The native action already accepts an absent furniture object here.
+    return ISRestAction.start(self)
 end
 
 local function hasWaitingAction(action)

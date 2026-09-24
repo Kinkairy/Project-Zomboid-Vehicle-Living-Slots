@@ -9,6 +9,8 @@ require "Fluids/ISFluidTransferUI"
 require "Definitions/ContainerButtonIcons"
 require "ISUI/LootWindow/ISLootWindowContainerControls"
 require "ISUI/LootWindow/ISLootWindowObjectControlHandler"
+require "ISUI/LootWindow/Handlers/CombinationWasherDryerToggle"
+require "ISUI/LootWindow/Handlers/CombinationWasherDryerSetMode"
 require "Vehicles/ISUI/ISVehicleMenu"
 require "Vehicles/ISUI/ISVehicleSeatUI"
 require "TimedActions/ISInventoryTransferAction"
@@ -1181,10 +1183,128 @@ function VLSMicrowaveToggleHandler:new()
     return o
 end
 
+local function getLootLaundry(handler)
+    if not handler or not instanceof(handler.object, "BaseVehicle")
+            or not handler.container or not handler.playerObj then return nil end
+    local part = handler.container:getVehiclePart()
+    local vehicle = part and part:getVehicle()
+    if vehicle ~= handler.object or handler.playerObj:getVehicle() ~= vehicle
+            or VLS.getInstalledPart(vehicle, part and part:getId()) ~= part
+            or handler.container ~= part:getItemContainer() then return nil end
+    local capability = VLS.getEquipmentCapability(part:getInventoryItem())
+    if capability ~= "laundryCombo" then
+        return nil
+    end
+    return vehicle, part, VLS.getLaundryMode(part)
+end
+
+ISLootWindowObjectControlHandler_VLSLaundryToggle =
+    ISLootWindowObjectControlHandler:derive(
+        "ISLootWindowObjectControlHandler_VLSLaundryToggle")
+local VLSLaundryToggleHandler = ISLootWindowObjectControlHandler_VLSLaundryToggle
+
+local NativeLaundryToggle = ISLootWindowObjectControlHandler_CombinationWasherDryerToggle
+local NativeLaundryMode = ISLootWindowObjectControlHandler_CombinationWasherDryerSetMode
+
+-- These native UI methods only read mode/activation. Adapt their receiver
+-- locally; never replace instanceof or pass a Lua facade into a Java action.
+local function withLaundryControls(handler, callback, context)
+    local _, part = getLootLaundry(handler)
+    if not part then return end
+    local object = handler.object
+    handler.object = {
+        isActivated = function() return part:getModData().vlsLaundryActive == true end,
+        isModeWasher = function() return VLS.getLaundryMode(part) == "laundryWasher" end,
+    }
+    local ok, result = pcall(callback, handler, context)
+    handler.object = object
+    if not ok then error(result) end
+    return result
+end
+
+function VLSLaundryToggleHandler:shouldBeVisible()
+    if getCore():getGameMode() == "Tutorial" then return false end
+    local _, part = getLootLaundry(self)
+    return part ~= nil
+end
+
+function VLSLaundryToggleHandler:getControl()
+    return withLaundryControls(self, NativeLaundryToggle.getControl)
+end
+
+function VLSLaundryToggleHandler:handleJoypadContextMenu(context)
+    return withLaundryControls(self, NativeLaundryToggle.handleJoypadContextMenu, context)
+end
+
+function VLSLaundryToggleHandler:perform()
+    local vehicle, part, capability = getLootLaundry(self)
+    if not part then return end
+    local data = part:getModData()
+    local activate = not data.vlsLaundryActive
+    if activate then
+        if not VLS.hasAuxBatteryPower(vehicle,
+                VLS.getLaundryDrainPerMinute(capability)) then
+            HaloTextHelper.addBadText(self.playerObj,
+                getText("ContextMenu_VLSNoAuxPower"))
+            return
+        end
+        if capability == "laundryWasher" then
+            local tank = VLS.getInstalledWaterTank(vehicle)
+            local fluid = tank and tank:getFluidContainer()
+            local need = data.vlsLaundryPaused
+                and (tonumber(data.vlsLaundryWaterBudget) or 0)
+                    - (tonumber(data.vlsLaundryWaterSpent) or 0)
+                or VLS.getComboWaterPerCycle()
+            if not fluid or not VLS.isPureWaterFluid(fluid)
+                    or fluid:getAmount() + 0.0001 < need then
+                HaloTextHelper.addBadText(self.playerObj,
+                    getText("IGUI_RequiresWaterSupply"))
+                return
+            end
+        end
+    end
+    sendApplianceCommand(self.playerObj, "toggleLaundry", {
+        vehicle = vehicle:getId(), part = part:getId(),
+        item = part:getInventoryItem():getID(), active = activate,
+    })
+end
+
+function VLSLaundryToggleHandler:new()
+    local o = ISLootWindowObjectControlHandler.new(self)
+    o.altColor = true
+    return o
+end
+
+ISLootWindowObjectControlHandler_VLSLaundryMode =
+    ISLootWindowObjectControlHandler:derive("ISLootWindowObjectControlHandler_VLSLaundryMode")
+local VLSLaundryModeHandler = ISLootWindowObjectControlHandler_VLSLaundryMode
+VLSLaundryModeHandler.shouldBeVisible = VLSLaundryToggleHandler.shouldBeVisible
+VLSLaundryModeHandler.new = VLSLaundryToggleHandler.new
+
+function VLSLaundryModeHandler:getControl()
+    return withLaundryControls(self, NativeLaundryMode.getControl)
+end
+
+function VLSLaundryModeHandler:handleJoypadContextMenu(context)
+    return withLaundryControls(self, NativeLaundryMode.handleJoypadContextMenu, context)
+end
+
+function VLSLaundryModeHandler:perform()
+    local vehicle, part, mode = getLootLaundry(self)
+    if not part then return end
+    sendApplianceCommand(self.playerObj, "setLaundryMode", {
+        vehicle = vehicle:getId(), part = part:getId(),
+        item = part:getInventoryItem():getID(),
+        mode = mode == "laundryWasher" and "dryer" or "washer",
+    })
+end
+
 -- AddHandler updates an existing handler with the same Type. Register on
 -- every client Lua load so reconnect/reload cannot leave stale classes.
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveSettingsHandler, true)
 ISLootWindowContainerControls.AddHandler(VLSMicrowaveToggleHandler, true)
+ISLootWindowContainerControls.AddHandler(VLSLaundryToggleHandler, true)
+ISLootWindowContainerControls.AddHandler(VLSLaundryModeHandler, true)
 
 local function onVLSFluidTransferClick(ui, button)
     if button.internal ~= "TRANSFER" then return vanillaFluidOnButton(ui, button) end
@@ -1843,6 +1963,22 @@ local function showRadialMenuWithVLSSlices(vanillaShowRadialMenu, playerObj)
     if not ok then error(err) end
 end
 
+-- Native onBackpackMouseUp selects through ISButton.onclick, then again
+-- after dropItemsInContainer. The first selection rebuilds/reuses buttons;
+-- VLS freezer ordering can bind this button to another container by then.
+-- Let the native outer handler perform its one final selection/drag drop.
+local function onReorderedContainerMouseUp(button, x, y)
+    local onclick = button.onclick
+    if onclick ~= ISInventoryPage.onBackpackClick then
+        return ISInventoryPage.onBackpackMouseUp(button, x, y)
+    end
+    button.onclick = nil
+    local ok, result = pcall(ISInventoryPage.onBackpackMouseUp, button, x, y)
+    button.onclick = onclick
+    if not ok then error(result) end
+    return result
+end
+
 local function refreshVehicleContainerLabels(page, phase)
     CargoR6.safeInventoryPhase(page, phase)
     if phase == "end" and page then
@@ -1926,6 +2062,7 @@ local function refreshVehicleContainerLabels(page, phase)
     end
     for index, button in ipairs(page.backpacks) do
         button:setY(((index - 1) * page.buttonSize) - 1)
+        button.onMouseUp = onReorderedContainerMouseUp
     end
 end
 

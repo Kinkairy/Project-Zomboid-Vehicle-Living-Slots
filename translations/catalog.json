@@ -261,9 +261,9 @@
     },
     {
       "key": "Sandbox_VehicleLivingSlots_WaterPurificationPowerConsumption",
-      "en": "Vehicle water-purification power consumption",
-      "cn": "房车净水耗电量",
-      "ch": "房車淨水耗電量",
+      "en": "Water-tank purification power consumption",
+      "cn": "水箱净水耗电量",
+      "ch": "水箱淨水耗電量",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
     },
@@ -788,22 +788,6 @@
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
     },
     {
-      "key": "Sandbox_VehicleLivingSlots_EnableAuxBatteries",
-      "en": "Enable auxiliary battery installation",
-      "cn": "启用辅助电池安装",
-      "ch": "啟用輔助電池安裝",
-      "reviewed": true,
-      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
-    },
-    {
-      "key": "Sandbox_VehicleLivingSlots_EnableAuxBatteries_tooltip",
-      "en": "Disabling prevents new installations. Existing equipment and contents remain usable and removable. Re-enabling only permits installation.",
-      "cn": "关闭后禁止新增安装；已有设备和内容保留，可继续使用及正常拆卸。重新启用只恢复安装资格。",
-      "ch": "關閉後禁止新增安裝；已有設備和內容保留，可繼續使用及正常拆卸。重新啟用只恢復安裝資格。",
-      "reviewed": true,
-      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
-    },
-    {
       "key": "Sandbox_VehicleLivingSlots_EnableWaterTanks",
       "en": "Enable cabin water tanks",
       "cn": "启用车内水箱",
@@ -1004,14 +988,6 @@
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
     },
     {
-      "key": "IGUI_VehiclePartVLSPantryToaster",
-      "en": "Previous Test Appliance (Remove)",
-      "cn": "旧测试电器（可拆回）",
-      "ch": "舊測試電器（可拆回）",
-      "reviewed": true,
-      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
-    },
-    {
       "key": "ContextMenu_VLSPantryCoffeeMug",
       "en": "Make Coffee (Mug)",
       "cn": "泡咖啡（马克杯）",
@@ -1082,6 +1058,86 @@
       "ch": "暫時無法開啟電器製作選單",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_ComboWaterPerCycle",
+      "en": "Combo washer/dryer water consumption",
+      "cn": "洗烘一体机耗水量",
+      "ch": "洗烘一體機耗水量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_ComboWaterPerCycle_tooltip",
+      "en": "Clean water used over one 90-game-minute wash cycle. Default: 5 units. Requires a vehicle water tank with enough clean water. Drying uses no water.",
+      "cn": "一体机完整 90 游戏分钟洗衣周期消耗的净水量。默认 5 单位；需有足量净水的车载水箱。烘干不耗水。",
+      "ch": "一體機完整 90 遊戲分鐘洗衣週期消耗的淨水量。預設 5 單位；需有足量淨水的車載水箱。烘乾不耗水。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_ComboWashPowerConsumption",
+      "en": "Combo washer/dryer power consumption",
+      "cn": "洗烘一体机耗电量",
+      "ch": "洗烘一體機耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_ComboWashPowerConsumption_tooltip",
+      "en": "Shared by washing and drying. Displayed at 1000 times the actual auxiliary-battery drain per active game minute. Default: 0.4, matching the microwave.",
+      "cn": "洗衣与烘干共用此设置。数值为工作时每游戏分钟实际副电瓶耗电量的 1000 倍。默认 0.4，与微波炉相同。",
+      "ch": "洗衣與烘乾共用此設定。數值為工作時每遊戲分鐘實際副電瓶耗電量的 1000 倍。預設 0.4，與微波爐相同。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_SmallAppliancePowerConsumption",
+      "en": "Small-appliance power consumption",
+      "cn": "小电器耗电量",
+      "ch": "小電器耗電量",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_SmallAppliancePowerConsumption_tooltip",
+      "en": "Displayed at 1000 times the auxiliary-battery drain per coffee or toast craft. Default: 0.2; ten crafts use the same power as five minutes of microwave operation at default settings.",
+      "cn": "每次使用咖啡机或烤面包机实际耗电量的 1000 倍显示值。默认 0.2；默认设置下制作 10 次等于微波炉运行 5 分钟。",
+      "ch": "每次使用咖啡機或烤麵包機實際耗電量的 1000 倍顯示值。預設 0.2；預設設定下製作 10 次等於微波爐運行 5 分鐘。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableComboWasherDryers",
+      "en": "Enable cabin combo washer/dryers",
+      "cn": "启用车内洗烘一体机",
+      "ch": "啟用車內洗烘一體機",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableSmallAppliances",
+      "en": "Enable cabin small appliances",
+      "cn": "启用车内小电器",
+      "ch": "啟用車內小電器",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableComboWasherDryers_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment remains usable and removable.",
+      "cn": "关闭后禁止新增安装；已有设备仍可使用及拆卸。",
+      "ch": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableSmallAppliances_tooltip",
+      "en": "Disabling prevents new installations. Existing equipment remains usable and removable.",
+      "cn": "关闭后禁止新增安装；已有设备仍可使用及拆卸。",
+      "ch": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
     }
   ]
 }

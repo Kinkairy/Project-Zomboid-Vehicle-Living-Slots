@@ -87,6 +87,12 @@ VLS={VERSION='3.8.8',Server={},isSupportedVehicle=function(v)return v and v.id==
  getWaterPurificationCapacity=function(v)return v.charge*10 end,
  getWaterPurificationCost=function(a)return a/10 end,
  canAcceptNormalizedWater=function(f,a)return not f.refuse and not f.locked and f.amount+a<=f.cap end}
+local powerConfig=assert(io.open(path.."shared/VLS_Config.lua")):read("*a")
+local powerSource=assert(powerConfig:match("(VLS.VehiclePower =.-)function VLS.getInstalledWaterBottlePart"))
+local batteryGetter=VLS.getAuxBatteryPart
+assert(loadstring(powerSource))()
+VLS.getAuxBatteryPart=batteryGetter
+VLS.getWaterPurificationDrainPerLiter=function()return 0.1 end
 package.loaded.VLS_Config=VLS
 getTimestampMs=function()return 0 end
 Events={OnClientCommand={Add=noop},EveryOneMinute={Add=noop}}

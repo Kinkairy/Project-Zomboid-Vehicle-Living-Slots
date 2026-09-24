@@ -37,22 +37,51 @@ end
 
 -- The actual native action still owns manual item selection, duration, models,
 -- animation and outputs. Only its world-workbench predicate is adapted.
-function VLSPantryCraftAction:withNativeLogic(callback)
-    local nativeNew = HandcraftLogic.new
-    HandcraftLogic.new = function(character, bench, object)
-        local logic = nativeNew(character, bench, object)
-        if character ~= self.character or bench ~= nil or object ~= nil then return logic end
-        return setmetatable({}, { __index = function(_, key)
-            if key == "canPerformCurrentRecipe" then
-                return function()
-                    return self:isValid() and P.canCraft(character, logic, self.craftRecipe)
-                end
+local function bindNativeLogic(action, logic)
+    if not logic then return nil end
+    return setmetatable({}, { __index = function(_, key)
+        if key == "canPerformCurrentRecipe" then
+            return function()
+                return action:isValid()
+                    and P.canCraft(action.character, logic, action.craftRecipe)
             end
-            return function(_, ...) return logic[key](logic, ...) end
-        end })
+        end
+        return function(_, ...) return logic[key](logic, ...) end
+    end })
+end
+
+function VLSPantryCraftAction:withNativeLogic(callback)
+    -- Native start/serverStart construct their own logic. Intercept only this
+    -- action's field assignment, preserving its identity and every public
+    -- constructor. Other actions, including ones started by callbacks, are not
+    -- affected. Restore the original metatable even when native code fails.
+    local previousMeta = getmetatable(self)
+    local previousIndex = previousMeta.__index
+    local previousNewIndex = previousMeta.__newindex
+    local logic = rawget(self, "logic")
+    local scopedMeta = {}
+    for key, value in pairs(previousMeta) do scopedMeta[key] = value end
+    scopedMeta.__index = function(action, key)
+        if key == "logic" then return logic end
+        if type(previousIndex) == "function" then return previousIndex(action, key) end
+        return previousIndex[key]
     end
+    scopedMeta.__newindex = function(action, key, value)
+        if key == "logic" then
+            logic = bindNativeLogic(action, value)
+        elseif type(previousNewIndex) == "function" then
+            previousNewIndex(action, key, value)
+        elseif previousNewIndex then
+            previousNewIndex[key] = value
+        else
+            rawset(action, key, value)
+        end
+    end
+    rawset(self, "logic", nil)
+    setmetatable(self, scopedMeta)
     local ok, result = pcall(callback, self)
-    HandcraftLogic.new = nativeNew
+    setmetatable(self, previousMeta)
+    rawset(self, "logic", logic)
     if not ok then error(result, 0) end
     return result
 end
@@ -97,7 +126,7 @@ function VLSPantryCraftAction:performRecipe()
                 local succeeded = realLogic:performCurrentRecipe()
                 if succeeded then
                     spent = true
-                    VLS.consumeAuxBattery(vehicle, P.ENERGY_PER_USE)
+                    VLS.consumeAuxBattery(vehicle, VLS.getSmallApplianceDrainPerUse())
                 end
                 return succeeded
             end
@@ -108,6 +137,30 @@ function VLSPantryCraftAction:performRecipe()
     self.logic = realLogic
     if not ok then error(result, 0) end
     return result
+end
+
+-- Only native constructor arguments are serialized, not arbitrary action fields.
+-- Preserve vehicle authority explicitly while the original action owns crafting.
+local nativeNew = ISHandcraftAction.new
+function VLSPantryCraftAction:new(character, vehicleId, partId, applianceId, choice,
+        manualInputs, items, recipeItem)
+    local craftRecipe = P.recipe(choice)
+    local o
+    if craftRecipe then
+        o = nativeNew(self, character, craftRecipe, P.carriedContainers(character),
+            nil, nil, manualInputs or {}, items, recipeItem, 1, 0)
+    else
+        -- An invalid remote choice must be rejected without a constructor crash.
+        o = ISBaseTimedAction.new(self, character)
+        o.maxTime = 0
+    end
+    o.vehicleId, o.partId, o.applianceId, o.choice = vehicleId, partId, applianceId, choice
+    -- Java conversion requires a table; nil/false mean native automatic inputs.
+    -- Preserve the converted table from nativeNew only for actual manual inputs.
+    if not manualInputs or not craftRecipe then o.manualInputs = nil end
+    o.items, o.recipeItem = items, recipeItem
+    o.stopOnWalk, o.stopOnRun = true, true
+    return o
 end
 
 return VLSPantryCraftAction

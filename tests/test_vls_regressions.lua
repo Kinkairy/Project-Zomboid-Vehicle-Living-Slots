@@ -10,17 +10,6 @@ local function test(name,fn)
 end
 local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
 local noop=function() end
-local function read(path)
-    local f=assert(io.open(path));local s=f:read("*a");f:close();return s
-end
-test("outside water fill keeps its endpoint sync helper",function()
-    local source=read(root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/server/VLS_ApplianceServer.lua")
-    local definition=assert(source:find("local function syncFluidTransferEndpoint(vehicle, item, part)",1,true))
-    local call=assert(source:find("syncFluidTransferEndpoint(vehicle, tank, part)",1,true))
-    assert(definition<call)
-    assert(source:find("VLS.syncVehicleWaterTank(vehicle, part)",definition,true))
-    assert(source:find("vehicle:transmitPartItem(part)",definition,true))
-end)
 local V={FREEZER_PART_BY_UNIVERSAL={},UNIVERSAL_PART_BY_FREEZER={},allowedItems={},equipmentProfiles={},sleepingBagTypes={},WATER_TANK_PART_IDS={},vehicleProfiles={},mechanicsDisplayProviders={},getAuxBatteryPart=noop,getPartDisplayName=noop}
 package.loaded.VLS_Config=V
 package.loaded.VLS_Propane=V

@@ -24,6 +24,24 @@ option VehicleLivingSlots.TelevisionPowerConsumption = {
     translation = VehicleLivingSlots_TelevisionPowerConsumption,
 }
 
+option VehicleLivingSlots.ComboWaterPerCycle = {
+    type = double, min = 0.1, max = 100.0, default = 5.0,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_ComboWaterPerCycle,
+}
+
+option VehicleLivingSlots.ComboWashPowerConsumption = {
+    type = double, min = 0.01, max = 100.0, default = 0.4,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_ComboWashPowerConsumption,
+}
+
+option VehicleLivingSlots.SmallAppliancePowerConsumption = {
+    type = double, min = 0.01, max = 100.0, default = 0.2,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_SmallAppliancePowerConsumption,
+}
+
 option VehicleLivingSlots.EnableBeds = {
     type = boolean, default = true,
     page = VehicleLivingSlots,
@@ -66,10 +84,16 @@ option VehicleLivingSlots.EnableTelevisions = {
     translation = VehicleLivingSlots_EnableTelevisions,
 }
 
-option VehicleLivingSlots.EnableAuxBatteries = {
+option VehicleLivingSlots.EnableComboWasherDryers = {
     type = boolean, default = true,
     page = VehicleLivingSlots,
-    translation = VehicleLivingSlots_EnableAuxBatteries,
+    translation = VehicleLivingSlots_EnableComboWasherDryers,
+}
+
+option VehicleLivingSlots.EnableSmallAppliances = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableSmallAppliances,
 }
 
 option VehicleLivingSlots.EnableWaterTanks = {

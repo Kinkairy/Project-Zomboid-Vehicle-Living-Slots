@@ -297,6 +297,48 @@ for id in pairs(R.allowed)do
   end)
  end
 end
+-- Compare roof lists against the game's own packing recipes when native media is supplied.
+if arg[2] then
+ VLS.resolveEquipmentType=function(it)return it:getFullType() end
+ local recipes=read(arg[2]..'/scripts/generated/recipes/recipes_sleepingbags_and_tents.txt')
+ local nativeTents={}
+ for _,recipe in ipairs({'PackTent','UnpackTent'})do
+  local body=assert(recipes:match('craftRecipe%s+'..recipe..'%s*(%b{})'))
+  local inputs=assert(body:match('inputs%s*(%b{})'))
+  for ft in assert(inputs:match('%[([^%]]+)%]')):gmatch('[^;]+')do nativeTents[ft]=true end
+ end
+ for _,script in ipairs({'VLS_StepVanRoofRackAdjustment.txt','VLS_VehicleRoofAdapters.txt'})do
+  local body=assert(read(media..'scripts/'..script):match('part%s+VLSRoofTent%s*(%b{})'))
+  local types={}
+  for ft in assert(body:match('itemType%s*=%s*([^,]+),')):gmatch('[^;%s]+')do types[ft]=true end
+  -- The approved roof model accepts its configured packed tent, not every
+  -- tent in vanilla. Check script/Lua agreement and all native candidates.
+  test('configured roof tent is native and matches the runtime whitelist '..script,function()
+   local n=0
+   for ft in pairs(types)do assert(nativeTents[ft],'not a native tent: '..ft);assert(R.allowed.VLSRoofTent[ft]);n=n+1 end
+   assert(n>0)
+   for ft in pairs(R.allowed.VLSRoofTent)do assert(types[ft],'script omitted '..ft)end
+  end)
+  for ft in pairs(nativeTents)do
+   test('native tent validation without tools '..script..' '..ft,function()
+    local p=part('Base.StepVan','VLSRoofTent');local v=p.vehicle
+    function p:getItemType()return {contains=function(_,value)return types[value] or false end}end
+    v.parts[R.fixedId]={getInventoryItem=function()return item(R.fixedType)end}
+    local chr=character({materials={}});chr.inv.items={}
+    local tent=item(ft);chr.inv:AddItem(tent)
+    if not types[ft] then assert(not R.validateInstall(chr,p,tent,true));return end
+    assert(R.validateInstall(chr,p,tent,true))
+    eq(tent:getFullType(),ft) -- validation must not convert or replace the item
+    p.installed=tent;eq(R.validateInstall(chr,p,tent,true),false);p.installed=nil
+    local other=item('Base.SleepingBag');chr.inv:AddItem(other)
+    assert(not R.validateInstall(chr,p,other,true))
+    chr.inv:DoRemoveItem(tent);eq(R.validateInstall(chr,p,tent,true),false)
+    chr.inv:AddItem(tent);v.parts[R.fixedId]=nil
+    eq(R.validateInstall(chr,p,tent,true),false)
+   end)
+  end
+ end
+end
 -- Actual presentation provider delegates petrol state names to native item:getName.
 package.loaded['Definitions/ContainerButtonIcons']=true
 package.loaded['VLS_VehicleMechanicsIcons']=true

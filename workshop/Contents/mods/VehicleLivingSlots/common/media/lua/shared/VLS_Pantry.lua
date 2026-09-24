@@ -3,12 +3,10 @@ require "VLS_InstallGuard"
 
 VLSPantry = VLSPantry or {}
 local P = VLSPantry
-P.VERSION = "3.8.12"
-P.ENERGY_PER_USE = 0.0004
+P.VERSION = "3.9"
 -- Keep the first test slot ID so saved appliances stay installed.
 P.PART_ID = "VLSPantryCoffee"
-P.LEGACY_ID = "VLSPantryToaster"
-P.slots = { VLSPantryCoffee = {}, VLSPantryToaster = { legacy = true } }
+P.slots = { VLSPantryCoffee = {} }
 P.devices = {
     ["Base.Mov_CoffeeMaker"] = { itemType = "Base.Mov_CoffeeMaker", sprite = "appliances_cooking_01_56", entity = "Base.Coffee_Machine" },
     ["Base.Mov_Toaster"] = { itemType = "Base.Mov_Toaster", sprite = "appliances_cooking_01_32", entity = "Base.Toaster" },
@@ -42,11 +40,11 @@ end
 function P.accepts(part, item)
     local itemType = P.resolveType(item)
     return P.isPart(part) and itemType ~= nil
-        and (part:getId() == P.PART_ID or itemType == "Base.Mov_Toaster")
 end
 
 function P.canInstall(part, item)
     return part and part:getId() == P.PART_ID and P.accepts(part, item)
+        and VLS.isInstallationEnabled(part, item)
 end
 
 function P.CreateEmpty(vehicle, part)
@@ -65,7 +63,7 @@ function P.reason(character, vehicle, partId, itemId)
         return "ContextMenu_VLSPantryMissing"
     end
     if item:getCondition() <= 0 then return "ContextMenu_VLSPantryBroken" end
-    if not VLS.hasAuxBatteryPower(vehicle, P.ENERGY_PER_USE) then return "ContextMenu_VLSNoAuxPower" end
+    if not VLS.hasAuxBatteryPower(vehicle, VLS.getSmallApplianceDrainPerUse()) then return "ContextMenu_VLSNoAuxPower" end
 end
 
 function P.carriedContainers(character)
@@ -136,7 +134,9 @@ if not P.installHooksApplied then
         return allowed(part, item)
     end
     VLS.allowedItems[P.PART_ID] = { ["Base.Mov_CoffeeMaker"] = true, ["Base.Mov_Toaster"] = true }
-    VLS.allowedItems[P.LEGACY_ID] = {}
+    VLS.installationOptionProviders.pantry = function(part)
+        if P.isPart(part) then return "EnableSmallAppliances" end
+    end
     VLS.mechanicsDisplayProviders.pantry = P.isPart
 end
 

@@ -26,7 +26,7 @@ dofile(native.."/shared/Vehicles/TimedActions/ISInstallVehiclePart.lua")
 dofile(native.."/shared/Vehicles/TimedActions/ISUninstallVehiclePart.lua")
 package.loaded["Vehicles/TimedActions/ISInstallVehiclePart"]=true
 package.loaded["Vehicles/TimedActions/ISUninstallVehiclePart"]=true
-local V={allowedItems={},mechanicsDisplayProviders={},isUniversalPart=function()return false end,
+local V={allowedItems={},mechanicsDisplayProviders={},installationOptionProviders={},isUniversalPart=function()return false end,
  isSupportedVehicle=function(v)return v.supported end,resolveEquipmentType=noop,getEquipmentProfileByType=noop,
  isAllowedItem=function()return true end,isInstallationEnabled=function()return true end,
  canUninstallManagedPart=function()return true end}

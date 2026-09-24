@@ -10,36 +10,9 @@ local function isVLSTelevision(part, item)
         and item:getDeviceData() ~= nil
 end
 
--- B42.20 treats every Radio item (including TVs) as a vehicle speaker.
--- Delegate the whole transaction to vanilla and skip only that one type branch
--- for this exact TV. The one-shot predicate restores itself BEFORE part callbacks
--- run, so TV companion setup and every other instanceof call stay native.
--- The outer pcall also restores it if vanilla fails before reaching the branch.
-local function completeTelevision(action,item,nativeComplete)
-    local original=instanceof
-    local skipSpeaker
-    skipSpeaker=function(object,kind)
-        if object==item and kind=="Radio" then
-            instanceof=original
-            return false
-        end
-        return original(object,kind)
-    end
-    instanceof=skipSpeaker
-    local ok,result=pcall(nativeComplete,action)
-    if instanceof==skipSpeaker then instanceof=original end
-    if not ok then error(result,0) end
-    return result
-end
-
-VLSTelevisionInstallVehiclePart =
-    ISInstallVehiclePart:derive("VLSTelevisionInstallVehiclePart")
-function VLSTelevisionInstallVehiclePart:complete()
-    if not isVLSTelevision(self.part,self.item)
-            or not VLS.isInstallationEnabled(self.part,self.item) then return false end
-    return completeTelevision(self,self.item,ISInstallVehiclePart.complete)
-end
-
+-- The native Radio branch only copies presets and creates DeviceData. It is
+-- valid for televisions too: allow the original installation transaction in
+-- full instead of overriding the global instanceof predicate.
 VLSTelevisionUninstallVehiclePart =
     ISUninstallVehiclePart:derive("VLSTelevisionUninstallVehiclePart")
 function VLSTelevisionUninstallVehiclePart:complete()
@@ -47,7 +20,12 @@ function VLSTelevisionUninstallVehiclePart:complete()
     if not isVLSTelevision(self.part,item)
             or not VLS.canUninstallManagedPart(self.part) then return false end
     VLS.copyTelevisionStateToItem(self.part,item)
-    return completeTelevision(self,item,ISUninstallVehiclePart.complete)
+    -- Native removal copies this slot's presets into the item. The active TV
+    -- uses its companion device, so supply those same current presets through
+    -- the native slot endpoint before delegating the complete transaction.
+    local device = self.part:getDeviceData() or self.part:createSignalDevice()
+    device:cloneDevicePresets(item:getDeviceData():getDevicePresets())
+    return ISUninstallVehiclePart.complete(self)
 end
 
 if not VLS.installGuardApplied then
@@ -73,15 +51,6 @@ if not VLS.installGuardApplied then
     function ISInstallVehiclePart:complete()
         if not VLS.isInstallationEnabled(self.part, self.item) then return false end
         return vanillaComplete(self)
-    end
-
-    local vanillaInstallNew = ISInstallVehiclePart.new
-    function ISInstallVehiclePart:new(character, part, item, maxTimeInit)
-        if isVLSTelevision(part, item) then
-            return vanillaInstallNew(VLSTelevisionInstallVehiclePart,
-                character, part, item, maxTimeInit)
-        end
-        return vanillaInstallNew(self, character, part, item, maxTimeInit)
     end
 
     local vanillaUninstallIsValid = ISUninstallVehiclePart.isValid

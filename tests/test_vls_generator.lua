@@ -7,6 +7,8 @@ local base=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/"
 package.path=base.."shared/?.lua;"..base.."server/?.lua;"..native.."/shared/?.lua;"..package.path
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
 package.loaded["TimedActions/ISDeviceBatteryAction"]=true
+-- Cargo access is exercised against native Vehicles.lua in its own suite.
+package.loaded["Vehicles/Vehicles"]=true
 package.loaded["TimedActions/ISInventoryTransferUtil"]=true
 local V=require "VLS_Config"
 package.loaded.VLS_RoofCargo=true
@@ -267,7 +269,9 @@ test("unconnected native projection permits normal vehicle uninstall checks",fun
  local code=file:read("*a");file:close()
  local fn=assert(code:match("(function R.UninstallTest.-)\n%-%- Disassembly"))
  local env=setmetatable({R=VLSRoofCargo,VLS=V},{__index=_G})
- assert(load(fn,"uninstall-test","t",env))()
+ local loader=assert((loadstring or load)(fn,"uninstall-test"))
+ if setfenv then setfenv(loader,env) else loader=assert(load(fn,"uninstall-test","t",env)) end
+ loader()
  local R=VLSRoofCargo
  R.isActionPart=function()return true end;R.fabricationSpec=function()return nil end
  R.empty=function()return true end;R.serverCargoToolsReady=function()return true end

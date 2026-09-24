@@ -80,7 +80,8 @@ function D.Init(vehicle)
 end
 
 function D.IsSource(part)
-    return part and SOURCE_IDS[part:getId()] or false
+    return part and (SOURCE_IDS[part:getId()]
+        or (VLS.BodyArmor and VLS.BodyArmor.IsSource(part))) or false
 end
 
 -- Mechanics completion may call this after a source part is installed or repaired.
@@ -98,6 +99,7 @@ function D.RebaseSource(part)
         itemID = itemId(part:getInventoryItem()),
         condition = condition(part),
     }
+    if VLS.BodyArmor then VLS.BodyArmor.RebaseSource(part) end
 end
 
 local function region(part)
@@ -199,6 +201,7 @@ function D.Update(vehicle)
         vehicle:updatePartStats()
         vehicle:updateBulletStats()
     end
+    if VLS.BodyArmor then VLS.BodyArmor.SettleVehicle(vehicle, guarded) end
 end
 
 -- Native vehicle callbacks resolve this candidate namespace at script load.

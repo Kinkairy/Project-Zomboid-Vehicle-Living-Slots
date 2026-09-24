@@ -138,6 +138,19 @@ local function completeWash(action,nativeComplete,body)
     return result==true
 end
 
+-- Native actions own facing, metabolism, progress and queue behavior. Only
+-- substitute the physical vehicle endpoint for a map sink during that call.
+local function atVehicle(action, field, nativeMethod)
+    local vehicle = resolveAction(action)
+    if not vehicle then return end
+    local previous = action[field]
+    action[field] = vehicle
+    local ok, result = pcall(nativeMethod, action)
+    action[field] = previous
+    if not ok then error(result, 0) end
+    return result
+end
+
 VLSWashYourselfFromTank=ISWashYourself:derive("VLSWashYourselfFromTank")
 function VLSWashYourselfFromTank:isValid()
     local vehicle,_,_,fluid=resolveAction(self)
@@ -145,9 +158,7 @@ function VLSWashYourselfFromTank:isValid()
         and ISWashYourself.GetRequiredWater(self.character)>0
 end
 function VLSWashYourselfFromTank:update()
-    local vehicle=resolveAction(self)
-    if vehicle then self.character:faceThisObject(vehicle) end
-    self.character:setMetabolicTarget(Metabolics.LightDomestic)
+    return atVehicle(self, "sink", ISWashYourself.update)
 end
 function VLSWashYourselfFromTank:getDuration()
     self.soaps=self.character:getInventory():getSoapList(nil,false)
@@ -173,10 +184,7 @@ function VLSWashClothingFromTank:isValid()
     return fluid:getAmount()>=ISWashClothing.GetRequiredWater(self.item)
 end
 function VLSWashClothingFromTank:update()
-    local vehicle=resolveAction(self)
-    if vehicle then self.character:faceThisObject(vehicle) end
-    self.item:setJobDelta(self:getJobDelta())
-    self.character:setMetabolicTarget(Metabolics.HeavyDomestic)
+    return atVehicle(self, "sink", ISWashClothing.update)
 end
 function VLSWashClothingFromTank:getDuration()
     if not refreshClothing(self) then return 0 end
@@ -197,6 +205,17 @@ end
 -- Vanilla take/drink action with only the fluid endpoint replaced. The vehicle
 -- is a real world object for facing/animation; the installed item remains the
 -- authoritative source of fluid.
+-- Capture before client-only constructor routing is installed.
+local nativeTakeWaterNew=ISTakeWaterAction.new
+local function waterEndpoint(fluid)
+    return {
+        getFluidAmount=function() return fluid and fluid:getAmount() or 0 end,
+        hasFluid=function() return fluid~=nil and fluid:getAmount()>0 end,
+        -- A vehicle tap has no world-fixture sprite/properties. Native start()
+        -- uses the tap animation/sound when properties are absent.
+        getProperties=function() return nil end,
+    }
+end
 VLSTakeWaterFromTank=ISTakeWaterAction:derive("VLSTakeWaterFromTank")
 function VLSTakeWaterFromTank:isValid()
     local vehicle,_,_,fluid=resolveAction(self)
@@ -205,14 +224,14 @@ function VLSTakeWaterFromTank:isValid()
         local inventory=self.character:getInventory()
         local item=inventory and inventory:getItemWithIDRecursiv(self.item:getID())
         if item~=self.item or not item:getFluidContainer() then return false end
-        if not FluidContainer.CanTransfer(fluid,item:getFluidContainer()) then return false end
     end
-    return not self.character:hasFullInventory()
+    -- Do not invalidate a running action when its target becomes full: the
+    -- server may sync that state before native perform() advances the queue.
+    return ISTakeWaterAction.isValid({character=self.character,item=self.item,
+        waterObject=waterEndpoint(fluid)})
 end
 function VLSTakeWaterFromTank:waitToStart()
-    local vehicle=resolveAction(self)
-    if vehicle then self.character:faceThisObject(vehicle) end
-    return self.character:shouldBeTurning()
+    return atVehicle(self, "waterObject", ISCleanBandage.waitToStart)
 end
 VLSTakeWaterFromTank.updateUse=ISTakeWaterAction.updateUse
 function VLSTakeWaterFromTank:update()
@@ -225,34 +244,14 @@ function VLSTakeWaterFromTank:update()
     end
 end
 function VLSTakeWaterFromTank:start()
-    local vehicle=resolveAction(self)
+    local vehicle,_,_,fluid=resolveAction(self)
     if not vehicle then return end
+    self.waterObject=waterEndpoint(fluid)
+    local ok,err=pcall(ISTakeWaterAction.start,self)
     self.waterObject=vehicle
-
-    -- B42.20 ISTakeWaterAction:start() classifies normal world water sources
-    -- through waterObject:getSprite():getName(). BaseVehicle is valid for facing
-    -- and our fluid endpoint, but it has no world-object sprite name, which makes
-    -- vanilla luautils.stringStarts(nil, ...) throw. Keep the vanilla take/drink
-    -- action setup while skipping only that world-sprite classification step.
-    if self.item then
-        self.item:setBeingFilled(true)
-        self.item:setJobType(getText("ContextMenu_Fill") .. self.item:getName())
-        self.item:setJobDelta(0.0)
-        self.sound=self.character:playSound(self.item:getFillFromTapSound() or "GetWaterFromTap")
-        self:setAnimVariable("PourType",self.item:getPourType())
-        self:setActionAnim("fill_container_tap")
-        if self.character:isSecondaryHandItem(nil) then
-            self:setOverrideHandModels(nil,self.item:getStaticModel())
-        else
-            self:setOverrideHandModels(self.item:getStaticModel(),nil)
-        end
-    else
-        self.sound=self.character:playSound("DrinkingFromTap")
-        self:setActionAnim("drink_tap")
-        self:setOverrideHandModels(nil,nil)
-    end
-    self.character:reportEvent("EventTakeWater")
+    if not ok then error(err) end
 end
+
 function VLSTakeWaterFromTank:transferFluid(amount)
     if isClient() or not amount or amount<=0 then return end
     local vehicle,part,tank,fluid=resolveAction(self)
@@ -287,29 +286,11 @@ VLSTakeWaterFromTank.serverStart=ISTakeWaterAction.serverStart
 VLSTakeWaterFromTank.animEvent=ISTakeWaterAction.animEvent
 VLSTakeWaterFromTank.getDuration=ISTakeWaterAction.getDuration
 function VLSTakeWaterFromTank:new(character,vehicleId,partId,tankId,item)
-    local o=ISBaseTimedAction.new(self,character)
-    o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId;o.item=item
     local vehicle,_,_,fluid=W.resolve(character,vehicleId,partId,tankId,true)
-    if not vehicle then o.maxTime=1;o.waterUnit=0;return o end
+    local o=nativeTakeWaterNew(self,character,item,waterEndpoint(fluid),
+        fluid~=nil and fluid:contains(Fluid.TaintedWater) or false)
+    o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId
     o.waterObject=vehicle
-    o.waterTaintedCL=fluid:contains(Fluid.TaintedWater)
-    local available=fluid:getAmount()
-    if item and item:getFluidContainer() then
-        o.startUsedAmount=item:getFluidContainer():getAmount()
-        o.endUsedAmount=item:getFluidContainer():getCapacity()
-        local freeInventoryCapacity=character:getFreeInventoryCapacity()
-        if item:isEquipped() or character:isEquippedClothing(item) then
-            freeInventoryCapacity=freeInventoryCapacity/ZomboidGlobals.EquippedOrWornEncumbranceMultiplier
-        end
-        o.waterUnit=math.max(0,math.min(o.endUsedAmount-o.startUsedAmount,available,freeInventoryCapacity))
-    else
-        local thirst=character:getStats():get(CharacterStat.THIRST)*2
-        o.waterUnit=math.max(0,math.min(thirst,available))
-        o.startUsedAmount=0
-        o.startThirst=thirst
-        o.endUsedAmount=math.min(o.waterUnit,1)
-    end
-    o.maxTime=o:getDuration()
     return o
 end
 
@@ -322,14 +303,10 @@ function VLSCleanBandageFromTank:isValid()
         and self.item and self.item:getContainer()==self.character:getInventory()
 end
 function VLSCleanBandageFromTank:waitToStart()
-    local vehicle=resolveAction(self)
-    if vehicle then self.character:faceThisObject(vehicle) end
-    return self.character:shouldBeTurning()
+    return atVehicle(self, "waterObject", ISCleanBandage.waitToStart)
 end
 function VLSCleanBandageFromTank:update()
-    self.item:setJobDelta(self:getJobDelta())
-    local vehicle=resolveAction(self)
-    if vehicle then self.character:faceThisObject(vehicle) end
+    return atVehicle(self, "waterObject", ISCleanBandage.update)
 end
 VLSCleanBandageFromTank.start=ISCleanBandage.start
 VLSCleanBandageFromTank.stopSound=ISCleanBandage.stopSound

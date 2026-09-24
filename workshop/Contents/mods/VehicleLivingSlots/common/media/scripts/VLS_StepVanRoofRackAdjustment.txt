@@ -510,7 +510,7 @@ module Base
             itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
-            setAllModelsVisible = true,
+            setAllModelsVisible = false,
             repairMechanic = false,
             durability = 5,
             model PetrolCan1
@@ -553,7 +553,7 @@ module Base
             itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
-            setAllModelsVisible = true,
+            setAllModelsVisible = false,
             repairMechanic = false,
             durability = 5,
             model PetrolCan2
@@ -596,7 +596,7 @@ module Base
             itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
-            setAllModelsVisible = true,
+            setAllModelsVisible = false,
             repairMechanic = false,
             durability = 5,
             model PetrolCan3

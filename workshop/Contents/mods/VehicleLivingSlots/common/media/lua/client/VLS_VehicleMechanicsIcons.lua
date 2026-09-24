@@ -16,7 +16,7 @@ end
 function VLS.getMechanicsItemName(part, item)
     local provider = providerFor(part)
     if provider and provider.itemName then return provider.itemName(part, item) end
-    return item:getDisplayName()
+    return VLS.getEquipmentDisplayName(item)
 end
 function VLS.getMechanicsPartName(part)
     local provider = providerFor(part)
@@ -182,6 +182,9 @@ local function applyFurnitureIcons(mechanics, part)
         if option and profile and profile.moveableName then
             option.name = Translator.getMoveableDisplayName(profile.moveableName)
         end
+        if option and profile and profile.capability == "laundryCombo" then
+            option.name = getItemNameFromFullType("Base.Mov_BlueComboWasherDryer")
+        end
         if option and profile and profile.previewSprite then
             local texture = getPreviewTexture(itemType)
             if texture then
@@ -195,11 +198,29 @@ local function applyFurnitureIcons(mechanics, part)
             option.iconTexture = nil
             option.itemForTexture = iconItem
         end
+        -- These moveables have a default inventory icon. Keep their native
+        -- install candidates and callbacks, but draw the known world preview
+        -- in each item submenu as well as the parent row.
+        if option and (itemType == "Base.Mov_TrailerFridge"
+                or (profile and profile.capability == "laundryCombo")) then
+            local texture = getPreviewTexture(itemType)
+            local itemMenu = option.subOption
+                and mechanics.context:getSubMenu(option.subOption) or nil
+            if texture and itemMenu then
+                for _, itemOption in ipairs(itemMenu.options or {}) do
+                    if itemOption.itemForTexture and VLS.resolveEquipmentType(
+                            itemOption.itemForTexture) == itemType then
+                        itemOption.iconTexture = texture
+                    end
+                end
+            end
+        end
         if option and not VLS.isInstallationEnabled(part, itemType) then
             option.notAvailable = true
         end
 
     end
+
 end
 local function normalizeMenu(mechanics, part, menu)
     if not menu then return end

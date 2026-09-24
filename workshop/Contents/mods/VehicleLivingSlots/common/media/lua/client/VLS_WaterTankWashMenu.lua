@@ -61,82 +61,34 @@ local function makeProxy(character,vehicle,part,tank,fluid)
     return proxy
 end
 
-function W.queueBody(character,vehicleId,partId,tankId)
-    if not W.resolve(character,vehicleId,partId,tankId,true) then return end
-    ISTimedActionQueue.add(VLSWashYourselfFromTank:new(character,vehicleId,partId,tankId))
-end
-
-function W.queueClothes(character,vehicleId,partId,tankId,items)
-    if not W.resolve(character,vehicleId,partId,tankId,true) then return end
-    for _,item in ipairs(items or {}) do
-        if W.isWashable(item) then
-            ISInventoryPaneContextMenu.transferIfNeeded(character,item)
-            ISTimedActionQueue.add(VLSWashClothingFromTank:new(character,vehicleId,partId,tankId,item))
-        end
+-- Keep native callbacks (including cached references) and their queue/bag/mask
+-- handling. Adapt only constructors for objects registered by this module.
+-- Parameter names/order are part of NetTimedAction's multiplayer wire contract.
+local function installNativeConstructors()
+    if W.nativeConstructorsInstalled then return end
+    W.nativeConstructorsInstalled=true
+    local takeWaterNew=ISTakeWaterAction.new
+    function ISTakeWaterAction:new(character, item, waterObject, waterTaintedCL)
+        local info=proxyInfo(waterObject)
+        if not info then return takeWaterNew(self,character,item,waterObject,waterTaintedCL) end
+        return VLSTakeWaterFromTank:new(character,info.vehicle,info.part,info.tank,item)
     end
-end
-
-local function queueDrink(playerNum,info)
-    local character=getSpecificPlayer(playerNum)
-    if not character or not W.resolve(character,info.vehicle,info.part,info.tank,true) then return end
-    ISTimedActionQueue.add(VLSTakeWaterFromTank:new(character,info.vehicle,info.part,info.tank,nil))
-end
-
-local function queueTakeWater(playerNum,info,waterContainerList,waterContainer)
-    local character=getSpecificPlayer(playerNum)
-    if not character or not W.resolve(character,info.vehicle,info.part,info.tank,true) then return end
-    if not waterContainerList or #waterContainerList==0 then waterContainerList={waterContainer} end
-    local playerInv=character:getInventory()
-    for _,item in ipairs(waterContainerList) do
-        if item and item:getFluidContainer() then
-            local original=item:getContainer()
-            local returnToContainer=original and original:isInCharacterInventory(character) and original or nil
-            ISWorldObjectContextMenu.transferIfNeeded(character,item)
-            ISTimedActionQueue.add(VLSTakeWaterFromTank:new(character,info.vehicle,info.part,info.tank,item))
-            if returnToContainer and returnToContainer~=playerInv then
-                ISTimedActionQueue.add(ISInventoryTransferUtil.newInventoryTransferAction(
-                    character,item,playerInv,returnToContainer))
-            end
-        end
-    end
-end
-
-local function installNativeCallbacks()
-    if W.nativeCallbacksInstalled then return end
-    W.nativeCallbacksInstalled=true
-    W.nativeOnWashYourself=ISWorldObjectContextMenu.onWashYourself
-    W.nativeOnWashClothing=ISWorldObjectContextMenu.onWashClothing
-    W.nativeOnDrink=ISWorldObjectContextMenu.onDrink
-    W.nativeOnTakeWater=ISWorldObjectContextMenu.onTakeWater
-    W.nativeCleanBandageNew=ISCleanBandage.new
-
-    ISWorldObjectContextMenu.onWashYourself=function(playerObj,sink,soapList)
+    local washYourselfNew=ISWashYourself.new
+    function ISWashYourself:new(character, sink)
         local info=proxyInfo(sink)
-        if not info then return W.nativeOnWashYourself(playerObj,sink,soapList) end
-        return W.queueBody(playerObj,info.vehicle,info.part,info.tank)
+        if not info then return washYourselfNew(self,character,sink) end
+        return VLSWashYourselfFromTank:new(character,info.vehicle,info.part,info.tank)
     end
-    ISWorldObjectContextMenu.onWashClothing=function(playerObj,sink,soapList,washList,singleClothing)
+    local washClothingNew=ISWashClothing.new
+    function ISWashClothing:new(character, sink, item, bloodAmount, dirtAmount, noSoap)
         local info=proxyInfo(sink)
-        if not info then return W.nativeOnWashClothing(playerObj,sink,soapList,washList,singleClothing) end
-        local items=washList
-        if not items then items={singleClothing} end
-        return W.queueClothes(playerObj,info.vehicle,info.part,info.tank,items)
+        if not info then return washClothingNew(self,character,sink,item,bloodAmount,dirtAmount,noSoap) end
+        return VLSWashClothingFromTank:new(character,info.vehicle,info.part,info.tank,item)
     end
-    ISWorldObjectContextMenu.onDrink=function(worldobjects,waterObject,playerNum)
+    local cleanBandageNew=ISCleanBandage.new
+    function ISCleanBandage:new(character, item, waterObject, recipe)
         local info=proxyInfo(waterObject)
-        if not info then return W.nativeOnDrink(worldobjects,waterObject,playerNum) end
-        return queueDrink(playerNum,info)
-    end
-    ISWorldObjectContextMenu.onTakeWater=function(worldobjects,waterObject,waterContainerList,waterContainer,playerNum)
-        local info=proxyInfo(waterObject)
-        if not info then
-            return W.nativeOnTakeWater(worldobjects,waterObject,waterContainerList,waterContainer,playerNum)
-        end
-        return queueTakeWater(playerNum,info,waterContainerList,waterContainer)
-    end
-    ISCleanBandage.new=function(self,character,item,waterObject,recipe)
-        local info=proxyInfo(waterObject)
-        if not info then return W.nativeCleanBandageNew(self,character,item,waterObject,recipe) end
+        if not info then return cleanBandageNew(self,character,item,waterObject,recipe) end
         return VLSCleanBandageFromTank:new(character,info.vehicle,info.part,info.tank,item,recipe)
     end
 end
@@ -190,7 +142,7 @@ local function addTankToNativeFetch(playerNum,context,worldobjects,test)
     if not vehicle then return end
     if test then return ISWorldObjectContextMenu.setTest() end
 
-    installNativeCallbacks()
+    installNativeConstructors()
     local fetch=ISWorldObjectContextMenu.fetchVars
     if not fetch then return end
     fetch.storeWater=fetch.storeWater or {}

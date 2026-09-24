@@ -21,12 +21,14 @@ local function hasManagedAppliance(vehicle)
         local part = VLS.getInstalledPart(vehicle, partId)
         local capability = part
             and VLS.getEquipmentCapability(part:getInventoryItem()) or nil
-        if capability == "cooling" and (VLS.getAuxBatteryCharge(vehicle) > 0
-                or VLS.getFridgeDrainPerMinute() == 0) then return true end
+        if capability == "cooling" and VLS.hasAuxBatteryPower(vehicle,
+                VLS.getFridgeDrainPerMinute()) then return true end
         if capability == "cooking"
                 and part:getModData().vlsMicrowaveActive then
             return true
         end
+        if capability == "laundryCombo"
+                and part:getModData().vlsLaundryActive then return true end
         if capability == "television" then
             local deviceData = VLS.getTelevisionDeviceData(part)
             if deviceData and deviceData:getIsTurnedOn() then return true end
@@ -123,13 +125,11 @@ local function settleMicrowave(vehicle, part, currentHours)
     local elapsedSeconds = math.min(remaining, math.max(0, currentHours - previous) * 3600)
     data.vlsMicrowaveLastHours = currentHours
     local drainPerMinute = VLS.getMicrowaveDrainPerMinute()
-    local charge = VLS.getAuxBatteryCharge(vehicle)
-    local poweredSeconds = elapsedSeconds
-    if drainPerMinute > 0 then
-        poweredSeconds = math.min(poweredSeconds, math.max(0, charge) / drainPerMinute * 60)
-    end
+    local poweredSeconds = math.min(elapsedSeconds,
+        VLS.VehiclePower.capacity(vehicle, drainPerMinute) * 60)
     if poweredSeconds > 0 and drainPerMinute > 0 then
-        VLS.consumeAuxBattery(vehicle, math.min(charge, poweredSeconds / 60 * drainPerMinute))
+        VLS.consumeAuxBattery(vehicle, math.min(VLS.getAuxBatteryCharge(vehicle),
+            poweredSeconds / 60 * drainPerMinute))
     end
     data.vlsMicrowaveRemaining = math.max(0, remaining - poweredSeconds)
     if data.vlsMicrowaveRemaining <= 0.000001
@@ -256,9 +256,7 @@ local canAcceptNormalizedWater = VLS.canAcceptNormalizedWater
 -- IsoObject reserve water is stored in these two native modData fields.
 local function waterTransaction(vehicle, target, sourceFluid, sourceObject, operation)
     local copies, objects, temporaries = {}, {}, {}
-    local batteryPart = VLS.getAuxBatteryPart(vehicle)
-    local battery = batteryPart and batteryPart:getInventoryItem()
-    local charge = battery and battery:getCurrentUsesFloat()
+    local powerSnapshot = VLS.VehiclePower.snapshot(vehicle)
     local function keep(container)
         temporaries[#temporaries + 1] = container
         return container
@@ -338,7 +336,9 @@ local function waterTransaction(vehicle, target, sourceFluid, sourceObject, oper
                 data.waterAmount, data.waterMaxAmount = entry.waterAmount, entry.waterMaxAmount
             end)
         end
-        if battery then restore("battery", function() battery:setUsedDelta(charge) end) end
+        restore("battery", function()
+            assert(VLS.VehiclePower.restore(powerSnapshot, true), "battery_changed")
+        end)
         print("[VLS 3.8.9] water transaction failed: " .. tostring(moved))
         if #failures > 0 then
             print("[VLS 3.8.9] WATER ROLLBACK FAILED: " .. table.concat(failures, ";"))
@@ -359,8 +359,8 @@ local function waterTransaction(vehicle, target, sourceFluid, sourceObject, oper
         end)
         if not synced then print("[VLS 3.8.9] water source sync failed: " .. tostring(err)) end
     end
-    if batteryPart then
-        local synced, err = pcall(function() vehicle:transmitPartUsedDelta(batteryPart) end)
+    if powerSnapshot then
+        local synced, err = pcall(function() VLS.VehiclePower.sync(vehicle, powerSnapshot.part) end)
         if not synced then print("[VLS 3.8.9] water battery sync failed: " .. tostring(err)) end
     end
     for _, container in ipairs(temporaries) do FluidContainer.DisposeContainer(container) end
@@ -368,25 +368,12 @@ local function waterTransaction(vehicle, target, sourceFluid, sourceObject, oper
 end
 
 local function reservePurificationPower(vehicle, amount)
-    local cost = VLS.getWaterPurificationCost(amount)
-    if cost <= 0 then return {} end
-    local part = VLS.getAuxBatteryPart(vehicle)
-    local item = part and part:getInventoryItem()
-    if not item then return nil end
-    local charge = item:getCurrentUsesFloat()
-    if charge < cost then return nil end
-    item:setUsedDelta(math.max(0, charge - cost))
-    return { part = part, item = item, cost = cost }
+    return VLS.VehiclePower.reserve(vehicle, VLS.getWaterPurificationCost(amount))
 end
 
 local function finishPurificationPower(vehicle, reservation, accepted)
-    if not reservation.item then return end
-    local used = VLS.getWaterPurificationCost(accepted)
-    local unused = math.max(0, reservation.cost - used)
-    if unused > 0 then
-        reservation.item:setUsedDelta(math.min(1,
-            reservation.item:getCurrentUsesFloat() + unused))
-    end
+    assert(VLS.VehiclePower.settle(reservation,
+        VLS.getWaterPurificationCost(accepted)), "power_reservation_changed")
 end
 
 -- The original ISFluidTransferAction owns progress and transfer calculation.
@@ -657,6 +644,257 @@ local function processCooledContainer(container, currentHours, vehicleId,
     end)
 end
 
+-- Native map-machine updates require grid power and a world-object identity.
+-- Keep one vehicle cycle/resource adapter; use native item fields and native
+-- container/item packets, never a second client-side cleaning implementation.
+local function syncLaundryItem(item)
+    if not isServer() then return end
+    local players = getOnlinePlayers()
+    for index = 0, players:size() - 1 do
+        -- B42.20 syncItemFields(player, item) targets that player's connection.
+        -- A nil player does NOT broadcast. The packet retains the vehicle
+        -- container identity and includes clothing visuals, patches and fields.
+        syncItemFields(players:get(index), item)
+    end
+end
+
+local function replaceLaundryItem(container, item, fullType)
+    local replacement = instanceItem(fullType)
+    if not replacement then return false end
+    container:Remove(item)
+    container:AddItem(replacement)
+    if isServer() then
+        sendRemoveItemFromContainer(container, item)
+        sendAddItemToContainer(container, replacement)
+    end
+    return true
+end
+
+-- B42.20 ClothingWasherLogic updates clothing each paid game minute:
+-- wetness 100, and -2 percentage points of blood/dirt on each visual part.
+-- Its helpers are private Java methods; use the same public visual setters
+-- and native total calculators here. Dryer clothing loses one wetness point.
+local function updateLaundryClothing(part, mode)
+    local container = part:getItemContainer()
+    if not container then return end
+    local items = container:getItems()
+    for index = 0, items:size() - 1 do
+        local item = items:get(index)
+        if instanceof(item, "Clothing") then
+            if mode == "laundryWasher" then
+                local visual = item:getVisual()
+                if visual then
+                    for i = 0, BloodBodyPartType.MAX:index() - 1 do
+                        local bodyPart = BloodBodyPartType.FromIndex(i)
+                        local blood = visual:getBlood(bodyPart)
+                        local dirt = visual:getDirt(bodyPart)
+                        if blood > 0 then
+                            visual:setBlood(bodyPart, math.max(0, blood - 0.02))
+                        end
+                        if dirt > 0 then
+                            visual:setDirt(bodyPart, math.max(0, dirt - 0.02))
+                        end
+                    end
+                    BloodClothingType.calcTotalBloodLevel(item)
+                    BloodClothingType.calcTotalDirtLevel(item)
+                end
+                item:setWetness(100)
+            else
+                item:setWetness(math.max(0, item:getWetness() - 1))
+            end
+            syncLaundryItem(item)
+        end
+    end
+end
+
+local function finishLaundry(vehicle, part, mode)
+    local container = part:getItemContainer()
+    if not container then return end
+    local items = container:getItems()
+    -- Backward iteration permits native container replacements (wet towels,
+    -- ItemAfterCleaning) without processing a new item twice.
+    for index = items:size() - 1, 0, -1 do
+        local item = items:get(index)
+        if instanceof(item, "Clothing") then
+            if mode == "laundryWasher" then
+                local visual = item:getVisual()
+                if visual then
+                    visual:removeBlood()
+                    visual:removeDirt()
+                end
+                item:setBloodLevel(0)
+                item:setDirtiness(0)
+                item:setWetness(100)
+            else
+                item:setWetness(0)
+            end
+            syncLaundryItem(item)
+        elseif mode == "laundryWasher" then
+            local replacement = item:getModData().ItemAfterCleaning
+            if type(replacement) == "string" then
+                replaceLaundryItem(container, item, replacement)
+            elseif instanceof(item, "InventoryContainer") then
+                item:setBloodLevel(0)
+                syncLaundryItem(item)
+            end
+        elseif item:isWet() and item:getItemWhenDry() then
+            if replaceLaundryItem(container, item, item:getItemWhenDry()) then
+                item:setWet(false)
+                getCell():addToProcessItemsRemove(item)
+            end
+        end
+    end
+end
+
+local function processLaundry(vehicle, part, capability)
+    local data = part:getModData()
+    local item = part:getInventoryItem()
+    if not data.vlsLaundryActive then return false end
+    if not item or item:getID() ~= data.vlsLaundryItemId
+            or item:getCondition() <= 0 or part:getCondition() <= 0 then
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = false
+        return true
+    end
+    local remaining = tonumber(data.vlsLaundryRemaining) or 0
+    if remaining <= 0 or remaining > VLS.LAUNDRY_CYCLE_MINUTES then
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = false
+        return true
+    end
+    local power = VLS.getLaundryDrainPerMinute(capability)
+    local tank, tankPart, fluid, waterStep
+    if capability == "laundryWasher" then
+        tank, tankPart = VLS.getInstalledWaterTank(vehicle)
+        fluid = tank and tank:getFluidContainer()
+        local budget = tonumber(data.vlsLaundryWaterBudget)
+            or VLS.getComboWaterPerCycle()
+        waterStep = remaining == 1
+            and math.max(0, budget - (tonumber(data.vlsLaundryWaterSpent) or 0))
+            or budget / VLS.LAUNDRY_CYCLE_MINUTES
+    end
+    if not VLS.hasAuxBatteryPower(vehicle, power)
+            or (capability == "laundryWasher" and (not fluid
+                or not VLS.isPureWaterFluid(fluid)
+                or fluid:getAmount() + 0.0001 < waterStep)) then
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = true
+        return true
+    end
+    if not VLS.consumeAuxBattery(vehicle, power) then
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = true
+        return true
+    end
+    if waterStep and waterStep > 0 then
+        fluid:removeFluid(waterStep)
+        data.vlsLaundryWaterSpent =
+            (tonumber(data.vlsLaundryWaterSpent) or 0) + waterStep
+        VLS.syncVehicleWaterTank(vehicle, tankPart)
+        vehicle:transmitPartModData(tankPart)
+        vehicle:transmitPartItem(tankPart)
+    end
+    remaining = remaining - 1
+    data.vlsLaundryRemaining = remaining
+    if remaining > 0 then
+        updateLaundryClothing(part, capability)
+    end
+    if remaining == 0 then
+        finishLaundry(vehicle, part, capability)
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = false
+    end
+    return true
+end
+
+function VLS.Server.toggleLaundry(player, args)
+    if type(args) ~= "table" or not isCommandId(args.vehicle)
+            or type(args.part) ~= "string" or args.part == ""
+            or not isCommandId(args.item) or type(args.active) ~= "boolean" then
+        return rejectCommand("toggleLaundry", "required_vehicle_part_item_active")
+    end
+    local vehicle = getPlayerVehicle(player, args)
+    if not vehicle then return rejectCommand("toggleLaundry", "not_in_supported_vehicle") end
+    local part = VLS.getInstalledPart(vehicle, args.part)
+    local item = part and part:getInventoryItem()
+    local capability = item and VLS.getEquipmentCapability(item)
+    if not part or not item or item:getID() ~= args.item
+            or capability ~= "laundryCombo" then
+        return rejectCommand("toggleLaundry", "equipment_missing_or_replaced")
+    end
+    local data = part:getModData()
+    local mode = VLS.getLaundryMode(part)
+    if args.active then
+        if item:getCondition() <= 0 or part:getCondition() <= 0 then
+            return rejectCommand("toggleLaundry", "broken_equipment")
+        end
+        if data.vlsLaundryActive then return true end
+        local power = VLS.getLaundryDrainPerMinute(mode)
+        if not VLS.hasAuxBatteryPower(vehicle, power) then
+            return rejectCommand("toggleLaundry", "no_aux_power")
+        end
+        local resume = data.vlsLaundryPaused == true
+            and data.vlsLaundryItemId == item:getID()
+            and type(data.vlsLaundryRemaining) == "number"
+            and data.vlsLaundryRemaining > 0
+        local budget = resume and (tonumber(data.vlsLaundryWaterBudget) or 0)
+            or VLS.getComboWaterPerCycle()
+        local spent = resume and (tonumber(data.vlsLaundryWaterSpent) or 0) or 0
+        if mode == "laundryWasher" then
+            local tank = VLS.getInstalledWaterTank(vehicle)
+            local fluid = tank and tank:getFluidContainer()
+            if not fluid or not VLS.isPureWaterFluid(fluid)
+                    or fluid:getAmount() + 0.0001 < budget - spent then
+                return rejectCommand("toggleLaundry", "insufficient_clean_water")
+            end
+        end
+        data.vlsLaundryItemId = item:getID()
+        data.vlsLaundryWaterBudget = budget
+        data.vlsLaundryWaterSpent = spent
+        data.vlsLaundryRemaining = resume and data.vlsLaundryRemaining
+            or VLS.LAUNDRY_CYCLE_MINUTES
+        data.vlsLaundryActive = true
+        data.vlsLaundryPaused = false
+    else
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = false
+        data.vlsLaundryRemaining = 0
+    end
+    vehicle:transmitPartModData(part)
+    VLS.Server.trackVehicle(vehicle)
+    return true
+end
+
+function VLS.Server.setLaundryMode(player, args)
+    if type(args) ~= "table" or not isCommandId(args.vehicle)
+            or type(args.part) ~= "string" or args.part == ""
+            or not isCommandId(args.item)
+            or (args.mode ~= "washer" and args.mode ~= "dryer") then
+        return rejectCommand("setLaundryMode", "required_vehicle_part_item_mode")
+    end
+    local vehicle = getPlayerVehicle(player, args)
+    local part = vehicle and VLS.getInstalledPart(vehicle, args.part)
+    local item = part and part:getInventoryItem()
+    if not item or item:getID() ~= args.item
+            or VLS.getEquipmentCapability(item) ~= "laundryCombo" then
+        return rejectCommand("setLaundryMode", "equipment_missing_or_replaced")
+    end
+    local mode = args.mode == "dryer" and "laundryDryer" or "laundryWasher"
+    if VLS.getLaundryMode(part) == mode then return true end
+    local data = part:getModData()
+    -- Like the native combination machine, switching mode stops the old cycle.
+    data.vlsLaundryMode = mode
+    data.vlsLaundryActive = false
+    data.vlsLaundryPaused = false
+    data.vlsLaundryRemaining = 0
+    data.vlsLaundryWaterBudget = nil
+    data.vlsLaundryWaterSpent = nil
+    VLS.ensureUniversalContainerProfile(part)
+    vehicle:transmitPartModData(part)
+    VLS.Server.trackVehicle(vehicle)
+    return true
+end
+
 local function processTrackedVehicle(vehicle, elapsedMinutes, currentHours, seen)
     local profile = vehicle and VLS.getVehicleProfile(vehicle)
     if not profile then return end
@@ -682,6 +920,9 @@ local function processTrackedVehicle(vehicle, elapsedMinutes, currentHours, seen
                 publishCoolingSnapshot(vehicle, part)
                 if freezerPart then publishCoolingSnapshot(vehicle, freezerPart) end
             end
+        elseif capability == "laundryCombo"
+                and data.vlsLaundryActive then
+            changed = processLaundry(vehicle, part, VLS.getLaundryMode(part))
         elseif capability == "television" then
             local deviceData = VLS.getTelevisionDeviceData(part)
             if deviceData and deviceData:getIsTurnedOn() then
@@ -730,6 +971,8 @@ local commands = {
     setMicrowaveParams = VLS.Server.setMicrowaveParams,
     toggleMicrowave = VLS.Server.toggleMicrowave,
     stopMicrowave = VLS.Server.stopMicrowave,
+    toggleLaundry = VLS.Server.toggleLaundry,
+    setLaundryMode = VLS.Server.setLaundryMode,
     fillWaterTank = VLS.Server.fillWaterTank,
     requestCoolingSnapshot = VLS.Server.requestCoolingSnapshot,
 }

@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.8.12"
-VLS.BUILD_ID = "release-3.8.12-small-appliances"
+VLS.VERSION = "3.9"
+VLS.BUILD_ID = "release-3.9-feedback-fixes-test"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
@@ -67,6 +67,10 @@ VLS.FRIDGE_POWER_CONSUMPTION = 0.04
 VLS.MICROWAVE_POWER_CONSUMPTION = 0.4
 VLS.WATER_PURIFICATION_POWER_CONSUMPTION = 0.4
 VLS.TELEVISION_POWER_CONSUMPTION = 0.4
+VLS.COMBO_POWER_CONSUMPTION = 0.4
+VLS.SMALL_APPLIANCE_POWER_CONSUMPTION = 0.2
+VLS.COMBO_WATER_PER_CYCLE = 5.0
+VLS.LAUNDRY_CYCLE_MINUTES = 90
 VLS.Create = VLS.Create or {}
 VLS.Init = VLS.Init or {}
 VLS.PartComplete = VLS.PartComplete or {}
@@ -259,6 +263,16 @@ VLS.equipmentProfiles = {
         containerPutSound = "PutItemInFridge",
         containerTakeSound = "PutItemInFridge",
     },
+    ["Base.Mov_TrailerFridge"] = {
+        capability = "cooling",
+        previewSprite = "location_trailer_02_10",
+        capacity = VLS.FRIDGE_CAPACITY,
+        containerType = "fridge",
+        containerOpenSound = "OpenFridge",
+        containerCloseSound = "CloseFridge",
+        containerPutSound = "PutItemInFridge",
+        containerTakeSound = "PutItemInFridge",
+    },
     ["Base.WaterDispenserBottle"] = {
         capability = "waterDispenser",
     },
@@ -274,6 +288,20 @@ VLS.equipmentProfiles = {
         capability = "television",
         previewSprite = "appliances_television_01_0",
     },
+}
+
+-- The vanilla blue combo is a real Base moveable item. Keep its native item
+-- type and ordinary vehicle-part install transaction; only its vehicle
+-- container and wash/dry modes need a vehicle adapter.
+VLS.equipmentProfiles["Base.Mov_BlueComboWasherDryer"] = {
+    capability = "laundryCombo",
+    previewSprite = "appliances_laundry_01_0",
+    capacity = 20,
+    containerType = "clothingwasher",
+    containerOpenSound = "WashingMachineOpen",
+    containerCloseSound = "WashingMachineClose",
+    containerPutSound = "WashingMachineTransferItem",
+    containerTakeSound = "WashingMachineTransferItem",
 }
 
 -- B42's ordinary floor-mounted kitchen counters.  The matching wall/upper
@@ -334,6 +362,10 @@ VLS.supportedMoveableSprites = {
     ["appliances_refrigeration_01_25"] = "Base.Mov_FridgeMini",
     ["appliances_refrigeration_01_26"] = "Base.Mov_FridgeMini",
     ["appliances_refrigeration_01_27"] = "Base.Mov_FridgeMini",
+    ["location_trailer_02_10"] = "Base.Mov_TrailerFridge",
+    ["location_trailer_02_11"] = "Base.Mov_TrailerFridge",
+    ["location_trailer_02_16"] = "Base.Mov_TrailerFridge",
+    ["location_trailer_02_17"] = "Base.Mov_TrailerFridge",
     ["furniture_storage_01_48"] = "Base.Mov_SmallPineCabinet",
     ["furniture_storage_01_49"] = "Base.Mov_SmallPineCabinet",
     ["furniture_storage_01_50"] = "Base.Mov_SmallPineCabinet",
@@ -343,6 +375,11 @@ VLS.supportedMoveableSprites = {
     ["furniture_storage_02_10"] = "Base.Mov_GreenWallLocker",
     ["furniture_storage_02_11"] = "Base.Mov_GreenWallLocker",
 }
+
+for spriteIndex = 0, 3 do
+    VLS.supportedMoveableSprites["appliances_laundry_01_" .. spriteIndex] =
+        "Base.Mov_BlueComboWasherDryer"
+end
 
 for _, family in ipairs(lowerCounterFamilies) do
     local name, sprite = family[1], family[2]
@@ -550,6 +587,7 @@ VLS.installationOptions = {
     weaponStorage = "EnableWeaponCabinets", cooking = "EnableMicrowaves",
     cooling = "EnableFridges", waterDispenser = "EnableWaterDispensers",
     television = "EnableTelevisions",
+    laundryCombo = "EnableComboWasherDryers",
 }
 VLS.installationOptionProviders = VLS.installationOptionProviders or {}
 function VLS.getInstallationOption(part, itemOrType)
@@ -559,7 +597,8 @@ function VLS.getInstallationOption(part, itemOrType)
         if option then return option end
     end
     if not VLS.isSupportedVehicle(part:getVehicle()) then return nil end
-    if part:getId() == VLS.AUX_BATTERY_PART_ID then return "EnableAuxBatteries" end
+    -- Auxiliary batteries are essential power infrastructure, always installable.
+    if part:getId() == VLS.AUX_BATTERY_PART_ID then return nil end
     if VLS.isWaterTankPart(part) then return "EnableWaterTanks" end
     if not VLS.isUniversalPart(part) and part:getId() ~= VLS.WEAPON_PART_ID then
         return nil
@@ -580,7 +619,8 @@ end
 function VLS.isInstallationEnabled(part, itemOrType)
     local option = VLS.getInstallationOption(part, itemOrType)
     local settings = SandboxVars and SandboxVars.VehicleLivingSlots
-    return not option or not settings or settings[option] ~= false
+    if option and settings and settings[option] == false then return false end
+    return true
 end
 
 function VLS.isAllowedItem(part, item)
@@ -643,13 +683,22 @@ function VLS.getFirstInstalledUniversalPart(vehicle)
     return nil
 end
 
+function VLS.getEquipmentDisplayName(item)
+    if not item then return nil end
+    if VLS.resolveEquipmentType(item) == "Base.Mov_BlueComboWasherDryer"
+            and not (item.isCustomName and item:isCustomName()) then
+        return getItemNameFromFullType("Base.Mov_BlueComboWasherDryer")
+    end
+    return item:getDisplayName()
+end
+
 function VLS.getPartDisplayName(part, fallback)
     local item = part and part:getInventoryItem()
     if item and VLS.isManagedPart(part) then
         if VLS.isWaterTankPart(part) then
             return getText("IGUI_VehiclePartVLSLargeVanWaterTank")
         end
-        return item:getDisplayName()
+        return VLS.getEquipmentDisplayName(item)
     end
     if part and VLS.isUniversalPart(part) then
         local vehicle = part:getVehicle()
@@ -801,6 +850,13 @@ function VLS.ensureUniversalContainerProfile(part)
     local container = part:getItemContainer()
     if not container then return nil end
     local profile = VLS.getEquipmentProfile(part:getInventoryItem())
+    if profile and profile.capability == "laundryCombo"
+            and VLS.getLaundryMode(part) == "laundryDryer" then
+        local dryerProfile = {}
+        for key, value in pairs(profile) do dryerProfile[key] = value end
+        dryerProfile.containerType = "clothingdryer"
+        profile = dryerProfile
+    end
     local changed = applyContainerProfile(container,
         profile and profile.capacity and profile or nil,
         VLS.UNIVERSAL_PART_ID)
@@ -840,6 +896,8 @@ function VLS.syncUniversalSlot(part)
     local profileChanged = data.vlsContainerProfileVersion
         ~= CONTAINER_PROFILE_VERSION
 
+    if itemChanged then data.vlsLaundryMode = nil end
+
     -- Part modData and the installed item can arrive before the client-side
     -- ItemContainer fields. Reapply the desired profile on every lifecycle
     -- pass; applyContainerProfile itself writes only fields that differ.
@@ -853,6 +911,13 @@ function VLS.syncUniversalSlot(part)
     end
     if itemChanged then
         data.vlsEquipmentItemId = itemId
+        data.vlsLaundryActive = false
+        data.vlsLaundryPaused = false
+        data.vlsLaundryRemaining = 0
+        data.vlsLaundryItemId = nil
+        data.vlsLaundryWaterBudget = nil
+        data.vlsLaundryWaterSpent = nil
+        data.vlsLaundryMode = nil
         data.vlsMicrowaveActive = false
         data.vlsMicrowaveTimer = 0
         data.vlsMicrowaveRemaining = 0
@@ -951,7 +1016,7 @@ function VLS.getTelevisionDeviceData(part)
     return deviceData
 end
 
-local function copyTelevisionMetadata(target, source)
+local function copyTelevisionMetadata(target, source, preserveSettings)
     target:setDeviceName(source:getDeviceName())
     target:setIsTwoWay(source:getIsTwoWay())
     target:setTransmitRange(source:getTransmitRange())
@@ -970,9 +1035,25 @@ local function copyTelevisionMetadata(target, source)
     -- hidden signal device only mirrors charge for vanilla validity/UI logic.
     target:setUseDelta(0)
     target:setMediaType(source:getMediaType())
-    target:setChannelRaw(source:getChannel())
-    target:setDeviceVolumeRaw(source:getDeviceVolume())
-    target:cloneDevicePresets(source:getDevicePresets())
+    if not preserveSettings then
+        target:setChannelRaw(source:getChannel())
+        target:setDeviceVolumeRaw(source:getDeviceVolume())
+        target:cloneDevicePresets(source:getDevicePresets())
+    end
+end
+
+local function televisionMetadataMatches(target, source)
+    return target:getDeviceName() == source:getDeviceName()
+        and target:getMediaType() == source:getMediaType()
+        and target:getIsTwoWay() == source:getIsTwoWay()
+        and target:getTransmitRange() == source:getTransmitRange()
+        and target:getMicRange() == source:getMicRange()
+        and target:getBaseVolumeRange() == source:getBaseVolumeRange()
+        and not target:getIsPortable()
+        and target:getIsTelevision() == source:getIsTelevision()
+        and target:getMinChannelRange() == source:getMinChannelRange()
+        and target:getMaxChannelRange() == source:getMaxChannelRange()
+        and target:getIsHighTier() == source:getIsHighTier()
 end
 
 function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
@@ -1012,6 +1093,13 @@ function VLS.syncTelevisionDevice(vehicle, part, _refreshMetadata)
     if data.vlsTelevisionItemId ~= itemId or not deviceData:getIsTelevision() then
         copyTelevisionMetadata(deviceData, source)
         data.vlsTelevisionItemId = itemId
+        changed = true
+    elseif not televisionMetadataMatches(deviceData, source) then
+        -- Part modData may arrive with the new item ID while the hidden
+        -- signal device still describes the old TV. Its metadata is not
+        -- carried by transmitPartItem; compare the actual local device.
+        -- Preserve live station, volume and presets during this repair.
+        copyTelevisionMetadata(deviceData, source, true)
         changed = true
     end
     if ensureTelevisionPresets(deviceData) then changed = true end
@@ -1399,65 +1487,172 @@ function VLS.getTelevisionPowerConsumption()
         VLS.TELEVISION_POWER_CONSUMPTION, 100)
 end
 
+function VLS.getComboWaterPerCycle()
+    return getApplianceBalanceOption("ComboWaterPerCycle",
+        VLS.COMBO_WATER_PER_CYCLE, 100)
+end
+
+-- Retain the existing wash option key so saved settings carry forward.
+-- Washing and drying now use one user-visible power setting.
+function VLS.getComboPowerConsumption()
+    return getApplianceBalanceOption("ComboWashPowerConsumption",
+        VLS.COMBO_POWER_CONSUMPTION, 100)
+end
+
+function VLS.getComboWashPowerConsumption()
+    return VLS.getComboPowerConsumption()
+end
+
+function VLS.getComboDryPowerConsumption()
+    return VLS.getComboPowerConsumption()
+end
+
+function VLS.getLaundryMode(part)
+    local data = part and part:getModData()
+    return data and data.vlsLaundryMode == "laundryDryer"
+        and "laundryDryer" or "laundryWasher"
+end
+
+-- Shared vehicle power adapter. All auxiliary-battery consumers use this
+-- boundary; device code supplies a rate and units (minutes, crafts or liters).
+-- Existing public VLS helpers below remain small compatibility delegates.
+VLS.VehiclePower = VLS.VehiclePower or {}
+local VehiclePower = VLS.VehiclePower
+
+local function finitePower(value)
+    return type(value) == "number" and value == value
+        and value >= 0 and value < math.huge
+end
+
+function VehiclePower.rate(displayValue)
+    if not finitePower(displayValue) then return 0 end
+    return displayValue / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+end
+
+function VLS.getSmallApplianceDrainPerUse()
+    return VehiclePower.rate(getApplianceBalanceOption("SmallAppliancePowerConsumption",
+        VLS.SMALL_APPLIANCE_POWER_CONSUMPTION, 100))
+end
+
+function VLS.getLaundryDrainPerMinute(mode)
+    return VehiclePower.rate(VLS.getComboPowerConsumption())
+end
+
 function VLS.getFridgeDrainPerMinute()
-    return VLS.getFridgePowerConsumption() / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+    return VehiclePower.rate(VLS.getFridgePowerConsumption())
 end
 
 function VLS.getMicrowaveDrainPerMinute()
-    return VLS.getMicrowavePowerConsumption() / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+    return VehiclePower.rate(VLS.getMicrowavePowerConsumption())
 end
 
 function VLS.getWaterPurificationDrainPerLiter()
-    return VLS.getWaterPurificationPowerConsumption()
-        / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+    return VehiclePower.rate(VLS.getWaterPurificationPowerConsumption())
 end
 
 function VLS.getTelevisionDrainPerMinute()
-    return VLS.getTelevisionPowerConsumption()
-        / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
+    return VehiclePower.rate(VLS.getTelevisionPowerConsumption())
 end
 
 function VLS.getAuxBatteryPart(vehicle)
     return VLS.getInstalledPart(vehicle, VLS.AUX_BATTERY_PART_ID)
 end
 
-function VLS.getAuxBatteryCharge(vehicle)
+function VehiclePower.snapshot(vehicle)
     local part = VLS.getAuxBatteryPart(vehicle)
     local item = part and part:getInventoryItem()
-    return item and item:getCurrentUsesFloat() or 0
+    if not item then return nil end
+    return { vehicle = vehicle, part = part, item = item,
+        charge = item:getCurrentUsesFloat() }
+end
+
+local function writePower(snapshot, charge, deferSync)
+    if isClient and isClient() then return false end
+    if not snapshot or not finitePower(charge)
+            or VLS.getAuxBatteryPart(snapshot.vehicle) ~= snapshot.part
+            or snapshot.part:getInventoryItem() ~= snapshot.item then return false end
+    charge = math.min(1, charge)
+    if snapshot.item:getCurrentUsesFloat() ~= charge then
+        snapshot.item:setUsedDelta(charge)
+        if not deferSync then VehiclePower.sync(snapshot.vehicle, snapshot.part) end
+    end
+    return true
+end
+
+function VehiclePower.sync(vehicle, part)
+    if isClient and isClient() then return end
+    part = part or VLS.getAuxBatteryPart(vehicle)
+    if part then vehicle:transmitPartUsedDelta(part) end
+end
+
+function VehiclePower.restore(snapshot, deferSync)
+    return snapshot == nil or writePower(snapshot, snapshot.charge, deferSync)
+end
+
+function VehiclePower.charge(vehicle)
+    local state = VehiclePower.snapshot(vehicle)
+    return state and state.charge or 0
+end
+
+function VehiclePower.has(vehicle, required)
+    required = required == nil and 0.0001 or required
+    local state = VehiclePower.snapshot(vehicle)
+    return finitePower(required) and state ~= nil and state.charge >= required
+end
+
+function VehiclePower.capacity(vehicle, rate)
+    if not finitePower(rate) then return 0 end
+    local state = VehiclePower.snapshot(vehicle)
+    if not state then return 0 end
+    return rate == 0 and math.huge or math.max(0, state.charge) / rate
+end
+
+function VehiclePower.consume(vehicle, amount)
+    if not finitePower(amount) then return false end
+    local state = VehiclePower.snapshot(vehicle)
+    if not state then return false end
+    -- Preserve established continuous-device behavior: an exhausted battery
+    -- reaches zero and the caller stops the device on this false result.
+    local sufficient = state.charge >= amount
+    if not writePower(state, math.max(0, state.charge - amount)) then return false end
+    return sufficient
+end
+
+function VehiclePower.reserve(vehicle, amount)
+    if not finitePower(amount) or (isClient and isClient()) then return nil end
+    if amount == 0 then return { cost = 0 } end
+    local state = VehiclePower.snapshot(vehicle)
+    if not state or state.charge < amount then return nil end
+    if not writePower(state, state.charge - amount, true) then return nil end
+    state.cost = amount
+    return state
+end
+
+function VehiclePower.settle(reservation, used)
+    if not reservation or reservation.settled or not finitePower(used)
+            or used > reservation.cost + 0.000000001 then return false end
+    used = math.min(used, reservation.cost)
+    if reservation.cost == 0 then reservation.settled = true; return true end
+    local charge = reservation.item:getCurrentUsesFloat()
+    if not writePower(reservation, charge + reservation.cost - used, true) then return false end
+    reservation.settled = true
+    return true
+end
+
+function VLS.getAuxBatteryCharge(vehicle)
+    return VehiclePower.charge(vehicle)
 end
 
 function VLS.hasAuxBatteryPower(vehicle, required)
-    local part = VLS.getAuxBatteryPart(vehicle)
-    local item = part and part:getInventoryItem()
-    if not item then return false end
-    local minimum = math.max(0, tonumber(required) or 0.0001)
-    return item:getCurrentUsesFloat() >= minimum
-end
-
-function VLS.getWaterPurificationCapacity(vehicle)
-    local drain = VLS.getWaterPurificationDrainPerLiter()
-    if drain <= 0 then return math.huge end
-    local part = VLS.getAuxBatteryPart(vehicle)
-    local item = part and part:getInventoryItem()
-    if not item then return 0 end
-    return math.max(0, item:getCurrentUsesFloat()) / drain
+    return VehiclePower.has(vehicle, required)
 end
 
 function VLS.consumeAuxBattery(vehicle, amount)
-    local part = VLS.getAuxBatteryPart(vehicle)
-    local item = part and part:getInventoryItem()
-    if not item then return false end
-    if type(amount) ~= "number" or amount ~= amount or amount < 0
-            or amount == math.huge then return false end
-    local charge = item:getCurrentUsesFloat()
-    local sufficient = charge >= amount
-    local remaining = sufficient and math.max(0, charge - amount) or 0
-    if remaining ~= charge then
-        item:setUsedDelta(remaining)
-        vehicle:transmitPartUsedDelta(part)
-    end
-    return sufficient
+    return VehiclePower.consume(vehicle, amount)
+end
+
+function VLS.getWaterPurificationCapacity(vehicle)
+    return VehiclePower.capacity(vehicle, VLS.getWaterPurificationDrainPerLiter())
 end
 
 function VLS.getInstalledWaterBottlePart(vehicle)
@@ -1853,6 +2048,10 @@ function VLS.canUninstallManagedPart(part)
     if VLS.isUniversalPart(part) then
         local capability = VLS.getEquipmentCapability(part:getInventoryItem())
         if capability == "cooking" and part:getModData().vlsMicrowaveActive then
+            return false
+        end
+        if capability == "laundryCombo"
+                and part:getModData().vlsLaundryActive then
             return false
         end
         if capability == "cooling" then

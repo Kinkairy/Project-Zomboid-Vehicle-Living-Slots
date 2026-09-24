@@ -6,7 +6,7 @@ require "ISUI/Crafting/ISHandcraftWindow"
 require "Entity/ISUI/CraftRecipe/ISHandCraftPanel"
 
 P.uiSources = P.uiSources or setmetatable({}, { __mode = "k" })
-P.stationOrder = { "VLSPantryCoffee", "VLSPantryToaster" }
+P.stationOrder = { P.PART_ID }
 
 VLS.registerMechanicsUIProvider("pantry", {
     matches = P.isPart,
@@ -14,9 +14,6 @@ VLS.registerMechanicsUIProvider("pantry", {
         local name = getText("IGUI_VehiclePart" .. part:getId())
         local item = part:getInventoryItem()
         return item and item:getDisplayName() or name
-    end,
-    hidden = function(part)
-        return part:getId() == P.LEGACY_ID and not part:getInventoryItem()
     end,
 })
 
@@ -117,13 +114,13 @@ if not P.uiHooksApplied then
     end
 
     local nativePanel = ISHandCraftPanel.new
-    function ISHandCraftPanel:new(x, y, width, height, character, bench, object, query)
-        local source = P.uiSources[object]
-        if source and source.character == character then
-            bench = source.bench
-            query = bench:getRecipeTagQuery()
+    function ISHandCraftPanel:new(x, y, width, height, player, craftBench, isoObject, recipeQuery)
+        local source = P.uiSources[isoObject]
+        if source and source.character == player then
+            craftBench = source.bench
+            recipeQuery = craftBench:getRecipeTagQuery()
         end
-        return nativePanel(self, x, y, width, height, character, bench, object, query)
+        return nativePanel(self, x, y, width, height, player, craftBench, isoObject, recipeQuery)
     end
 
     local nativeRecipeChanged = ISHandCraftPanel.onRecipeChanged
@@ -196,22 +193,19 @@ if not P.uiHooksApplied then
     end
 
     local nativeNew = ISHandcraftAction.new
-    function ISHandcraftAction:new(character, recipe, containers, object, bench,
-            manualInputs, items, recipeItem, ratio, eat)
-        local source = P.uiSources[object]
+    -- NetTimedAction reads constructor parameter names from action fields.
+    -- Keep the vanilla signature exact, including names used only in MP.
+    function ISHandcraftAction:new(character, craftRecipe, containers, isoObject, craftBench,
+            manualInputs, items, recipeItem, variableInputRatio, eatPercentage)
+        local source = P.uiSources[isoObject]
         if not source then
-            return nativeNew(self, character, recipe, containers, object, bench,
-                manualInputs, items, recipeItem, ratio, eat)
+            return nativeNew(self, character, craftRecipe, containers, isoObject, craftBench,
+                manualInputs, items, recipeItem, variableInputRatio, eatPercentage)
         end
         local part = source.vehicle:getPartById(source.partId)
-        local choice = P.choiceForRecipe(recipe, source.partId, part and part:getInventoryItem())
-        local action = nativeNew(VLSPantryCraftAction, character, recipe,
-            containers, nil, nil, manualInputs or nil, items, recipeItem, ratio, eat)
-        action.vehicleId, action.applianceId, action.choice =
-            source.vehicle:getId(), source.itemId, choice or ""
-        action.partId = source.partId
-        action.stopOnWalk, action.stopOnRun = true, true
-        return action
+        local choice = P.choiceForRecipe(craftRecipe, source.partId, part and part:getInventoryItem())
+        return VLSPantryCraftAction:new(character, source.vehicle:getId(), source.partId,
+            source.itemId, choice or "", manualInputs, items, recipeItem)
     end
 end
 

@@ -27,24 +27,6 @@ module Base
                 test = Vehicles.UninstallTest.Default,
             }
         }
-        part VLSPantryToaster
-        {
-            mechanicArea = Back,
-            area = TruckBed,
-            category = VLSLiving,
-            itemType = Base.Mov_Toaster,
-            specificItem = false,
-            mechanicRequireKey = true,
-            durability = 3,
-            lua { create = VLSPantry.CreateEmpty, }
-            table uninstall
-            {
-                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
-                time = 100,
-                skills = Mechanics:1,
-                test = Vehicles.UninstallTest.Default,
-            }
-        }
     }
     vehicle SUV { template = VLSPantryPositions, }
     vehicle PickUpVan { template = VLSPantryPositions, }

@@ -61,6 +61,5 @@
   "IGUI_VLSChassisConflict": "Chassis mass baseline is unavailable or changed by another mod.",
   "IGUI_VLSTankSource": "Water tank source",
   "IGUI_VehiclePartCatVLSPantry": "Small Appliances",
-  "IGUI_VehiclePartVLSPantryCoffee": "Small Appliance",
-  "IGUI_VehiclePartVLSPantryToaster": "Previous Test Appliance (Remove)"
+  "IGUI_VehiclePartVLSPantryCoffee": "Small Appliance"
 }

@@ -1,66 +1,58 @@
-# 3.8.8 native delegation audit
+# VLS 3.9 native delegation and shared-adapter audit
 
-This mod uses native menus, actions and resource operations wherever the native
-object contract fits. A thin adapter is not a claim that every feature is native
-or that every custom calculation has a verified native replacement.
+Published 2026-09-24 for B42.20. Version 3.9 is the owner-selected sole rollback
+baseline. Native behavior is reused where the vehicle identity permits it;
+vehicle-only power and container bridges remain explicit below.
 
-| Area | Native owner | Retained vehicle adapter |
+| Area | Native owner | Retained single adapter / outcome |
 | --- | --- | --- |
-| Roof attachment install/removal | Vehicle script requirements, ISInstallVehiclePart / ISUninstallVehiclePart, native callbacks and success calculation | Supported slot/rack ownership, item visuals, connected-generator removal guard; no tool requirement; Mechanics 1 recommendation |
-| Petrol names | InventoryItem.getName -> FluidContainer.getUiName | Presentation provider passes the actual installed PetrolCan/JerryCan |
-| Petrol collection | Original fill-fuel menu, onTakeFuelNew and ISTakeFuel portable-container effects | Vehicle service point, finite mounted source identity/debit and concurrency checks |
-| Propane refill | ISHandcraftAction and Base.RefillBlowTorch; Java native recipe owns fuel use, replacement and condition | Installed-tank input binding, walking/turning, server serialization and validation; no hardcoded refill ratio |
-| Generator | Real IsoGenerator; native context menu/actions and engine power, fuel, wear, noise and hazards | Ownership, service positioning, world-object lifecycle, movement disconnect and installed-object pickup suppression |
-| Water | Native drinking/filling/washing effects and FluidContainer transfer | Vehicle tank identity, reservations, purification/battery policy and network ownership |
-| Roof lights / repair | Native headlight updates and FixingManager | Roof geometry, main-battery wiring and supported-part association |
-| Seats / mechanics lists | Original renderers, hit testing, selection and navigation | Display rows/coordinates, equipment icons, dynamic names and upstream duplicate virtual-seat filtering |
-| TV / microwave / work surfaces | Native device/action/UI paths where compatible | Vehicle ownership, reach, timers and battery accounting |
-| Cooling | Native food data and verified engine timing contracts | Bounded vehicle power/aging/freezing bridge; native world-parent power lookup is not a drop-in vehicle freezer API |
-| Chassis / armor / fabricated racks | Native item/vehicle mass and vehicle parts | Mod-specific material scaling, armor and mass ownership rules |
+| Living-space, pantry and ordinary roof installation/removal | ISInstallVehiclePart / ISUninstallVehiclePart, original requirements, success calculation and item transaction | Shared installation policy; TV uninstall copies current companion presets before the native transaction. Removed the TV install subclass and global instanceof replacement. |
+| Fixed rack, armor, chassis fabrication | Native vehicle/item objects and action shell | One R.installFixed materials/rollback transaction, with part specifications and chassis commit/rollback callbacks. These are mod-specific fabrication features, not duplicate furniture installation. |
+| Repairs | ISFixVehiclePartAction / FixingManager | Shared position/material preconditions for fabricated parts; visual refresh after original repair. No second repair-success or condition formula. |
+| Collision forwarding / armor | Native vehicle damage remains the source | D.Update is the single settlement entry: sample impact for rack, settle armor absorption, rebase both consumers. Tick, rack callback and mechanics completion use this same path. Armor and rack have different effects, not duplicate damage charges. |
+| Maintenance boundaries | Original install/uninstall/repair completion | Settle pending real damage before maintenance, rebase both rack and armor afterward, including side windows and native exceptions. Prevent maintenance loss from being misread as collision. |
+| Auxiliary power | Native battery item and part-used-delta synchronization | VLS.VehiclePower owns unit conversion, charge/capacity checks, debit, reservation/settlement, rollback and sync. Fridge, microwave, television, combo, pantry crafts and water purification reuse it. Client inspection cannot debit/refund. |
+| Native power equipment | Native headlight and IsoGenerator engines | Roof lights retain main-battery/headlight updates; parked real generator retains native fuel, wear, power, sound and hazards. No second simulated source and no forced conversion to auxiliary power. |
+| Cooling | Native food/container fields | Existing shared bounded vehicle cooling/aging/freezing bridge; client projects server snapshots using the same shared math. Map-parent power lookup has no direct auxiliary-battery provider. Trailer fridge uses the mini-fridge implementation. |
+| Microwave | Original microwave UI, native food/container behavior | Vehicle identity, settings command and elapsed-time controller; battery arithmetic now delegates to VehiclePower. Native stove commands require a world object. |
+| Television | Native DeviceData, radio UI/media actions and packets | Companion part identity/power view; only shared vehicle adapter charges power. Device useDelta is zero to avoid a second native battery charge. |
+| Combo laundry | Original Base item, vehicle installation, native inventory getControl/joypad methods and SyncItemFields/container packets | One server vehicle cycle for both modes, five water units by default, auxiliary battery. Switch resets old cycle; resource loss pauses. No white machines, separate mode-enable switches or custom client cleaning replay. |
+| Pantry crafting | Original recipes, HandcraftLogic execution, output callbacks and ISHandcraftAction lifecycle | All entry menus share the same vehicle craft adapter. Bind logic on the action instance; no temporary global HandcraftLogic.new replacement. |
+| Water / washing | Native callbacks, Fill All iteration, bag return, washing effects and action queue | Finite vehicle fluid identity and authority. Native body/clothes/bandage update and turning use a scoped actual-vehicle receiver, restored after errors. Purification reserves/refunds through shared power. |
+| Vehicle rest | ISRestAction start/update/progress | Native start reused; vehicle identity/bed validation and server binding remain where native code assumes a map bed. |
+| Petrol / propane | Native portable-fuel effects and native refill recipe | Mounted-source identity/debit, service position and serialized authority; no hardcoded replacement recipe or second fuel conversion. |
+| Cargo / seats / mechanics UI | Native access queries, rendering and navigation | Scoped vehicle view, slot display and preview texture; native source functions remain the decision owner where compatible. |
+| Chassis / material scaling | Native mass, parts and items | Mod-specific percentage reduction and recipes; one chassis sync and shared fabrication specification path, with idempotence and rollback tests. |
 
-The parked generator is a real engine object. The adapter does not simulate its
-fuel use or substitute a custom generator action. Movement deactivates it before
-removal because electricity is not controlled by the connected flag alone.
-Interior equipment does not switch to the generator.
+## Concrete regression and boundaries
 
-Propane server startup tolerates the client arrival position still replicating;
-strict completion rechecks the service area, stopped vehicle, installed tank,
-carried torch and ownership before native recipe effects. Cancellation completes
-the native network action safely. Native recipe synchronization is not duplicated.
+The previous armor loop kept a separate source-condition baseline. Mechanics
+completion rebased only rack damage. Four tests reproduced wrong armor absorption
+of maintenance loss (hood and side window), pending impact settlement and native
+exception handling. They failed before the fix and pass afterward. Repeated
+entries settle the same impact once; destroyed native windows are not revived;
+god-mode updates do not defer a later damage charge.
 
-The latest roof changes remove tool declarations from ordinary attachment
-configuration and the corresponding server tool check. Rack fabrication keeps
-its existing tools. Native skills are recommendations used by success/failure
-calculation; no separate VLS skill gate was introduced.
+Native world washer/dryer and freezer power reads the world object's map square
+through ItemContainer.isPowered / IsoObject.checkObjectPowered. A vehicle part
+cannot supply that grid-power identity via an exposed Lua provider. Reparenting
+its container would also change native ContainerID network ownership. This
+release does not inject map power, create a parallel fake world appliance or
+add a Java dependency. The fallback is explicit: laundry effects update during the
+vehicle cycle and apply the final result at completion, using native item fields. Native
+world-machine sounds/noise and every transfer-lock behavior are not claimed as
+identical. Automated coverage does not replace exhaustive real-game testing.
 
-## Verification and limits
+## Verification
 
-- 14 Lua suites / 1113 checks passed, covering real native Lua bodies with engine
-  fixtures, resource conservation, action cancellation, UI restoration and
-  actual supported vehicle profiles. These are not a live-game simulation.
-- Actual B42.20 Kahlua/Java probes verified relevant vector, network-action and
-  fluid contracts during the 3.8.8 repair lineage. Native naming bytecode confirms
-  delegation to FluidContainer.getUiName().
-- The 224-file runtime payload is identical across source, local client and
-  isolated test server; exact hashes are in release-3.8.8.json.
-- Owner tested fuel/propane services and chassis reduction (StepVan 2504 to 2004),
-  then completed a targeted petrol-can uninstall/reinstall after a clean login.
-  Latest client/server checks found no new errors.
-- Six duplicate-ID messages from an earlier client session lacked attribution.
-  Clean-login and isolated petrol install/removal checks did not reproduce them;
-  they were not proven to come from VLS or from another mod.
-- A one-time initial-mass-zero chassis skip is diagnostic, not a Lua exception.
-  Known upstream VVA missing-template startup errors are outside this payload.
+The 3.9 release rechecks runtime syntax, generated EN/CN/CH catalogs, exact
+235-file hashes, source regression suites, native cargo callbacks, native
+constructor parameter contracts and the actual inventory-button selection path.
+Fixtures identify where engine objects are mocked. Earlier Kahlua action
+serialization probes remain part of the recorded evidence.
 
-Full singleplayer/controller, every vehicle variant and all mod combinations
-have not been exhaustively retested. No speculative cooling or fluid-dispatch
-rewrite is included merely to reduce the amount of custom Lua.
-
-## 3.8.12 small-appliance adapter
-
-Radial and item-context crafting enter the same OpenHandcraftWindow adapter. A
-detached original CraftBench supplies UI identity; it never becomes a world or
-network-owned object. The native ISHandcraftAction owns recipe execution and
-completion; the shared derived action validates installed vehicle/part/item and
-auxiliary power, keeping output idempotence separate from native UI notification.
-Native recipe definitions and ingredient/output callbacks remain unchanged.
+The independently downloaded Workshop package and deployed NUC test/Windows
+client payload match `release-3.9.json`. English mod names and packaged icons
+are verified. Exhaustive gameplay, controller and multiplayer acceptance are
+not implied. See `docs/release-3.9.md` for current changes and removed legacy
+slot behavior; historical release manifests are not selected rollback baselines.

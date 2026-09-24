@@ -23,27 +23,41 @@ Math={ceil=math.ceil}
 BloodBodyPartType={MAX={index=function()return 3 end},FromIndex=function(i)return i end}
 BloodClothingType={getCoveredParts=function()return list({0,1})end}
 ItemBodyLocation={MAKE_UP_FULL_FACE=1,MAKE_UP_EYES=2,MAKE_UP_EYES_SHADOW=3,MAKE_UP_LIPS=4}
-CharacterStat={UNHAPPINESS=1};ComponentType={FluidContainer=1};Fluid={CleaningLiquid=1}
-ZomboidGlobals={CleanStainCleaningFluidAmount=0.1}
+CharacterStat={UNHAPPINESS=1,THIRST=2};ComponentType={FluidContainer=1};Fluid={CleaningLiquid=1}
+ZomboidGlobals={CleanStainCleaningFluidAmount=0.1,EquippedOrWornEncumbranceMultiplier=0.3}
 sendHumanVisual=noop;syncVisuals=noop;syncItemFields=noop;sendItemStats=noop;sendRemoveItemFromContainer=noop;sendAddItemToContainer=noop
-FluidContainer={CreateContainer=function()
- local f={setCapacity=noop}
+local function water(amount,capacity)
+ local f={amount=amount or 0,capacity=capacity or 65,water=true,emptyable=true}
+ function f:getAmount()return self.amount end
+ function f:getCapacity()return self.capacity end
+ function f:setCapacity(n)self.capacity=n end
+ function f:contains(kind)return self.tainted==true end
  function f:copyFluidsFrom(other)self.amount=other.amount;self.tainted=other.tainted end
+ function f:canPlayerEmpty()return self.emptyable end
+ function f:removeFluid(n)self.amount=math.max(0,self.amount-n)end
+ function f:transferTo(target,n)
+  n=math.min(n,self.amount,target.capacity-target.amount)
+  self.amount=self.amount-n;target.amount=target.amount+n;target.tainted=self.tainted
+ end
  return f
-end,DisposeContainer=noop}
+end
+FluidContainer={CreateContainer=function()return water(0,1)end,DisposeContainer=noop,
+ CanTransfer=function(source,target)return not target.locked and target.amount<target.capacity end}
 local vehicles={}
 getVehicleById=function(id)return vehicles[id]end
 local function inventory()
  local c={items={},soaps={}}
  function c:getItemWithIDRecursiv(id)for _,it in ipairs(self.items)do if it.id==id then return it end end end
  function c:getSoapList()return list(self.soaps)end
+ function c:isInCharacterInventory()return true end
+ function c:setDrawDirty()end
  function c:getItems()return list(self.items)end
  function c:Remove(it)for i,v in ipairs(self.items)do if v==it then table.remove(self.items,i);it.container=nil;return end end end
  function c:AddItem(ft)local it={id=99,ft=ft,setFavorite=function()end};self.items[#self.items+1]=it;return it end
  return c
 end
 local function char()
- local c={inv=inventory(),dead=false,inside=false,near=true,visual={blood={1,1,1},dirt={1,1,1}}}
+ local c={inv=inventory(),dead=false,inside=false,near=true,thirst=0.4,free=100,visual={blood={1,1,1},dirt={1,1,1}}}
  function c.visual:getBlood(i)return self.blood[i+1]end
  function c.visual:getDirt(i)return self.dirt[i+1]end
  function c.visual:setBlood(i,v)self.blood[i+1]=v end
@@ -54,20 +68,18 @@ local function char()
  function c:getHumanVisual()return self.visual end
  function c:getWornItem()return nil end
  function c:isTimedActionInstant()return false end
- function c:getStats()return {remove=noop}end
+ function c:getStats()return {remove=noop,get=function()return c.thirst end}end
+ function c:getFreeInventoryCapacity()return self.free end
+ function c:hasFullInventory()return self.free<=0 end
+ function c:isEquippedClothing()return false end
+ function c:DrinkFluid(f)self.thirst=self.thirst-f:getAmount()/2 end
  function c:isPrimaryHandItem()return false end
  function c:isSecondaryHandItem()return false end
  c.updateHandEquips=noop;c.faceThisObject=noop;c.setMetabolicTarget=noop
  return c
 end
 local function tank(amount)
- local fluid={amount=amount,water=true,emptyable=true}
- function fluid:getAmount()return self.amount end
- function fluid:getCapacity()return 65 end
- function fluid:contains(kind)return self.tainted==true end
- function fluid:copyFluidsFrom(other)self.amount=other.amount;self.tainted=other.tainted end
- function fluid:canPlayerEmpty()return self.emptyable end
- function fluid:removeFluid(n)self.amount=math.max(0,self.amount-n)end
+ local fluid=water(amount)
  local t={id=7,fluid=fluid,getID=function(self)return self.id end,getFluidContainer=function(self)return self.fluid end,syncItemFields=noop}
  local p={getId=function()return "Tank"end}
  local v={id=42,tank=t,part=p,stopped=true,removed=false,sync=0}
@@ -109,6 +121,33 @@ local function clothing(c)
 end
 local function body(c)return VLSWashYourselfFromTank:new(c,42,"Tank",7)end
 local function wash(c,it)return VLSWashClothingFromTank:new(c,42,"Tank",7,it)end
+
+for _,fail in ipairs({false,true}) do
+ test("native water action updates retain effects and restore endpoint fault="..tostring(fail),function()
+  local c=char();local v=tank(20);local it=clothing(c)
+  Metabolics={LightDomestic="light",HeavyDomestic="heavy"}
+  c.faceThisObjectAlt=function(_,object)
+   eq(object,v);c.faced=object;if fail then error("native facing fault")end
+  end
+  c.faceThisObject=c.faceThisObjectAlt
+  c.setMetabolicTarget=function(_,value)c.metabolic=value end
+  c.shouldBeTurning=function()return true end
+  local a=body(c);local source=a.sink
+  eq(pcall(a.update,a),not fail);eq(a.sink,source);eq(c.faced,v)
+  if not fail then eq(c.metabolic,"light")end
+  a=wash(c,it);a.getJobDelta=function()return 0.25 end;source=a.sink
+  eq(pcall(a.update,a),not fail);eq(a.sink,source);eq(it.delta,0.25)
+  if not fail then eq(c.metabolic,"heavy")end
+  a=setmetatable({character=c,vehicleId=42,partId="Tank",tankId=7,item=it,
+   waterObject={fixture="source"},getJobDelta=function()return 0.5 end},
+   {__index=VLSCleanBandageFromTank})
+  source=a.waterObject
+  local ok,result=pcall(a.waitToStart,a);eq(ok,not fail)
+  if ok then eq(result,true)end
+  eq(a.waterObject,source)
+  eq(pcall(a.update,a),not fail);eq(a.waterObject,source);eq(it.delta,0.5)
+ end)
+end
 for _,amount in ipairs({0,0.5,1,2,3,10}) do
  test("body actual native completion amount "..amount,function()
   local c=char();local v,t,f=tank(amount);local a=body(c)
@@ -188,6 +227,10 @@ Events={OnPreFillWorldObjectContextMenu={Add=function(f)table.insert(hooks.pre,f
 local queue={}
 ISTimedActionQueue={add=function(a)queue[#queue+1]=a end}
 ISInventoryPaneContextMenu={transferIfNeeded=noop}
+ISInventoryTransferUtil={newInventoryTransferAction=function(c,it,from,to)
+ return {Type="ReturnToBag",item=it,from=from,to=to}
+end}
+luautils={walkAdjObject=function()return true end}
 ISVehicleMenu={getVehicleToInteractWith=function()return vehicles[42]end}
 VLS.getWaterTankPartIds=function()return {"Tank"}end
 getCell=function()return {} end
@@ -197,7 +240,9 @@ getSpecificPlayer=function()return current end
 local sprite={getName=function()return "floor"end}
 local square={getFloor=function()return {getSprite=function()return sprite end}end}
 local function menuCharacter()local c=char();function c:getSquare()return square end;return c end
-IsoObject={new=function()return {setSquare=noop,setSprite=noop}end}
+IsoObject={new=function()return {setSquare=function(self,s)self.square=s end,setSprite=noop,
+ getSquare=function(self)return self.square end,getFluidAmount=function(self)return self.fluid.amount end,
+ isTaintedWater=function(self)return self.fluid.tainted or false end}end}
 ComponentType.FluidContainer={CreateComponent=function()
  local f={setCapacity=noop,setCanPlayerEmpty=noop}
  function f:copyFluidsFrom(real)self.amount=real.amount;self.tainted=real.tainted end
@@ -205,7 +250,28 @@ ComponentType.FluidContainer={CreateComponent=function()
 end}
 Fluid.TaintedWater="tainted"
 GameEntityFactory={AddComponent=function(proxy,_,f)proxy.fluid=f end}
-ISWorldObjectContextMenu={onWashYourself=noop,onWashClothing=noop,onDrink=noop,onTakeWater=noop,setTest=function()return true end}
+-- Capture real native callbacks BEFORE VLS installs anything, as the Java menu
+-- cache does when a player uses an ordinary tap first. Calling the current Lua
+-- table alone missed this regression in the old tests.
+local contextFile=assert(io.open(native.."/client/ISUI/ISWorldObjectContextMenu.lua"))
+local nativeContext=contextFile:read("*a"):gsub("\r\n","\n");contextFile:close()
+ISWorldObjectContextMenu={setTest=function()return true end,transferIfNeeded=noop}
+local cached={}
+for _,name in ipairs({"onTakeWater","onDrink","onWashYourself","onWashClothing"})do
+ local code=assert(nativeContext:match("ISWorldObjectContextMenu%."..name.." = function.-\nend"))
+ assert((loadstring or load)(code))();cached[name]=ISWorldObjectContextMenu[name]
+end
+ISInventoryPaneContextMenu.getEatingMask=function()return nil end
+local function bottle(c,amount,capacity,bag)
+ local it={id=100+#c.inv.items,fluid=water(amount,capacity),container=bag or c.inv}
+ function it:getID()return self.id end
+ function it:getFluidContainer()return self.fluid end
+ function it:getContainer()return self.container end
+ function it:canStoreWater()return false end
+ function it:isEquipped()return false end
+ it.syncItemFields=noop;it.setJobDelta=noop;it.setBeingFilled=noop
+ c.inv.items[#c.inv.items+1]=it;return it
+end
 dofile(path.."client/VLS_WaterTankWashMenu.lua")
 local function fetch(tainted)
  current=menuCharacter();local v,t,f=tank(20);f.tainted=tainted
@@ -214,6 +280,15 @@ local function fetch(tainted)
  hooks.pre[1](0,context,{},false)
  return context,ISWorldObjectContextMenu.fetchVars.storeWater[1],f
 end
+local function near(a,b)assert(math.abs(a-b)<0.000001,tostring(a).." != "..tostring(b))end
+test("cached native Fill callback queues IDs instead of the transient world object",function()
+ local context,proxy=fetch(false);queue={};local it=bottle(current,0,0.9)
+ cached.onTakeWater({},proxy,nil,it,0)
+ eq(#queue,1);eq(queue[1].Type,"VLSTakeWaterFromTank")
+ eq(queue[1].vehicleId,42);eq(queue[1].partId,"Tank");eq(queue[1].tankId,7)
+ assert(queue[1].waterObject~=proxy)
+ for name,callback in pairs(cached)do eq(ISWorldObjectContextMenu[name],callback)end
+end)
 test("native fetch receives actual composition without draining tank",function()
  local context,proxy,f=fetch(true)
  eq(proxy.fluid.amount,20);eq(proxy.fluid.tainted,true);eq(f.amount,20)
@@ -240,7 +315,7 @@ test("unrelated native water option unchanged",function()
 end)
 test("native callback queues real tank action",function()
  local context,proxy=fetch(false);queue={}
- ISWorldObjectContextMenu.onWashYourself(current,proxy,nil)
+ cached.onWashYourself(current,proxy,nil)
  eq(#queue,1);eq(queue[1].Type,"VLSWashYourselfFromTank");eq(queue[1].tankId,7)
 end)
 test("world-menu test pass creates no proxy",function()
@@ -248,16 +323,18 @@ test("world-menu test pass creates no proxy",function()
  hooks.pre[1](0,{options={}},{},true)
  eq(#ISWorldObjectContextMenu.fetchVars.storeWater,before)
 end)
-test("tank changed after menu cancels queue submission",function()
- current=char();local v,t=tank(20);queue={};t.id=8
- W.queueBody(current,42,"Tank",7);eq(#queue,0)
+test("tank changed after menu rejects the queued native callback result",function()
+ local context,proxy=fetch(false);queue={};vehicles[42].tank.id=8
+ cached.onWashYourself(current,proxy,nil)
+ eq(#queue,1);eq(queue[1]:isValid(),false);eq(queue[1]:complete(),false)
 end)
 test("menu hooks installed once",function()
  dofile(path.."client/VLS_WaterTankWashMenu.lua");eq(#hooks.pre,1);eq(#hooks.post,1)
 end)
 test("wash queue stops when a second garment lacks water",function()
- current=char();local v,t,f=tank(12);local a,b=clothing(current),clothing(current);b.id=9
- queue={};W.queueClothes(current,42,"Tank",7,{a,b});eq(#queue,2)
+ local context,proxy,f=fetch(false);f.amount=12
+ local a,b=clothing(current),clothing(current);b.id=9
+ queue={};cached.onWashClothing(current,proxy,nil,{a,b},nil);eq(#queue,2)
  eq(queue[1]:complete(),true);eq(queue[2]:complete(),false);eq(f.amount,4);eq(b.wetness,0)
 end)
 test("bandage delegates native replacement once with reserved water",function()
@@ -279,10 +356,141 @@ test("water shortcut defaults on and disabled queued actions cannot spend water"
  eq(a:complete(),true);eq(f.amount,17)
  SandboxVars=saved
 end)
+test("Fill All uses native bag return and preserves both container identities",function()
+ local context,proxy,f=fetch(false);queue={};local bag=inventory()
+ local a,b=bottle(current,0,0.9,bag),bottle(current,0.1,0.5)
+ cached.onTakeWater({},proxy,{a,b},nil,0)
+ eq(#queue,3);eq(queue[1].Type,"VLSTakeWaterFromTank");eq(queue[1].item,a)
+ eq(queue[2].Type,"ReturnToBag");eq(queue[2].to,bag)
+ eq(queue[3].Type,"VLSTakeWaterFromTank");eq(queue[3].item,b)
+ queue[1]:complete();queue[3]:complete()
+ near(a.fluid.amount,0.9);near(b.fluid.amount,0.5);near(f.amount,18.7)
+end)
+for _,raining in ipairs({false,true})do
+ for _,initial in ipairs({0.15,0.9,2})do
+  test("MP Fill debits actual tank, rain="..tostring(raining).." water="..initial,function()
+   local context,proxy,f=fetch(false);f.amount=initial;queue={}
+   proxy.isTaintedWater=function()return raining end
+   local it=bottle(current,0,0.9)
+   cached.onTakeWater({},proxy,nil,it,0)
+   local a=queue[1];eq(a.Type,"VLSTakeWaterFromTank");eq(a.waterTaintedCL,false)
+   local roundtrip=dofile((io.open(root.."/tests/net_action_roundtrip.lua", "r") and root.."/tests/net_action_roundtrip.lua") or root.."/../../tests/vehicle-living-slots/net_action_roundtrip.lua")
+   local server=roundtrip(VLSTakeWaterFromTank,path.."shared/VLS_WaterTankWash.lua",a)
+   eq(server:isValid(),true);near(server.waterUnit,math.min(initial,0.9))
+   server:updateUse(0.5);near(f.amount+it.fluid.amount,initial)
+   server:complete();near(it.fluid.amount,math.min(initial,0.9))
+   near(f.amount+it.fluid.amount,initial);assert(not it.fluid.tainted)
+   server:complete();near(f.amount+it.fluid.amount,initial)
+  end)
+ end
+end
+test("partial Fill cancellation retains exactly the amount already transferred",function()
+ local context,proxy,f=fetch(false);queue={};local it=bottle(current,0,1)
+ cached.onTakeWater({},proxy,nil,it,0);local a=queue[1]
+ a:updateUse(0.25);a:stop();near(it.fluid.amount,0.25);near(f.amount,19.75)
+end)
+test("cached Drink preserves native mask handling and real tank debit",function()
+ local context,proxy,f=fetch(false);queue={}
+ local mask={};ISInventoryPaneContextMenu.getEatingMask=function()return mask end
+ ISWearClothing={new=function(_,c,item)return {Type="WearMask",item=item}end}
+ cached.onDrink({},proxy,0)
+ eq(#queue,2);eq(queue[1].Type,"VLSTakeWaterFromTank");eq(queue[2].item,mask)
+ queue[1]:complete();near(current.thirst,0);near(f.amount,19.2)
+ ISInventoryPaneContextMenu.getEatingMask=function()return nil end
+end)
+test("ordinary dispenser keeps the original native action",function()
+ local context,proxy=fetch(false);queue={};local it=bottle(current,0,1)
+ local dispenser={getSquare=function()return square end,getFluidAmount=function()return 20 end,
+  isTaintedWater=function()return false end}
+ cached.onTakeWater({},dispenser,nil,it,0)
+ eq(#queue,1);eq(queue[1].Type,"ISTakeWaterAction");eq(queue[1].waterObject,dispenser)
+ queue={};cached.onWashYourself(current,dispenser,nil)
+ eq(#queue,1);eq(queue[1].Type,"ISWashYourself");eq(queue[1].sink,dispenser)
+end)
+test("another player exhausting the tank cannot create water",function()
+ local context,proxy,f=fetch(false);f.amount=0.5;queue={}
+ local a,b=bottle(current,0,1),bottle(current,0,1)
+ cached.onTakeWater({},proxy,{a,b},nil,0)
+ queue[1]:complete();queue[2]:complete()
+ near(a.fluid.amount,0.5);near(b.fluid.amount,0);near(f.amount,0)
+end)
+test("tainted tank composition is preserved during collection",function()
+ local context,proxy,f=fetch(true);queue={};local it=bottle(current,0,1)
+ cached.onTakeWater({},proxy,nil,it,0)
+ eq(queue[1].waterTaintedCL,true);queue[1]:complete()
+ eq(it.fluid.tainted,true);near(f.amount,19);near(it.fluid.amount,1)
+end)
+test("native inventory capacity caps vehicle water collection",function()
+ local context,proxy,f=fetch(false);queue={};local it=bottle(current,0,1);current.free=0.2
+ cached.onTakeWater({},proxy,nil,it,0);near(queue[1].waterUnit,0.2)
+ queue[1]:complete();near(it.fluid.amount,0.2);near(f.amount,19.8)
+end)
+for _,fault in ipairs({"changedtank","moving","away","empty","locked","disabled","client"})do
+ test("queued Fill refuses stale or invalid source: "..fault,function()
+  local context,proxy,f=fetch(false);queue={};local it=bottle(current,0,1)
+  cached.onTakeWater({},proxy,nil,it,0);local a=queue[1]
+  if fault=="changedtank"then vehicles[42].tank.id=9 elseif fault=="moving"then vehicles[42].stopped=false
+  elseif fault=="away"then current.near=false elseif fault=="empty"then f.amount=0
+  elseif fault=="locked"then it.fluid.locked=true elseif fault=="disabled"then SandboxVars={VehicleLivingSlots={EnableWaterTankShortcut=false}}
+  elseif fault=="client"then client=true end
+  local before=f.amount;a:complete();near(it.fluid.amount,0);near(f.amount,before)
+  client=false;SandboxVars=nil
+ end)
+end
+test("vehicle water start delegates original tap setup and restores facing target",function()
+ local context,proxy,f=fetch(false);queue={};local it=bottle(current,0,1)
+ it.getName=function()return "Bottle"end
+ it.getFillFromTapSound=function()return "NativeFillSound"end
+ it.getPourType=function()return "bottle"end;it.getStaticModel=function()return "BottleModel"end
+ it.setJobType=function(_,v)it.job=v end
+ it.setBeingFilled=function(_,v)it.filling=v end
+ current.playSound=function(_,v)current.sound=v;return 1 end
+ current.reportEvent=function(_,v)current.event=v end
+ cached.onTakeWater({},proxy,nil,it,0);local a=queue[1]
+ a.setAnimVariable=noop;a.setActionAnim=function(_,v)a.animation=v end;a.setOverrideHandModels=noop
+ a:start();eq(a.waterObject,vehicles[42]);eq(it.filling,true)
+ eq(a.animation,"fill_container_tap");eq(current.sound,"NativeFillSound");eq(current.event,"EventTakeWater")
+ near(it.fluid.amount,0);near(f.amount,20)
+end)
+
+-- Exercise native queue advancement after authoritative fluid sync, not just
+-- two direct complete() calls. Full target state arrives before client perform.
+test("Fill All survives MP full-container sync and advances the native queue",function()
+ local context,proxy,f=fetch(false)
+ local a,b,c=bottle(current,0,1),bottle(current,0.25,0.5),bottle(current,0,0.75)
+ local savedQueue,savedPerform,savedBaseObject=ISTimedActionQueue,Base.perform,ISBaseObject
+ package.loaded.ISBaseObject=true;ISBaseObject=Base
+ local file=assert(io.open(native.."/client/TimedActions/ISTimedActionQueue.lua"))
+ local code=file:read("*a"):gsub("\r\n","\n");file:close()
+ assert((loadstring or load)(code:sub(1,assert(code:find("local STATES =",1,true))-1)))()
+ local baseFile=assert(io.open(native.."/shared/TimedActions/ISBaseTimedAction.lua"))
+ local baseCode=baseFile:read("*a"):gsub("\r\n","\n");baseFile:close()
+ assert((loadstring or load)(assert(baseCode:match("function ISBaseTimedAction:perform%(%)\n.-\nend"))))()
+ ISLogSystem={logAction=noop};current.setIsFarming=noop
+ local started=0
+ Base.begin=function()started=started+1 end
+ Base.isValidStart=function()return true end
+ Base.isStarted=function()return false end;Base.forceCancel=noop
+ cached.onTakeWater({},proxy,{a,b,c},nil,0)
+ local q=ISTimedActionQueue.getTimedActionQueue(current);eq(#q.queue,3);eq(started,1)
+ local roundtrip=dofile((io.open(root.."/tests/net_action_roundtrip.lua", "r") and root.."/tests/net_action_roundtrip.lua") or root.."/../../tests/vehicle-living-slots/net_action_roundtrip.lua")
+ for index,item in ipairs({a,b,c}) do
+  local action=q.current;eq(action.item,item);eq(action:isValid(),true)
+  local server=roundtrip(VLSTakeWaterFromTank,path.."shared/VLS_WaterTankWash.lua",action)
+  server:updateUse(0.5);eq(action:isValid(),true);server:complete()
+  near(item.fluid.amount,item.fluid.capacity)
+  eq(action:isValid(),true) -- used to cancel the rest of Fill All here
+  action:perform();eq(#q.queue,3-index)
+ end
+ eq(started,3);eq(q.current,nil);near(f.amount,18)
+ ISTimedActionQueue=savedQueue;Base.perform=savedPerform;ISBaseObject=savedBaseObject
+end)
+
 -- Actual vehicle/tank registration, without granting every fixture a water tank.
 package.path=path.."shared/?.lua;"..root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/?.lua;"..package.path
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
 package.loaded["TimedActions/ISDeviceBatteryAction"]=true
+package.loaded["Vehicles/Vehicles"]=true
 package.loaded.VLS_Config=dofile(path.."shared/VLS_Config.lua")
 require "VLS_KI5Campers_Config"
 -- Geometry is covered by the inlet tests; keep this matrix about actual equipment.

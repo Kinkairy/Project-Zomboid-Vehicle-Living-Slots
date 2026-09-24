@@ -25,6 +25,8 @@ isServer=function() return not isMPClient end
 -- Use real profiles: VanSeats has roof equipment but no interior profile.
 package.loaded['Entity/TimedActions/ISHandcraftAction']=true
 package.loaded['TimedActions/ISDeviceBatteryAction']=true
+-- Cargo access is exercised against native Vehicles.lua in its own suite.
+package.loaded["Vehicles/Vehicles"]=true
 require 'VLS_Config'
 require 'VLS_Propane'
 local nextId=10

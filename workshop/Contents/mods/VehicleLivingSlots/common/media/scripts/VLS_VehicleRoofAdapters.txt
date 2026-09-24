@@ -231,7 +231,7 @@ module Base
             itemType = Base.PetrolCan;Base.JerryCan,
             specificItem = false,
             mechanicRequireKey = false,
-            setAllModelsVisible = true,
+            setAllModelsVisible = false,
             repairMechanic = false,
             durability = 5,
             table install

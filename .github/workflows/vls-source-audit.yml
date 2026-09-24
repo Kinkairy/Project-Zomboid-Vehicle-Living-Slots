@@ -21,7 +21,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json
           from pathlib import Path
-          manifest = json.loads(Path('release-3.8.12.json').read_text())
+          manifest = json.loads(Path('release-3.9.json').read_text())
           root = Path('workshop/Contents/mods')
           files = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                    for p in root.rglob('*') if p.is_file()}
@@ -35,9 +35,10 @@ jobs:
         run: |
           # These existing fixtures provide their own engine stubs. The separate
           # cargo suite below loads and checks the actual pinned native callback.
-          for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions; do
+          for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions test_vls_trailer_fridge; do
             lua5.1 -e 'package.loaded["Vehicles/Vehicles"] = true' "tests/$name.lua" .
           done
+          lua5.1 -e 'package.loaded["Vehicles/Vehicles"] = true' tests/test_vls_boundaries.lua . . Base.Mov_TrailerFridge
       - name: Native cargo callback contract regression
         run: |
           python3 - <<'PY'

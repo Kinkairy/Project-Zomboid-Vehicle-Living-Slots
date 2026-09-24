@@ -2,10 +2,10 @@
 {
     "appid" "108600"
     "publishedfileid" "3791192579"
-    "contentfolder" "/home/aiops/private-state/steam-workshop-publisher/VehicleLivingSlots-3.8.12-mp-install/Contents"
-    "previewfile" "/home/aiops/private-state/steam-workshop-publisher/VehicleLivingSlots-3.8.12-mp-install/preview.png"
+    "contentfolder" "Contents"
+    "previewfile" "preview.png"
     "visibility" "0"
     "title" "Mobile Living"
     "tags" "Build 42;Multiplayer;Vehicles"
-    "changenote" "3.8.12：修复联机兼容问题。 / Fixed multiplayer compatibility issues."
+    "changenote" "3.9: Appliance, laundry, freezer selection, auxiliary power, water queue and model fixes; removes the obsolete toaster test slot."
 }

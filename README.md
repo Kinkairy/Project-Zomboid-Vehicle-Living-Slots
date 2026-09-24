@@ -1,4 +1,4 @@
-# Mobile Living 3.8.12
+# Mobile Living 3.9
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -24,7 +24,8 @@ The Shasta models require Campers! v0.940b or later. KI5/DAMN assets are not bun
 
 The roof whitelist contains 106 vanilla script/paint/job variants, not 106
 separate vehicle models. Existing seats remain. Living positions accept supported
-beds, cabinets, refrigerators, microwaves, televisions and water-dispenser bottles.
+beds, cabinets, refrigerators, microwaves, televisions, washing machines,
+clothing dryers and water-dispenser bottles.
 Van and StepVan also have a weapon-locker position. Installed non-bed equipment
 uses native white equipment blocks in the seat map.
 
@@ -35,6 +36,28 @@ slot counts vary by body. All roof attachments install and uninstall without
 tools. Native **Mechanics 1** is the recommendation used by the original success
 calculation, not a custom hard gate. Fabricating the rack retains its tools and
 skills. Spotlights use the original headlight switch and main battery.
+
+## Cabin combination washer/dryer
+
+A living position can hold the vanilla Blue Combo Washer/Dryer
+(`Base.Mov_BlueComboWasherDryer`, all four world facings). Standalone white
+washing machines and dryers are no longer installation choices. Installation
+and removal use the normal vehicle actions. The inventory window reuses the
+native combination-machine buttons and controller labels for on/off and mode
+switching; no second mode menu is added.
+
+The shared vehicle power adapter draws from the installed auxiliary battery. Installation does not require a water tank; starting a wash requires a tank containing clean water. Washing also
+uses the installed vehicle water tank: default 5 clean-water units over a
+90-game-minute cycle. Drying uses no water. If power or water is exhausted, the
+cycle pauses; replenish and turn it on to resume. Switching modes stops and
+resets the old cycle. The sandbox has one combo installation switch, wash-water
+cost and one shared wash/dry power cost. Disabling installation retains existing
+devices. The small-appliance switch and per-craft power setting remain separate.
+
+The authoritative vehicle cycle updates clothing wetness, blood and dirt during
+washing, and reduces wetness during drying. Completion also applies the final
+cycle result. Container and item changes are synchronized for multiplayer.
+This adapter uses native item fields; it is not a native map machine instance.
 
 ## Vehicle quick menus
 
@@ -79,20 +102,10 @@ BBCode and publication VDF must agree. Keep `AnimSets/.gitkeep` and
 are required by the native loader.
 
 See [THIN-SHELL-AUDIT.md](THIN-SHELL-AUDIT.md) for native delegation boundaries,
-[release-3.8.12.json](release-3.8.12.json) for exact runtime hashes, and
-[NOTICE.md](NOTICE.md) for asset rights. Previous release manifests remain in Git history; 3.8.8 is the selected sole
-rollback version.
-
-The current payload passed 14 Lua suites / 1113 checks and targeted multiplayer
-owner testing. Mock-based tests and Java contract probes are not exhaustive
-singleplayer, controller or multiplayer compatibility certification. An earlier
-session logged six duplicate-item-ID messages without a VLS stack; a subsequent
-clean-login and isolated petrol uninstall/reinstall check did not reproduce them.
-The source of that earlier transient remains unknown.
-
-Version 3.8.10 contains the owner-tested R6 cargo and seat-access fixes.
-The version correction does not change that gameplay logic. NUC deployment
-and Steam Workshop publication are separate steps; this source update does not perform them.
+[release-3.9.json](release-3.9.json) for exact runtime hashes, and
+[NOTICE.md](NOTICE.md) for asset rights. Historical release manifests remain as source history. **3.9 is the sole
+owner-selected rollback baseline**; older standalone VLS backups are retired.
+See [3.9 release notes](docs/release-3.9.md) for changes and evidence boundaries.
 
 ## 3.8.11 native cargo access
 
@@ -114,3 +127,19 @@ components were verified against the matching installed game definitions. This
 release does not claim exhaustive coffee-maker, controller or multiplayer testing.
 
 3.8.12：新增车载小电器位，支持咖啡机和烤面包机。 / Added a vehicle small-appliance slot supporting coffee makers and toasters.
+
+## 3.9
+
+This release includes the multiplayer crafting constructor fix, queued native
+water actions, trailer fridge support, freezer container selection repair,
+progressive laundry updates, shared auxiliary power accounting, native appliance
+names, simplified settings, TV state recovery, damage accounting and roof fuel
+can visibility fixes. Liquid transfer retains the native timing used in 3.8.12.
+
+The obsolete separate toaster test slot and its compatibility logic are removed.
+Any item left in that obsolete slot is discarded; the current interchangeable
+coffee-maker/toaster slot remains. DeRumba adaptation is deferred.
+
+The Workshop download and deployed test/client payload match the 235-file
+release manifest. Automated checks and targeted player tests do not constitute
+exhaustive gameplay or multiplayer certification.

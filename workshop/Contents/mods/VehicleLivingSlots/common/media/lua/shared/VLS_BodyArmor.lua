@@ -54,6 +54,16 @@ local function sourceFor(vehicle, armorPart)
     end
     return configured and vehicle:getPartById(configured) or nil
 end
+function A.IsSource(part)
+    local vehicle = part and part:getVehicle()
+    if not vehicle then return false end
+    for armorId in pairs(A.parts) do
+        local armorPart = vehicle:getPartById(armorId)
+        if armorPart and sourceFor(vehicle, armorPart) == part then return true end
+    end
+    return false
+end
+
 local function hasInstalledArmor(vehicle)
     for armorId in pairs(A.parts) do
         local part = vehicle:getPartById(armorId)
@@ -65,6 +75,20 @@ local function rebase(vehicle, armorPart)
     local source = sourceFor(vehicle, armorPart)
     stateFor(vehicle).parts[armorPart] = { armor = itemId(armorPart:getInventoryItem()), source = itemId(source and source:getInventoryItem()), condition = condition(source) }
 end
+-- Shared mechanics boundary: armor baselines must be rebased together with
+-- rack damage samples, including side windows outside the rack source list.
+function A.RebaseSource(part)
+    local vehicle = part and part:getVehicle()
+    if not vehicle or not isHost() then return end
+    for armorId in pairs(A.parts) do
+        local armorPart = vehicle:getPartById(armorId)
+        if armorPart and armorPart:getInventoryItem()
+                and sourceFor(vehicle, armorPart) == part then
+            rebase(vehicle, armorPart)
+        end
+    end
+end
+
 function A.Register(vehicle, armorPart)
     if vehicle and armorPart and armorPart:getInventoryItem() then registered[vehicle] = true end
 end
@@ -134,6 +158,20 @@ local function settle(vehicle, armorPart)
     end
     rebase(vehicle, armorPart)
 end
+-- Damage.Update owns authoritative ordering: sample the original impact for
+-- the rack, then absorb it with armor, then rebase both. Every trigger uses that
+-- same path; this module does not run a second damage loop after it.
+function A.SettleVehicle(vehicle, protected)
+    if not isHost() or not registered[vehicle] then return end
+    for armorId in pairs(A.parts) do
+        local armorPart = vehicle:getPartById(armorId)
+        if armorPart and armorPart:getInventoryItem() then
+            if protected then rebase(vehicle, armorPart)
+            else settle(vehicle, armorPart) end
+        end
+    end
+end
+
 local function onTick()
     tick = tick + 1
     if tick % 6 ~= 0 then return end
@@ -144,10 +182,7 @@ local function onTick()
             if isHost() and VLS.Damage and VLS.Damage.Update then VLS.Damage.Update(vehicle) end
             for armorId in pairs(A.parts) do
                 local armorPart = vehicle:getPartById(armorId)
-                if armorPart and armorPart:getInventoryItem() then
-                    if isHost() then settle(vehicle, armorPart) end
-                    A.SyncDamageVisual(armorPart)
-                end
+                if armorPart and armorPart:getInventoryItem() then A.SyncDamageVisual(armorPart) end
             end
         end
     end

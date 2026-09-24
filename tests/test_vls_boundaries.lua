@@ -1,7 +1,9 @@
 local root=assert(arg[1])
+local fridgeType=arg[3] or "Base.Mov_FridgeMini"
 local media=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/"
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
 package.loaded["TimedActions/ISDeviceBatteryAction"]=true
+package.loaded["Vehicles/Vehicles"]=true
 local V=dofile(media.."shared/VLS_Config.lua")
 package.loaded.VLS_Config=V
 local n=0
@@ -88,7 +90,7 @@ for _,args in ipairs({false,{}, {vehicle="42",part="SeatBed"}, {vehicle=0/0,part
 end
 test("empty fridge leaves active work; charged fridge can register again",function()
  local i=battery(0)
- local fridge={getFullType=function()return "Base.Mov_FridgeMini"end}
+ local fridge={getFullType=function()return fridgeType end}
  local part={getInventoryItem=function()return fridge end}
  local v={getScriptName=function()return "Base.StepVan"end,getId=function()return 42 end,
   getPartById=function(_,id)return id=="SeatBed" and part end}
@@ -114,7 +116,7 @@ test("authoritative freezer mirrors native progress and egg viability",function(
  local cabinet=container({});local freezer=container({egg})
  local parts={}
  parts.SeatBed={getId=function()return "SeatBed"end,getVehicle=function()return vehicle end,
- getInventoryItem=function()return {getFullType=function()return "Base.Mov_FridgeMini"end}end,
+ getInventoryItem=function()return {getFullType=function()return fridgeType end}end,
  getItemContainer=function()return cabinet end,getModData=function()return {}end}
  parts.VLSUniversalFreezer={getId=function()return "VLSUniversalFreezer"end,getItemContainer=function()return freezer end}
  function vehicle:getPartById(id)return parts[id]end

@@ -61,6 +61,5 @@
   "IGUI_VLSChassisConflict": "无法取得底盘原始重量，或重量已被其他模组修改。",
   "IGUI_VLSTankSource": "水箱水源",
   "IGUI_VehiclePartCatVLSPantry": "小电器",
-  "IGUI_VehiclePartVLSPantryCoffee": "小电器",
-  "IGUI_VehiclePartVLSPantryToaster": "旧测试电器（可拆回）"
+  "IGUI_VehiclePartVLSPantryCoffee": "小电器"
 }

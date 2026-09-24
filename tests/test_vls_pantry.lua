@@ -15,11 +15,13 @@ end
 ArrayList={new=function()return list()end}
 function instanceof(x,t) return x and x.kind==t or false end
 package.loaded["VLS_Config"]=nil
-local V={allowedItems={},mechanicsDisplayProviders={}}
+local V={allowedItems={},mechanicsDisplayProviders={},installationOptionProviders={}}
 V.isSupportedVehicle=function(v)return v and v.supported end
 V.resolveEquipmentType=function()return "old" end
 V.getEquipmentProfileByType=function()return nil end
 V.isAllowedItem=function()return "old" end
+V.isInstallationEnabled=function()return true end
+V.getSmallApplianceDrainPerUse=function()return 0.0004 end
 V.walkApplianceContainer=function(inv,fn) for _,i in ipairs(inv.items or {})do fn(i)end end
 V.hasAuxBatteryPower=function(v,n)return v.charge and v.charge>=n end
 V.consumeAuxBattery=function(v,n)v.charge=v.charge-n;v.debits=(v.debits or 0)+1 end
@@ -48,7 +50,8 @@ local function item(ft,sprite,id)
 end
 local coffee=item("Base.Mov_CoffeeMaker",nil,42)
 local toaster=item("Base.Mov_Toaster",nil,43)
-for id,spec in pairs(P.slots)do
+-- Include an old saved-part fixture to verify it is rejected.
+for _,id in ipairs({P.PART_ID,"VLSPantryToaster"})do
  local part={id=id,item=id=="VLSPantryCoffee" and coffee or nil}
  function part:getId()return self.id end
  function part:getVehicle()return vehicle end
@@ -62,9 +65,18 @@ test("one flexible slot accepts either appliance without accepting other furnitu
  assert(not P.canInstall(vehicle.parts.VLSPantryCoffee,item("Base.Wood",nil,44)))
  assert(not P.canInstall(vehicle.parts.VLSPantryToaster,toaster))
 end)
-test("old occupied toaster slot remains readable but cannot be installed again",function()
+test("small-appliance sandbox disables only new installation",function()
+ local enabled=V.isInstallationEnabled
+ V.isInstallationEnabled=function()return false end
+ assert(not P.canInstall(vehicle.parts.VLSPantryCoffee,coffee))
+ assert(P.accepts(vehicle.parts.VLSPantryCoffee,coffee))
+ V.isInstallationEnabled=enabled
+end)
+test("retired toaster part cannot install or provide crafting authority",function()
  local part=vehicle.parts.VLSPantryToaster
- part.item=toaster;assert(P.accepts(part,toaster));assert(not P.canInstall(part,toaster))
+ part.item=toaster;assert(not P.isPart(part));assert(not P.accepts(part,toaster))
+ assert(not P.canInstall(part,toaster));assert(P.reason(character,vehicle,part.id))
+ eq(P.choiceForRecipe(P.recipe("toast"),part.id,toaster),nil)
  part.item=nil;assert(not P.accepts(part,nil))
 end)
 test("six native moveable orientations",function()
@@ -103,7 +115,7 @@ dofile(native.."/shared/Entity/TimedActions/ISHandcraftAction.lua")
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
 function log()end
 DebugType={CraftLogic=1};CharacterTrait={ALL_THUMBS=1}
-convertToPZNetTable=function(x)assert(x~=false);return x end
+convertToPZNetTable=function(x)assert(type(x)=="table", "expected KahluaTable");return x end
 getVehicleById=function(id)return id==17 and vehicle or nil end
 local client,server=false,true
 isClient=function()return client end;isServer=function()return server end
@@ -137,6 +149,8 @@ HandcraftLogic={new=function(chr, bench, object)
  end
  logic.resources=list();logic.all=list()
  function logic:getRecipeData()return data end
+ function logic:getPlayer()return chr end
+ function logic:isUsingRecipeAtHandBenefit()return false end
  function logic:getContainers()return self.containers end
  function logic:isContainersAccessible()return true end
  function logic:getSourceResources()return self.resources end
@@ -159,8 +173,7 @@ end}
 dofile(arg[4] or (base.."shared/VLS_PantryCraftAction.lua"))
 local function action(choice)
  vehicle.parts.VLSPantryCoffee.item=choice=="toast" and toaster or coffee
- local a=ISHandcraftAction.new(VLSPantryCraftAction,character,P.recipe(choice),list(),nil,nil,nil,nil,nil,1,0)
- a.partId=P.PART_ID;a.choice=choice;a.vehicleId=17;a.applianceId=choice=="toast" and 43 or 42
+ local a=VLSPantryCraftAction:new(character,17,P.PART_ID,choice=="toast" and 43 or 42,choice,nil,nil,nil)
  a.netAction={forceComplete=function()a.forced=true end}
  return a
 end
@@ -203,10 +216,23 @@ test("manual input mode preserved by native validator",function()
  logic:setManualSelectInputs(true);assert(P.canCraft(character,logic,recipe));eq(observedManual,true)
  logic:setManualSelectInputs(false);assert(P.canCraft(character,logic,recipe));eq(observedManual,false)
 end)
-test("native logic constructor restored after errors",function()
- local a=action("toast");local original=HandcraftLogic.new
- local ok=pcall(function()a:withNativeLogic(function()error("injected")end)end)
- eq(ok,false);eq(HandcraftLogic.new,original)
+test("local logic interception preserves constructor, identity and nested actions",function()
+ local a=action("toast");local original=HandcraftLogic.new;local meta=getmetatable(a)
+ a:withNativeLogic(function(current)
+  eq(current,a);eq(HandcraftLogic.new,original)
+  current.logic=HandcraftLogic.new(character,nil,nil)
+  local unrelated=HandcraftLogic.new(character,nil,nil)
+  assert(current.logic~=unrelated)
+  -- The nested constructor is still the original engine entry during execution.
+  eq(HandcraftLogic.new,original)
+  current.nativeStateWritten=true
+ end)
+ eq(getmetatable(a),meta);eq(a.nativeStateWritten,true);assert(a.logic)
+ local before=a.logic
+ local ok=pcall(function()a:withNativeLogic(function(current)
+  eq(current,a);eq(HandcraftLogic.new,original);error("injected")
+ end)end)
+ eq(ok,false);eq(HandcraftLogic.new,original);eq(getmetatable(a),meta);eq(a.logic,before)
 end)
 test("client completion cannot create outputs",function()
  local a=action("toast");a:serverStart();local n=outputCount
@@ -395,11 +421,11 @@ test("installed-device mismatch cannot execute a different appliance recipe",fun
  local a=action("coffeeMug");a.applianceId=43;vehicle.parts.VLSPantryCoffee.item=toaster
  assert(not a:isValid());vehicle.parts.VLSPantryCoffee.item=coffee
 end)
-test("only occupied old test slots are visible for item recovery",function()
+test("only the current appliance slot is exposed by pantry UI",function()
  local old=vehicle.parts.VLSPantryToaster
- eq(V.pantryProvider.hidden(old),true);old.item=toaster
- eq(V.pantryProvider.hidden(old),false);old.item=nil
- eq(V.pantryProvider.hidden(vehicle.parts.VLSPantryCoffee),false)
+ old.item=toaster;assert(not V.pantryProvider.matches(old));old.item=nil
+ eq(#P.stationOrder,1);eq(P.stationOrder[1],P.PART_ID)
+ assert(V.pantryProvider.matches(vehicle.parts[P.PART_ID]))
 end)
 test("closed appliance window releases local registry without network ownership",function()
  P.openAppliance(character,vehicle,"VLSPantryCoffee")
@@ -432,22 +458,22 @@ end)
 test("actual VLS auxiliary battery helpers gate and debit all three native recipes",function()
  local f=assert(io.open(base.."shared/VLS_Config.lua"));local config=f:read("*a");f:close()
  local has,consume,partGetter=V.hasAuxBatteryPower,V.consumeAuxBattery,V.getAuxBatteryPart
- for _,name in ipairs({"hasAuxBatteryPower","consumeAuxBattery"})do
-  local start=assert(config:find("function VLS."..name.."(",1,true))
-  local finish=assert(config:find("\nend",start,true))+3
-  assert(loadstring(config:sub(start,finish)))()
- end
+ local powerSource=assert(config:match("(VLS.VehiclePower =.-)function VLS.getInstalledWaterBottlePart"))
+ local smallRate=V.getSmallApplianceDrainPerUse
+ assert(loadstring(powerSource))()
+ V.getSmallApplianceDrainPerUse=smallRate
  local charge,transmissions,installed=1,0,true
  local battery={getCurrentUsesFloat=function()return charge end,setUsedDelta=function(_,n)charge=n end}
- V.getAuxBatteryPart=function()return {getInventoryItem=function()return installed and battery or nil end}end
+ local batteryPart={getInventoryItem=function()return installed and battery or nil end}
+ V.getAuxBatteryPart=function()return batteryPart end
  vehicle.transmitPartUsedDelta=function()transmissions=transmissions+1 end
  for _,choice in ipairs({"coffeeMug","coffeeCup","toast"})do
   local a=action(choice);installed=false;assert(not a:isValid())
   installed=true;charge=0;assert(not a:isValid())
-  charge=P.ENERGY_PER_USE/2;assert(not a:isValid())
+  charge=V.getSmallApplianceDrainPerUse()/2;assert(not a:isValid())
   charge=1;assert(a:isValid());a:serverStart()
-  local before=transmissions;a:complete();eq(charge,1-P.ENERGY_PER_USE);eq(transmissions,before+1)
-  a:complete();eq(charge,1-P.ENERGY_PER_USE);eq(transmissions,before+1)
+  local before=transmissions;a:complete();eq(charge,1-V.getSmallApplianceDrainPerUse());eq(transmissions,before+1)
+  a:complete();eq(charge,1-V.getSmallApplianceDrainPerUse());eq(transmissions,before+1)
  end
  V.hasAuxBatteryPower,V.consumeAuxBattery,V.getAuxBatteryPart=has,consume,partGetter
  vehicle.parts.VLSPantryCoffee.item=coffee
@@ -494,7 +520,7 @@ test("ordinary craft menu keeps general queries and discovers fitted appliance",
  panel.logic:setRecipe(P.recipe("coffeeMug"));eq(panel.logic:getIsoObject(),V.genericSurface)
  local ordinary=setmetatable({isAnySurfaceCraft=function()return true end},{__index=P.recipe("coffeeMug")})
  panel.logic:setRecipe(ordinary);eq(panel.logic:getIsoObject(),V.genericSurface)
- local action=ISHandcraftAction:new(character,ordinary,list(),panel.logic:getIsoObject(),nil,nil,nil,nil,1,0)
+ local action=ISHandcraftAction:new(character,ordinary,list(),panel.logic:getIsoObject(),nil,{},nil,nil,1,0)
  eq(action.Type,"ISHandcraftAction");eq(action.isoObject,vehicle)
  V.genericSurface=nil
  ISEntityUI.OpenHandcraftWindow(character,nil,nil,false)
@@ -576,4 +602,50 @@ for _,failure in ipairs({"power","missing-materials","missing-logic"})do
   vehicle.charge=1;canCraft=true;vehicle.parts[P.PART_ID].item=coffee
  end)
 end
+-- Match the shipped NetTimedAction constructor-field collection and ordered
+-- server reconstruction. No manually copied vehicle/choice fields are allowed.
+local function roundtrip(class, path, original, serverConstructor)
+ local f=assert(io.open(path));local source=f:read("*a");f:close()
+ local params=assert(source:match("function%s+"..class.Type..":new%(([^)]*)%)"))
+ local args,n={},0
+ for name in params:gmatch("[%w_]+")do n=n+1;args[n]=rawget(original,name)end
+ return serverConstructor(class,unpack(args,1,n))
+end
+for _,choice in ipairs(P.choiceOrder)do
+ for _,entry in ipairs({"radial","inventory"})do
+  test(entry.." "..choice.." survives named-field MP reconstruction twice",function()
+   vehicle.parts[P.PART_ID].item=choice=="toast" and toaster or coffee
+   if entry=="radial" then P.openAppliance(character,vehicle,P.PART_ID)
+   else ISEntityUI.OpenHandcraftWindow(character,nil,"*",true,P.recipe(choice),nil)end
+   for iteration=1,2 do
+    local panel=opened().handCraftPanel;panel.logic:setRecipe(P.recipe(choice))
+    local clientAction=ISHandcraftAction.FromLogic(panel.logic,0)
+    local a=roundtrip(VLSPantryCraftAction,base.."shared/VLS_PantryCraftAction.lua",clientAction,VLSPantryCraftAction.new)
+    eq(a.vehicleId,17);eq(a.partId,P.PART_ID);eq(a.applianceId,choice=="toast" and 43 or 42);eq(a.choice,choice)
+    eq(a.craftRecipe,P.recipe(choice));eq(a.isoObject,nil);eq(a.craftBench,nil)
+    a.netAction={forceComplete=noop};a:serverStart();assert(a:isValid())
+    local outputs,debits=outputCount,vehicle.debits or 0
+    a:complete();eq(outputCount,outputs+1);eq(vehicle.debits,debits+1)
+   end
+  end)
+ end
+end
+test("ordinary crafting retains native constructor field names and values",function()
+ -- Capture a fresh unwrapped constructor for the server's original class.
+ local saved=ISHandcraftAction
+ dofile(native.."/shared/Entity/TimedActions/ISHandcraftAction.lua")
+ local serverNew=ISHandcraftAction.new;ISHandcraftAction=saved
+ local object,bench,containers={},{},list()
+ local a=ISHandcraftAction:new(character,P.recipe("toast"),containers,object,bench,{},nil,nil,0.5,0.25)
+ eq(a.Type,"ISHandcraftAction")
+ local b=roundtrip(ISHandcraftAction,base.."client/VLS_PantryMenu.lua",a,serverNew)
+ eq(b.craftRecipe,a.craftRecipe);eq(b.isoObject,object);eq(b.craftBench,bench)
+ eq(b.containers,containers);eq(b.variableInputRatio,0.5);eq(b.eatPercentage,0.25)
+end)
+test("malformed remote appliance choice rejects without output or exception",function()
+ local a=VLSPantryCraftAction:new(character,17,P.PART_ID,42,"invalid-choice",nil,nil,nil)
+ a.netAction={forceComplete=function()a.rejected=true end}
+ local outputs=outputCount;a:serverStart();assert(a.rejected);eq(outputCount,outputs)
+end)
+
 print("RESULT pantry UI and transaction tests="..count.." failures=0")
