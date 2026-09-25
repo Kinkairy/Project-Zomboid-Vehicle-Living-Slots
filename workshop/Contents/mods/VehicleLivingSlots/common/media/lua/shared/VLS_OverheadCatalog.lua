@@ -1,0 +1,34 @@
+-- Native B42.20 overhead cupboards, verified against newtiledefinitions.tiles.txt.
+-- These are existing Moveables; no replacement items or ground-furniture changes.
+-- Only eight straight household families are installable. Other prior candidate
+-- entries recognize already fitted cupboards so their contents/removal stay safe.
+return {
+    {type="Moveables.fixtures_counters_01_16", installable=true, name="Oakwood_Floating_Counter", metal=false, sprites={"fixtures_counters_01_16","fixtures_counters_01_17","fixtures_counters_01_18","fixtures_counters_01_19"}},
+    {type="Moveables.fixtures_counters_01_20", installable=true, name="Hardwood_Floating_Counter", metal=false, sprites={"fixtures_counters_01_20","fixtures_counters_01_21","fixtures_counters_01_22","fixtures_counters_01_23"}},
+    {type="Moveables.fixtures_counters_01_24", installable=true, name="Birchwood_Floating_Counter", metal=false, sprites={"fixtures_counters_01_24","fixtures_counters_01_25","fixtures_counters_01_26","fixtures_counters_01_27"}},
+    {type="Moveables.fixtures_counters_01_28", installable=true, name="Steel_Floating_Counter", metal=true, sprites={"fixtures_counters_01_28","fixtures_counters_01_29","fixtures_counters_01_30","fixtures_counters_01_31"}},
+    {type="Moveables.fixtures_counters_01_144", installable=true, name="Oak_Floating_Counter", metal=false, sprites={"fixtures_counters_01_144","fixtures_counters_01_145","fixtures_counters_01_146","fixtures_counters_01_147"}},
+    {type="Moveables.fixtures_counters_01_148", installable=true, name="Dark_Floating_Counter", metal=false, sprites={"fixtures_counters_01_148","fixtures_counters_01_149","fixtures_counters_01_150","fixtures_counters_01_151"}},
+    {type="Moveables.fixtures_counters_01_152", installable=true, name="Green_Floating_Counter", metal=false, sprites={"fixtures_counters_01_152","fixtures_counters_01_153","fixtures_counters_01_154","fixtures_counters_01_155"}},
+    {type="Moveables.fixtures_counters_01_156", installable=true, name="White_Floating_Counter", metal=false, sprites={"fixtures_counters_01_156","fixtures_counters_01_157","fixtures_counters_01_158","fixtures_counters_01_159"}},
+    {type="Moveables.fixtures_counters_01_160", installable=false, name="Oakwood_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_160","fixtures_counters_01_161","fixtures_counters_01_162","fixtures_counters_01_163"}},
+    {type="Moveables.fixtures_counters_01_164", installable=false, name="Darkwood_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_164","fixtures_counters_01_165","fixtures_counters_01_166","fixtures_counters_01_167"}},
+    {type="Moveables.fixtures_counters_01_168", installable=false, name="Birchwood_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_168","fixtures_counters_01_169","fixtures_counters_01_170","fixtures_counters_01_171"}},
+    {type="Moveables.fixtures_counters_01_172", installable=false, name="Steel_Floating_Corner_Counter", metal=true, sprites={"fixtures_counters_01_172","fixtures_counters_01_173","fixtures_counters_01_174","fixtures_counters_01_175"}},
+    {type="Moveables.fixtures_counters_01_176", installable=false, name="Oak_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_176","fixtures_counters_01_177","fixtures_counters_01_178","fixtures_counters_01_179"}},
+    {type="Moveables.fixtures_counters_01_180", installable=false, name="Dark_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_180","fixtures_counters_01_181","fixtures_counters_01_182","fixtures_counters_01_183"}},
+    {type="Moveables.fixtures_counters_01_184", installable=false, name="Green_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_184","fixtures_counters_01_185","fixtures_counters_01_186","fixtures_counters_01_187"}},
+    {type="Moveables.fixtures_counters_01_188", installable=false, name="White_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_188","fixtures_counters_01_189","fixtures_counters_01_190","fixtures_counters_01_191"}},
+    {type="Moveables.fixtures_counters_01_200", installable=false, name="Dark_Oak_Floating_Counter", metal=false, sprites={"fixtures_counters_01_200","fixtures_counters_01_201","fixtures_counters_01_202","fixtures_counters_01_203"}},
+    {type="Moveables.fixtures_counters_01_204", installable=false, name="Dark_Oak_Floating_Corner_Counter", metal=false, sprites={"fixtures_counters_01_204","fixtures_counters_01_205","fixtures_counters_01_206","fixtures_counters_01_207"}},
+    {type="Moveables.location_hospitality_sunstarmotel_02_44", installable=false, name="Floating_Motel_Counter", metal=false, sprites={"location_hospitality_sunstarmotel_02_44","location_hospitality_sunstarmotel_02_45","location_hospitality_sunstarmotel_02_46","location_hospitality_sunstarmotel_02_47"}},
+    {type="Moveables.location_hospitality_sunstarmotel_02_48", installable=false, name="Floating_Motel_Corner_Counter", metal=false, sprites={"location_hospitality_sunstarmotel_02_48","location_hospitality_sunstarmotel_02_49","location_hospitality_sunstarmotel_02_50","location_hospitality_sunstarmotel_02_51"}},
+    {type="Moveables.location_restaurant_spiffos_03_32", installable=false, name="Floating_Burger_Counter", metal=false, sprites={"location_restaurant_spiffos_03_32","location_restaurant_spiffos_03_36"}},
+    {type="Moveables.location_restaurant_spiffos_03_33", installable=false, name="Floating_Icecream_Counter", metal=false, sprites={"location_restaurant_spiffos_03_33","location_restaurant_spiffos_03_37"}},
+    {type="Moveables.location_restaurant_spiffos_03_34", installable=false, name="Floating_Fries_Counter", metal=false, sprites={"location_restaurant_spiffos_03_34","location_restaurant_spiffos_03_39"}},
+    {type="Moveables.location_restaurant_spiffos_03_35", installable=false, name="Floating_Milkshake_Counter", metal=false, sprites={"location_restaurant_spiffos_03_35","location_restaurant_spiffos_03_38"}},
+    {type="Moveables.location_restaurant_spiffos_03_40", installable=false, name="Floating_Spiffo_Logo_Counter", metal=false, sprites={"location_restaurant_spiffos_03_40","location_restaurant_spiffos_03_43"}},
+    {type="Moveables.location_restaurant_spiffos_03_41", installable=false, name="Floating_Spiffo_Counter", metal=false, sprites={"location_restaurant_spiffos_03_41","location_restaurant_spiffos_03_42","location_restaurant_spiffos_03_44","location_restaurant_spiffos_03_45"}},
+    {type="Base.Mov_FloatingTrailerCounter", installable=false, name="Floating_Trailer_Counter", metal=false, sprites={"location_trailer_02_22","location_trailer_02_23","location_trailer_02_62","location_trailer_02_63"}},
+    {type="Moveables.location_trailer_02_68", installable=false, name="Floating_Trailer_Corner_Counter", metal=false, sprites={"location_trailer_02_68","location_trailer_02_69","location_trailer_02_70","location_trailer_02_71"}},
+}

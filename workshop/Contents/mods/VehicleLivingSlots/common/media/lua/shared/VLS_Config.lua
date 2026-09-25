@@ -8,6 +8,10 @@ VLS.MOD_ID = "VehicleLivingSlots"
 VLS.VERSION = "3.9"
 VLS.BUILD_ID = "release-3.9-feedback-fixes-test"
 VLS.CATEGORY_ID = "VLSLiving"
+VLS.OVERHEAD_CATEGORY_ID = VLS.CATEGORY_ID
+VLS.TOP_FRAME_PART_IDS = {"VLSTopFrame1", "VLSTopFrame2", "VLSTopFrame3"}
+VLS.TOP_FRAME_ITEM_TYPE = "Base.VLSTopFrame"
+VLS.OVERHEAD_PART_IDS = {"VLSPantryCoffee", "VLSOverhead1", "VLSOverhead2"}
 VLS.UNIVERSAL_PART_ID = "SeatBed"
 VLS.BED_PART_ID = VLS.UNIVERSAL_PART_ID
 VLS.BED_PASSENGER_ID = "Bed"
@@ -199,6 +203,15 @@ for _, scriptName in ipairs(VLS.stepVanScriptNames) do
         rearArea = "TruckBed",
         waterTankParts = { VLS.LARGE_VAN_WATER_TANK_PART_ID },
     }
+end
+
+for _, profile in pairs(VLS.vehicleProfiles) do
+    local count = profile.kind == "largeVan" and 3
+        or profile.kind == "mediumVan" and 2 or 1
+    profile.overheadParts = {}
+    for index = 1, count do
+        profile.overheadParts[index] = VLS.OVERHEAD_PART_IDS[index]
+    end
 end
 
 VLS.equipmentProfiles = {
@@ -428,6 +441,58 @@ for fullType in pairs(VLS.sleepingBagTypes) do
     end
 end
 
+
+-- Overhead storage shares the accepted furniture transaction/container adapter,
+-- but its item allowlist and installation positions remain separate.
+local overheadCatalog = require "VLS_OverheadCatalog"
+for _, id in ipairs(VLS.OVERHEAD_PART_IDS) do VLS.allowedItems[id] = {} end
+for _, entry in ipairs(overheadCatalog) do
+    local sound = entry.metal and "DoorMetalSmall" or "DoorWoodMedium"
+    VLS.equipmentProfiles[entry.type] = {
+        capability = "storage", overhead = true, capacity = 50,
+        overheadInstallable = entry.installable,
+        containerType = "overhead", previewSprite = entry.sprites[1],
+        moveableName = entry.name,
+        containerOpenSound = sound .. "Open", containerCloseSound = sound .. "Close",
+        containerPutSound = sound .. "TransferItem", containerTakeSound = sound .. "TransferItem",
+    }
+    for _, sprite in ipairs(entry.sprites) do
+        VLS.supportedMoveableSprites[sprite] = entry.type
+    end
+    for _, id in ipairs(VLS.OVERHEAD_PART_IDS) do
+        VLS.allowedItems[id][entry.type] = true
+    end
+end
+
+function VLS.getOverheadIndex(part)
+    if not part then return nil end
+    for index,id in ipairs(VLS.OVERHEAD_PART_IDS) do
+        if part:getId()==id then return index end
+    end
+end
+
+function VLS.getTopFramePart(cupboard)
+    local index=VLS.getOverheadIndex(cupboard)
+    return index and cupboard:getVehicle():getPartById(VLS.TOP_FRAME_PART_IDS[index]) or nil
+end
+function VLS.isTopFramePart(part)
+    local profile=part and VLS.getVehicleProfile(part:getVehicle())
+    local index=part and tonumber(part:getId():match("^VLSTopFrame([1-3])$"))
+    return profile and index and index<=#profile.overheadParts or false
+end
+function VLS.hasTopFrame(cupboard)
+    local part=VLS.getTopFramePart(cupboard)
+    local item=part and part:getInventoryItem()
+    return item and item:getFullType()==VLS.TOP_FRAME_ITEM_TYPE and item:getCondition()>0 or false
+end
+function VLS.isOverheadPart(part)
+    local profile = part and VLS.getVehicleProfile(part:getVehicle())
+    for _, id in ipairs(profile and profile.overheadParts or {}) do
+        if part:getId() == id then return true end
+    end
+    return false
+end
+
 function VLS.getVehicleProfile(vehicle)
     if not vehicle then return nil end
     return VLS.vehicleProfiles[vehicle:getScriptName()]
@@ -474,6 +539,7 @@ end
 
 function VLS.isUniversalPart(part)
     if not part then return false end
+    if VLS.isOverheadPart(part) then return true end
     local profile = VLS.getVehicleProfile(part:getVehicle())
     if not profile then return false end
     for _, partId in ipairs(profile.universalParts) do
@@ -617,6 +683,12 @@ function VLS.isWaterTankShortcutEnabled()
 end
 
 function VLS.isInstallationEnabled(part, itemOrType)
+    if VLS.isOverheadPart(part) then
+        if not VLS.hasTopFrame(part) then return false end
+        local profile = type(itemOrType) == "string"
+            and VLS.getEquipmentProfileByType(itemOrType) or VLS.getEquipmentProfile(itemOrType)
+        if profile and profile.overheadInstallable == false then return false end
+    end
     local option = VLS.getInstallationOption(part, itemOrType)
     local settings = SandboxVars and SandboxVars.VehicleLivingSlots
     if option and settings and settings[option] == false then return false end
@@ -629,6 +701,7 @@ function VLS.isAllowedItem(part, item)
     end
     local allowed = VLS.allowedItems[part:getId()]
     if not allowed then return false end
+    if part:getId():find("^VLSOverhead") and not VLS.isOverheadPart(part) then return false end
     local itemType = item:getFullType()
     if not allowed[itemType] then itemType = VLS.resolveEquipmentType(item) end
     if allowed[itemType] ~= true then return false end
@@ -700,6 +773,7 @@ function VLS.getPartDisplayName(part, fallback)
         end
         return VLS.getEquipmentDisplayName(item)
     end
+    if VLS.isOverheadPart(part) then return getText("IGUI_VehiclePartVLSOverhead1") end
     if part and VLS.isUniversalPart(part) then
         local vehicle = part:getVehicle()
         local profile = VLS.getVehicleProfile(vehicle)
@@ -1308,7 +1382,7 @@ end
 -- Display-only extensions must not turn transport cargo into living-system parts.
 VLS.mechanicsDisplayProviders = VLS.mechanicsDisplayProviders or {}
 function VLS.usesNormalizedPartCondition(part)
-    if VLS.isManagedPart(part) then return true end
+    if VLS.isManagedPart(part) or VLS.isTopFramePart(part) then return true end
     for _, test in pairs(VLS.mechanicsDisplayProviders) do
         if test(part) then return true end
     end

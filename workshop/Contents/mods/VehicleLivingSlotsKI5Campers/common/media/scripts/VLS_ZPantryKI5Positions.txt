@@ -1,9 +1,0 @@
-module Base
-{
-    vehicle Trailer87Scamp13 { template = VLSPantryPositions, }
-    vehicle Trailer87Scamp16 { template = VLSPantryPositions, }
-    vehicle Trailer61Bambi16 { template = VLSPantryPositions, }
-    vehicle Trailer54FlyingCloud22 { template = VLSPantryPositions, }
-    vehicle Trailer61Airflyte { template = VLSPantryPositions, }
-    vehicle Trailer61Astrodome { template = VLSPantryPositions, }
-}

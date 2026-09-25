@@ -252,6 +252,7 @@ end
 test("empty KI5 mechanics slots use the same positional names as seat/container views",function()
  local snapshot={};for k,v in pairs(VLS)do snapshot[k]=v end
  VLS.ki5CampersAdapterApplied=nil
+ VLS.OVERHEAD_PART_IDS={"VLSPantryCoffee","VLSOverhead1","VLSOverhead2"}
  VLS.vehicleProfiles={};VLS.FREEZER_PART_BY_UNIVERSAL={};VLS.UNIVERSAL_PART_BY_FREEZER={}
  VLS.sleepingBagTypes={};VLS.equipmentProfiles={};VLS.WATER_TANK_PART_IDS={};VLS.mechanicsDisplayProviders={}
  VLS.getVehicleProfile=function(v)return v and VLS.vehicleProfiles[v.name]end

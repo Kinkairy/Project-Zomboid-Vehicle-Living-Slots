@@ -1,0 +1,9 @@
+module Base
+{
+    vehicle Trailer87Scamp13 { template = VLSTopSpace1, }
+    vehicle Trailer87Scamp16 { template = VLSTopSpace2, }
+    vehicle Trailer61Bambi16 { template = VLSTopSpace2, }
+    vehicle Trailer54FlyingCloud22 { template = VLSTopSpace3, }
+    vehicle Trailer61Airflyte { template = VLSTopSpace2, }
+    vehicle Trailer61Astrodome { template = VLSTopSpace2, }
+}

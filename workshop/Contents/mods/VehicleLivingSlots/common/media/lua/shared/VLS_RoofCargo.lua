@@ -12,6 +12,8 @@ R.fabricatedParts = R.fabricatedParts or {}
 function R.fabricationScale(vehicle)
     local script=vehicle and vehicle:getScript()
     local name=script and script:getFullName()
+    local profile=vehicle and VLS.getVehicleProfile(vehicle)
+    if profile and profile.kind=="ki5Camper" then return profile.topFrameScale or 1 end
     if not name or not R.vehicleScripts[name] then return 1 end
     if name=="Base.SUV" or name:find("^Base%.PickUpVan") then return 0.5 end
     if name:find("^Base%.Van") then return 0.75 end

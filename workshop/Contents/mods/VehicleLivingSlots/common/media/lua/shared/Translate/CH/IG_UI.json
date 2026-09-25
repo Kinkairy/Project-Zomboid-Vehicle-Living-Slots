@@ -56,10 +56,17 @@
   "IGUI_VehiclePartVLSBumperRear": "後防撞桿",
   "IGUI_VehiclePartVLSImprovedChassis": "底盤改良",
   "IGUI_VLSChassisEngineOff": "進行底盤作業前需要關閉引擎。",
-  "IGUI_VLSChassisReduction": "車輛淨減重：%1。貨物重量不變。",
+  "IGUI_VLSChassisReduction": "車輛減重：%1。隨整車及貨物總重按比例變化。",
   "IGUI_VLSChassisProjected": "預計整車重量：%1（保持目前貨物）。",
   "IGUI_VLSChassisConflict": "無法取得底盤原始重量，或重量已被其他模組修改。",
   "IGUI_VLSTankSource": "水箱水源",
   "IGUI_VehiclePartCatVLSPantry": "小電器",
-  "IGUI_VehiclePartVLSPantryCoffee": "小電器"
+  "IGUI_VehiclePartCatVLSTopSpace": "頂部空間",
+  "IGUI_VehiclePartVLSTopSpace": "頂部空間",
+  "IGUI_VehiclePartVLSOverhead1": "頂部空間",
+  "IGUI_VehiclePartVLSOverhead2": "頂部空間",
+  "IGUI_VehiclePartVLSOverhead3": "頂部空間",
+  "IGUI_VehiclePartVLSTopFrame1": "頂部框架",
+  "IGUI_VehiclePartVLSTopFrame2": "頂部框架",
+  "IGUI_VehiclePartVLSTopFrame3": "頂部框架"
 }

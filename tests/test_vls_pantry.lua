@@ -17,14 +17,17 @@ function instanceof(x,t) return x and x.kind==t or false end
 package.loaded["VLS_Config"]=nil
 local V={allowedItems={},mechanicsDisplayProviders={},installationOptionProviders={}}
 V.isSupportedVehicle=function(v)return v and v.supported end
+V.isOverheadPart=function(p)return p and (p:getId()=="VLSPantryCoffee" or p:getId():match("^VLSOverhead[1-2]$")~=nil) end
 V.resolveEquipmentType=function()return "old" end
 V.getEquipmentProfileByType=function()return nil end
-V.isAllowedItem=function()return "old" end
-V.isInstallationEnabled=function()return true end
+V.isAllowedItem=function(p)if p and p:getId():match("^VLSOverhead")then return false end;return "old" end
+V.isInstallationEnabled=function(p)return not p or p.frameReady~=false end
+V.hasTopFrame=function(p)return p and p.frameReady~=false end
 V.getSmallApplianceDrainPerUse=function()return 0.0004 end
 V.walkApplianceContainer=function(inv,fn) for _,i in ipairs(inv.items or {})do fn(i)end end
 V.hasAuxBatteryPower=function(v,n)return v.charge and v.charge>=n end
 V.consumeAuxBattery=function(v,n)v.charge=v.charge-n;v.debits=(v.debits or 0)+1 end
+V.OVERHEAD_PART_IDS={"VLSPantryCoffee","VLSOverhead1","VLSOverhead2"}
 VLS=V;package.loaded["VLS_Config"]=V;package.loaded["VLS_InstallGuard"]=true
 ISInstallVehiclePart={complete=function(a)a.nativeInstalled=true;return true end}
 local base=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/"
@@ -90,9 +93,9 @@ test("wrong vehicle and stale part denied",function()
  local copy={getId=function()return "VLSPantryCoffee"end,getVehicle=function()return vehicle end}
  assert(not P.accepts(copy,coffee))
 end)
-test("inside and parked required",function()
+test("inside required and movement does not block appliance",function()
  character.vehicle=nil;assert(P.reason(character,vehicle,"VLSPantryCoffee"));character.vehicle=vehicle
- vehicle.stopped=false;assert(P.reason(character,vehicle,"VLSPantryCoffee"));vehicle.stopped=true
+ vehicle.stopped=false;eq(P.reason(character,vehicle,"VLSPantryCoffee"),nil);vehicle.stopped=true
  eq(P.reason(character,vehicle,"VLSPantryCoffee"),nil)
 end)
 test("missing broken swapped and unpowered denied",function()
@@ -193,10 +196,10 @@ test("failure consumes no electricity",function()
  local n=vehicle.debits;local outputs=outputCount;a:complete()
  eq(vehicle.debits,n);eq(outputCount,outputs);nativeFail=false
 end)
-for _,case in ipairs({"leave","move","remove","replace","power","break"})do
+for _,case in ipairs({"leave","remove","replace","power","break"})do
  test("completion rejects "..case,function()
   local a=action("coffeeMug");a:serverStart();local n=outputCount
-  if case=="leave"then character.vehicle=nil elseif case=="move"then vehicle.stopped=false
+  if case=="leave"then character.vehicle=nil
   elseif case=="remove"then vehicle.parts.VLSPantryCoffee.item=nil
   elseif case=="replace"then vehicle.parts.VLSPantryCoffee.item=item("Base.Mov_CoffeeMaker",nil,999)
   elseif case=="power"then vehicle.charge=0 elseif case=="break"then coffee.condition=0 end
@@ -402,20 +405,41 @@ local initCount=0
 ISVehicleMechanics={initParts=function()initCount=initCount+1 end}
 dofile(base.."client/VLS_PantryMechanics.lua")
 local function row(id)return {item={part={getId=function()return id end}}}end
-test("living-equipment row moves immediately before weapon cabinet, retaining selection",function()
- local weapon,pantry=row("VLSWeaponCabinetSlot"),row(P.PART_ID)
- local header={item={cat=true,name="Living equipment"}}
- local panel={vehicle=vehicle,leftListSelection=4,listbox={items={header,row("bed"),weapon,pantry,row("battery")},selected=4,mouseoverselected=3}}
- ISVehicleMechanics.initParts(panel)
- eq(initCount,1);eq(panel.listbox.items[3],pantry);eq(panel.listbox.items[4],weapon)
- eq(panel.listbox.selected,3);eq(panel.listbox.mouseoverselected,4);eq(panel.leftListSelection,3)
- for i,r in ipairs(panel.listbox.items)do eq(r.itemindex,i);eq(r.index,i)end
- P.orderMechanicsRows(panel,panel.listbox);eq(panel.listbox.items[3],pantry)
+test("top positions precede living equipment and preserve selection",function()
+ for count=2,3 do
+  local header={item={cat=true,name="Living equipment"}}
+  local other={item={cat=true,name="Engine"}}
+  local bed,weapon=row("SeatBed"),row("VLSWeaponCabinetSlot")
+  local rows={other,row("Engine"),header,bed,weapon}
+  local top={}
+  for i=count,1,-1 do
+   top[i]=row(i==2 and "VLSTopFrame2" or VLS.OVERHEAD_PART_IDS[i]);table.insert(rows,top[i])
+  end
+  local panel={vehicle=vehicle,leftListSelection=4,listbox={items=rows,selected=#rows,mouseoverselected=5}}
+  ISVehicleMechanics.initParts(panel)
+  eq(rows[1],other);eq(rows[3],header)
+  for i=1,count do eq(rows[3+i],top[i])end
+  eq(rows[4+count],bed);eq(rows[5+count],weapon)
+  eq(rows[panel.listbox.selected],top[1]);eq(rows[panel.listbox.mouseoverselected],weapon)
+  eq(rows[panel.leftListSelection],bed)
+  P.orderMechanicsRows(panel,panel.listbox)
+  for i=1,count do eq(rows[3+i],top[i])end
+  for i,r in ipairs(rows)do eq(r.itemindex,i);eq(r.index,i)end
+ end
 end)
-test("vehicles without a weapon cabinet keep native living-equipment order",function()
- local bed,pantry=row("bed"),row(P.PART_ID)
- local panel={listbox={items={bed,pantry},selected=2}}
- P.orderMechanicsRows(panel,panel.listbox);eq(panel.listbox.items[1],bed);eq(panel.listbox.items[2],pantry)
+test("unrelated vehicle rows retain their original order",function()
+ local a,b=row("Engine"),row("Battery")
+ local panel={listbox={items={a,b},selected=2}}
+ P.orderMechanicsRows(panel,panel.listbox);eq(panel.listbox.items[1],a);eq(panel.listbox.items[2],b)
+end)
+test("paired frame rows precede matching storage without changing clicked part",function()
+ local header={item={cat=true,name="Living equipment"}}
+ local bed,top,frame=row("SeatBed"),row("VLSPantryCoffee"),row("VLSTopFrame1")
+ local panel={leftListSelection=2,listbox={items={header,bed,top,frame},selected=4,mouseoverselected=3}}
+ P.orderMechanicsRows(panel,panel.listbox)
+ eq(panel.listbox.items[2],frame);eq(panel.listbox.items[3],top);eq(panel.listbox.items[4],bed)
+ eq(panel.listbox.selected,2);eq(panel.leftListSelection,4);eq(panel.listbox.mouseoverselected,3)
+ P.orderMechanicsRows(panel,panel.listbox);eq(panel.listbox.items[2],frame)
 end)
 test("installed-device mismatch cannot execute a different appliance recipe",function()
  local a=action("coffeeMug");a.applianceId=43;vehicle.parts.VLSPantryCoffee.item=toaster
@@ -424,7 +448,7 @@ end)
 test("only the current appliance slot is exposed by pantry UI",function()
  local old=vehicle.parts.VLSPantryToaster
  old.item=toaster;assert(not V.pantryProvider.matches(old));old.item=nil
- eq(#P.stationOrder,1);eq(P.stationOrder[1],P.PART_ID)
+ eq(#P.stationOrder,3);eq(P.stationOrder[1],P.PART_ID)
  assert(V.pantryProvider.matches(vehicle.parts[P.PART_ID]))
 end)
 test("closed appliance window releases local registry without network ownership",function()
@@ -436,7 +460,7 @@ end)
 test("mechanics uses installed name and empty small-appliance label",function()
  local part=vehicle.parts[P.PART_ID]
  for _,device in ipairs({coffee,toaster})do part.item=device;eq(V.pantryProvider.name(part),device:getDisplayName())end
- part.item=nil;eq(V.pantryProvider.name(part),"IGUI_VehiclePart"..P.PART_ID);part.item=coffee
+ part.item=nil;eq(V.pantryProvider.name(part),"IGUI_VehiclePartVLSOverhead1");part.item=coffee
 end)
 test("ordinary crafting keeps its own bench and object",function()
  local bench,obj={},{}
@@ -495,36 +519,57 @@ local function openFromItem(fullName)
  context.callback(context.target,unpack(context.args,1,context.n))
  return opened()
 end
-test("native item-right-click and radial discover the same appliance bench",function()
- for _,row in ipairs({{toaster,"Base.BreadSlices","toast"},{coffee,"Base.Coffee2","coffeeMug"}})do
-  vehicle.parts[P.PART_ID].item=row[1]
-  local window=openFromItem(row[2]);local panel=window.handCraftPanel
-  local source=P.uiSources[window.isoObject]
-  assert(source and panel.craftBench==source.bench,"right-click must discover native vehicle bench")
-  eq(panel.logic:getCraftBench(),source.bench);eq(panel.logic:getIsoObject(),source.object)
-  eq(panel.recipeQuery,"*");eq(panel.fixtureFilterText,"!"..row[2]);eq(panel.fixtureFilterMode,2)
-  local query=source.bench:getRecipeTagQuery()
-  local a=ISHandcraftAction:new(character,P.recipe(row[3]),list(),panel.logic:getIsoObject(),panel.logic:getCraftBench(),false,nil,nil,1,0)
-  eq(a.Type,"VLSPantryCraftAction");assert(a:isValid());eq(a.isoObject,nil);eq(a.craftBench,nil)
-  P.openAppliance(character,vehicle,P.PART_ID)
-  eq(opened().handCraftPanel.craftBench:getRecipeTagQuery(),query)
+test("item-right-click with either appliance keeps native item-filtered crafting",function()
+ for _,device in ipairs({coffee,toaster})do
+  vehicle.parts[P.PART_ID].item=device
+  for _,fullName in ipairs({"Base.Teacup","Base.Coffee2","Base.BreadSlices"})do
+   local window=openFromItem(fullName);local panel=window.handCraftPanel
+   eq(window.isoObject,V.genericSurface)
+   eq(panel.craftBench,nil);eq(panel.logic:getCraftBench(),nil)
+   eq(panel.logic:getIsoObject(),V.genericSurface)
+   eq(panel.recipeQuery,"*")
+   eq(panel.fixtureFilterText,"!"..fullName);eq(panel.fixtureFilterMode,2)
+   eq(P.uiSources[window.isoObject],nil)
+  end
  end
  vehicle.parts[P.PART_ID].item=coffee
 end)
-test("ordinary craft menu keeps general queries and discovers fitted appliance",function()
- vehicle.parts[P.PART_ID].item=toaster
- ISEntityUI.OpenHandcraftWindow(character,nil,nil,false)
- local panel=opened().handCraftPanel;local source=P.uiSources[opened().isoObject]
- eq(panel.recipeQuery,"InHandCraft;AnySurfaceCraft;Toaster")
- panel.logic:setRecipe(P.recipe("toast"));eq(panel.logic:getIsoObject(),source.object)
- panel.logic:setRecipe(P.recipe("coffeeMug"));eq(panel.logic:getIsoObject(),V.genericSurface)
- local ordinary=setmetatable({isAnySurfaceCraft=function()return true end},{__index=P.recipe("coffeeMug")})
- panel.logic:setRecipe(ordinary);eq(panel.logic:getIsoObject(),V.genericSurface)
- local action=ISHandcraftAction:new(character,ordinary,list(),panel.logic:getIsoObject(),nil,{},nil,nil,1,0)
- eq(action.Type,"ISHandcraftAction");eq(action.isoObject,vehicle)
+test("generic and selected-recipe menus stay native with either appliance",function()
+ for _,device in ipairs({coffee,toaster})do
+  vehicle.parts[P.PART_ID].item=device
+  for _,query in ipairs({"*", "InHandCraft;AnySurfaceCraft"})do
+   ISEntityUI.OpenHandcraftWindow(character,nil,query,false)
+   local window=opened();local panel=window.handCraftPanel
+   eq(window.isoObject,V.genericSurface);eq(panel.recipeQuery,query)
+   eq(panel.craftBench,nil);eq(panel.logic:getCraftBench(),nil)
+   eq(P.uiSources[window.isoObject],nil)
+  end
+  ISEntityUI.OpenHandcraftWindow(character,nil,"*",false,P.recipe("coffeeMug"))
+  eq(opened().handCraftPanel.craftBench,nil)
+  eq(P.uiSources[opened().isoObject],nil)
+  ISEntityUI.OpenHandcraftWindow(character,nil,nil,false)
+  local panel=opened().handCraftPanel
+  eq(panel.recipeQuery,"InHandCraft;AnySurfaceCraft")
+  eq(panel.logic:getIsoObject(),V.genericSurface)
+  local ordinary=setmetatable({
+   isAnySurfaceCraft=function()return true end,
+   getInputs=function()return list()end,
+  },{__index=P.recipe("coffeeMug")})
+  panel.logic:setRecipe(ordinary)
+  panel.logic:setManualSelectInputs(true)
+  local action=ISHandcraftAction.FromLogic(panel.logic,0)
+  eq(action.Type,"ISHandcraftAction")
+  eq(action.isoObject,V.genericSurface)
+  eq(action.craftBench,nil)
+  assert(action:isValid())
+  local outputs=outputCount
+  action:serverStart();action:complete()
+  eq(outputCount,outputs+1)
+ end
  V.genericSurface=nil
  ISEntityUI.OpenHandcraftWindow(character,nil,nil,false)
- panel=opened().handCraftPanel;panel.logic:setRecipe(ordinary);eq(panel.logic:getIsoObject(),nil)
+ eq(opened().isoObject,nil)
+ eq(opened().handCraftPanel.craftBench,nil)
  V.genericSurface=vehicle;vehicle.parts[P.PART_ID].item=coffee
 end)
 test("no vehicle appliance means untouched native crafting menu",function()
@@ -543,24 +588,17 @@ test("explicit real world workstation is not replaced by vehicle appliance",func
  ISEntityUI.OpenHandcraftWindow(character,object,"Wood",true)
  eq(opened().isoObject,object);eq(opened().handCraftPanel.recipeQuery,"Wood");eq(P.uiSources[object],nil)
 end)
-test("right-click appliance window observes the same power-loss guard",function()
- vehicle.parts[P.PART_ID].item=toaster
- local window=openFromItem("Base.BreadSlices");local source=P.uiSources[window.isoObject]
- vehicle.charge=0;eq(window:update(),false);assert(window.hasClosedWindowInstance);eq(P.uiSources[source.object],nil)
- vehicle.charge=1;vehicle.parts[P.PART_ID].item=coffee
-end)
 -- Native completion callback, driven by actions made from each actual UI entry.
 ISPanelJoypad=ISPanel;package.loaded["ISUI/ISPanelJoypad"]=true
 getTextManager=function()return {getFontHeight=function()return 12 end}end
 dofile(native.."/client/Entity/ISUI/CraftRecipe/ISWidgetHandCraftControl.lua")
 ISInventoryPage={dirtyUI=noop}
-for _,entry in ipairs({"radial","inventory-context"})do
+for _,entry in ipairs({"lightning"})do
  for _,choice in ipairs({"toast","coffeeMug","coffeeCup"})do
   test(entry.." "..choice.." completes and repeats without reopening",function()
    server=false;client=false
    vehicle.parts[P.PART_ID].item=choice=="toast" and toaster or coffee
-   if entry=="radial" then P.openAppliance(character,vehicle,P.PART_ID)
-   else openFromItem(choice=="toast" and "Base.BreadSlices" or "Base.Coffee2")end
+   P.openAppliance(character,vehicle,P.PART_ID)
    local window=opened();local panel=window.handCraftPanel;local logic=panel.logic
    P.recipe(choice).getInputs=function()return list()end
    logic:setRecipe(P.recipe(choice))
@@ -612,11 +650,10 @@ local function roundtrip(class, path, original, serverConstructor)
  return serverConstructor(class,unpack(args,1,n))
 end
 for _,choice in ipairs(P.choiceOrder)do
- for _,entry in ipairs({"radial","inventory"})do
+ for _,entry in ipairs({"lightning"})do
   test(entry.." "..choice.." survives named-field MP reconstruction twice",function()
    vehicle.parts[P.PART_ID].item=choice=="toast" and toaster or coffee
-   if entry=="radial" then P.openAppliance(character,vehicle,P.PART_ID)
-   else ISEntityUI.OpenHandcraftWindow(character,nil,"*",true,P.recipe(choice),nil)end
+   P.openAppliance(character,vehicle,P.PART_ID)
    for iteration=1,2 do
     local panel=opened().handCraftPanel;panel.logic:setRecipe(P.recipe(choice))
     local clientAction=ISHandcraftAction.FromLogic(panel.logic,0)
@@ -648,4 +685,27 @@ test("malformed remote appliance choice rejects without output or exception",fun
  local outputs=outputCount;a:serverStart();assert(a.rejected);eq(outputCount,outputs)
 end)
 
+test("three independent appliance slots retain their own native recipe and MP identity",function()
+ local old=vehicle.parts[P.PART_ID].item
+ local devices={item("Base.Mov_CoffeeMaker",nil,101),item("Base.Mov_Toaster",nil,102),item("Base.Mov_CoffeeMaker",nil,103)}
+ for n=1,3 do
+  local id=VLS.OVERHEAD_PART_IDS[n];local p=vehicle.parts[id] or {getVehicle=function()return vehicle end}
+  p.getId=function()return id end;p.getInventoryItem=function(self)return self.item end
+  p.item=devices[n];p.item.getDisplayName=function()return "Native device "..n end;vehicle.parts[id]=p
+ end
+ menu.slices={};ISVehicleMenu.showRadialMenu(character);eq(#menu.slices,3)
+ for n=1,3 do
+  local id=VLS.OVERHEAD_PART_IDS[n];local choice=n==2 and "toast" or "coffeeCup"
+  P.openAppliance(character,vehicle,id)
+  local panel=opened().handCraftPanel;panel.logic:setRecipe(P.recipe(choice))
+  local a=ISHandcraftAction.FromLogic(panel.logic,0)
+  local b=roundtrip(VLSPantryCraftAction,base.."shared/VLS_PantryCraftAction.lua",a,VLSPantryCraftAction.new)
+  eq(b.partId,id);eq(b.applianceId,100+n);eq(b.choice,choice)
+  b.netAction={forceComplete=noop};b:serverStart();assert(b:isValid())
+  local outputs,debits=outputCount,vehicle.debits or 0;b:complete();eq(outputCount,outputs+1);eq(vehicle.debits,debits+1)
+ end
+ local a=VLSPantryCraftAction:new(character,17,"VLSOverhead1",102,"toast",nil,nil,nil)
+ vehicle.parts.VLSOverhead1.frameReady=false;eq(a:isValid(),false)
+ vehicle.parts.VLSPantryCoffee.item=old;vehicle.parts.VLSOverhead1=nil;vehicle.parts.VLSOverhead2=nil
+end)
 print("RESULT pantry UI and transaction tests="..count.." failures=0")

@@ -14,6 +14,9 @@ local function emptySlots(distribution,profile)
         local freezer=VLS.FREEZER_PART_BY_UNIVERSAL[id]
         if freezer then result[freezer]=VehicleDistributions.EmptySeat end
     end
+    for _,id in ipairs(profile.overheadParts or {}) do
+        result[id]=VehicleDistributions.EmptySeat
+    end
     if profile.kind=="mediumVan" or profile.kind=="largeVan" then
         result[VLS.WEAPON_PART_ID]=VehicleDistributions.EmptySeat
     end

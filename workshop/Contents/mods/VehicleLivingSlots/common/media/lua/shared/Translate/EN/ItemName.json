@@ -2,5 +2,6 @@
   "Base.VLSFixedRoofRack": "Roof Rack",
   "Base.VLSWindowArmor": "Window Armor",
   "Base.VLSBumperArmor": "Pipe Bumper",
-  "ItemName_Base.VLSImprovedChassis": "Improved Chassis"
+  "ItemName_Base.VLSImprovedChassis": "Improved Chassis",
+  "ItemName_Base.VLSTopFrame": "Top Frame"
 }

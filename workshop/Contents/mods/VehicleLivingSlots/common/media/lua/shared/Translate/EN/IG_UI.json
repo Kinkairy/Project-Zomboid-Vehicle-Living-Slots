@@ -56,10 +56,17 @@
   "IGUI_VehiclePartVLSBumperRear": "Rear bumper guard",
   "IGUI_VehiclePartVLSImprovedChassis": "Chassis improvement",
   "IGUI_VLSChassisEngineOff": "Stop the engine before chassis work.",
-  "IGUI_VLSChassisReduction": "Net vehicle weight reduction: %1. Cargo weight is unchanged.",
+  "IGUI_VLSChassisReduction": "Vehicle weight reduction: %1. Scales with total vehicle and cargo weight.",
   "IGUI_VLSChassisProjected": "Projected total weight: %1 (with current cargo).",
   "IGUI_VLSChassisConflict": "Chassis mass baseline is unavailable or changed by another mod.",
   "IGUI_VLSTankSource": "Water tank source",
   "IGUI_VehiclePartCatVLSPantry": "Small Appliances",
-  "IGUI_VehiclePartVLSPantryCoffee": "Small Appliance"
+  "IGUI_VehiclePartCatVLSTopSpace": "Top Space",
+  "IGUI_VehiclePartVLSTopSpace": "Top Space",
+  "IGUI_VehiclePartVLSOverhead1": "Top Space",
+  "IGUI_VehiclePartVLSOverhead2": "Top Space",
+  "IGUI_VehiclePartVLSOverhead3": "Top Space",
+  "IGUI_VehiclePartVLSTopFrame1": "Top Frame",
+  "IGUI_VehiclePartVLSTopFrame2": "Top Frame",
+  "IGUI_VehiclePartVLSTopFrame3": "Top Frame"
 }

@@ -6,12 +6,12 @@ require "ISUI/Crafting/ISHandcraftWindow"
 require "Entity/ISUI/CraftRecipe/ISHandCraftPanel"
 
 P.uiSources = P.uiSources or setmetatable({}, { __mode = "k" })
-P.stationOrder = { P.PART_ID }
+P.stationOrder = { "VLSPantryCoffee", "VLSOverhead1", "VLSOverhead2" }
 
 VLS.registerMechanicsUIProvider("pantry", {
     matches = P.isPart,
     name = function(part)
-        local name = getText("IGUI_VehiclePart" .. part:getId())
+        local name = getText("IGUI_VehiclePartVLSOverhead1")
         local item = part:getInventoryItem()
         return item and item:getDisplayName() or name
     end,
@@ -41,26 +41,16 @@ local function uiSource(character, vehicle, partId)
     return source
 end
 
--- One discovery path for radial, inventory-context and ordinary crafting UI.
+-- Only an explicit appliance entry receives a detached workbench.
 local function installedPart(character, requestedId)
+    if not requestedId then return nil end
     local vehicle = character and character:getVehicle()
     if not vehicle or not VLS.isSupportedVehicle(vehicle) then return nil end
     for _, id in ipairs(P.stationOrder) do
-        if (not requestedId or id == requestedId) and not P.reason(character, vehicle, id) then
+        if id == requestedId and not P.reason(character, vehicle, id) then
             return vehicle, id
         end
     end
-end
-
-local function recipeObject(source, recipe)
-    if not source.generic then return source.object end
-    local part = source.vehicle:getPartById(source.partId)
-    if P.choiceForRecipe(recipe, source.partId, part and part:getInventoryItem()) then
-        return source.object
-    end
-    -- Other recipes retain the original real surface (or no surface).
-    -- A fitted toaster must not grant a cabinet/workbench to unrelated recipes.
-    return source.originalObject
 end
 
 function P.openAppliance(character, vehicle, partId)
@@ -87,16 +77,8 @@ if not P.uiHooksApplied then
             HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
             return
         end
-        source.generic = requestedId == nil
-        source.originalObject = object
-        if source.generic and not object and not ignoreSurface then
-            source.originalObject = ISEntityUI.FindCraftSurface(character, 1)
-        end
         local tag = source.bench:getRecipeTagQuery()
-        local effectiveQuery = source.generic and (query or "InHandCraft;AnySurfaceCraft;" .. tag) or tag
-        -- Preserve the native context-menu '*' query, selected recipe and input
-        -- filter. Only provide the native bench that vehicle parts cannot supply.
-        local ok, result = pcall(nativeOpen, character, source.object, effectiveQuery,
+        local ok, result = pcall(nativeOpen, character, source.object, tag,
             true, recipe, itemString)
         local window = ok and ISEntityUI.GetWindowInstance(character:getPlayerNum(), "HandcraftWindow")
         local panel = window and window.handCraftPanel
@@ -108,7 +90,7 @@ if not P.uiHooksApplied then
             HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
         end
         print("[VLS Pantry " .. P.VERSION .. "] open part=" .. partId
-            .. " benchBound=" .. tostring(not not bound) .. " query=" .. tostring(effectiveQuery))
+            .. " benchBound=" .. tostring(not not bound) .. " query=" .. tostring(tag))
         if not ok then error(result, 0) end
         return result
     end
@@ -123,29 +105,10 @@ if not P.uiHooksApplied then
         return nativePanel(self, x, y, width, height, player, craftBench, isoObject, recipeQuery)
     end
 
-    local nativeRecipeChanged = ISHandCraftPanel.onRecipeChanged
-    function ISHandCraftPanel:onRecipeChanged(recipe)
-        local source = P.uiSources[self.isoObject]
-        if source and source.generic then
-            self.logic:setIsoObject(recipeObject(source, recipe))
-            self:updateContainers(true)
-        end
-        return nativeRecipeChanged(self, recipe)
-    end
-
-    local nativeTooltip = ISHandCraftPanel.updateTooltip
-    function ISHandCraftPanel:updateTooltip()
-        local source = P.uiSources[self.isoObject]
-        if source and source.generic then
-            self.tooltipLogic:setIsoObject(recipeObject(source, self.tooltipRecipe))
-        end
-        return nativeTooltip(self)
-    end
-
     local nativeContainers = ISHandCraftPanel.updateContainers
     function ISHandCraftPanel:updateContainers(force)
         local source = P.uiSources[self.isoObject]
-        if not source or (source.generic and recipeObject(source, self.logic:getRecipe()) ~= source.object) then
+        if not source then
             return nativeContainers(self, force)
         end
         local getContainers = ISInventoryPaneContextMenu.getContainers

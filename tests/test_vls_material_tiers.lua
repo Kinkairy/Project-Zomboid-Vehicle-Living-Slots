@@ -19,6 +19,7 @@ isServer=function() return not client end
 ItemTag={WELDING_MASK="mask",WRENCH="wrench",BLOW_TORCH="torch"}
 Perks={MetalWelding="welding",Mechanics="mechanics"}
 VLS={equipmentProfiles={},supportedMoveableSprites={},installationOptionProviders={},
+    getVehicleProfile=function(vehicle) return vehicle.profile end,
     isInstallationEnabled=function() return true end}
 package.loaded.VLS_Config=VLS
 Events={OnTick={Add=noop}}

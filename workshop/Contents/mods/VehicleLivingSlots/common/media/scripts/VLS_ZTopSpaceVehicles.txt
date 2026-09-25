@@ -1,0 +1,512 @@
+module Base
+{
+    template vehicle VLSTopSpace1
+    {
+        part VLSTopFrame1
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSPantryCoffee
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+    }
+
+    template vehicle VLSTopSpace2
+    {
+        part VLSTopFrame1
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSTopFrame2
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSPantryCoffee
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSOverhead1
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame2,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+    }
+    template vehicle VLSTopSpace3
+    {
+        part VLSTopFrame1
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSTopFrame2
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSTopFrame3
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.Chassis.create,
+                init = VLS.Chassis.init,
+                update = VLS.Chassis.update,
+            }
+        }
+
+        part VLSPantryCoffee
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSOverhead1
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame2,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+        part VLSOverhead2
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame3,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+
+    }
+
+    vehicle SUV { template = VLSTopSpace1, }
+    vehicle PickUpVan { template = VLSTopSpace1, }
+    vehicle PickUpVanBrickingIt { template = VLSTopSpace1, }
+    vehicle PickUpVanBuilder { template = VLSTopSpace1, }
+    vehicle PickUpVanCallowayLandscaping { template = VLSTopSpace1, }
+    vehicle PickUpVanHeltonMetalWorking { template = VLSTopSpace1, }
+    vehicle PickUpVanKimbleKonstruction { template = VLSTopSpace1, }
+    vehicle PickUpVanMarchRidgeConstruction { template = VLSTopSpace1, }
+    vehicle PickUpVanMccoy { template = VLSTopSpace1, }
+    vehicle PickUpVanMetalworker { template = VLSTopSpace1, }
+    vehicle PickUpVanWeldingbyCamille { template = VLSTopSpace1, }
+    vehicle PickUpVanYingsWood { template = VLSTopSpace1, }
+    vehicle PickUpVan_Camo { template = VLSTopSpace1, }
+    vehicle Van { template = VLSTopSpace2, }
+    vehicle VanBeckmans { template = VLSTopSpace2, }
+    vehicle VanBrewsterHarbin { template = VLSTopSpace2, }
+    vehicle VanBuilder { template = VLSTopSpace2, }
+    vehicle VanCarpenter { template = VLSTopSpace2, }
+    vehicle VanCoastToCoast { template = VLSTopSpace2, }
+    vehicle VanDeerValley { template = VLSTopSpace2, }
+    vehicle VanFossoil { template = VLSTopSpace2, }
+    vehicle VanGardenGods { template = VLSTopSpace2, }
+    vehicle VanGardener { template = VLSTopSpace2, }
+    vehicle VanGreenes { template = VLSTopSpace2, }
+    vehicle VanJohnMcCoy { template = VLSTopSpace2, }
+    vehicle VanJonesFabrication { template = VLSTopSpace2, }
+    vehicle VanKerrHomes { template = VLSTopSpace2, }
+    vehicle VanKnobCreekGas { template = VLSTopSpace2, }
+    vehicle VanKnoxCom { template = VLSTopSpace2, }
+    vehicle VanKorshunovs { template = VLSTopSpace2, }
+    vehicle VanLouisvilleLandscaping { template = VLSTopSpace2, }
+    vehicle VanMail { template = VLSTopSpace2, }
+    vehicle VanMccoy { template = VLSTopSpace2, }
+    vehicle VanMechanic { template = VLSTopSpace2, }
+    vehicle VanMeltingPointMetal { template = VLSTopSpace2, }
+    vehicle VanMetalheads { template = VLSTopSpace2, }
+    vehicle VanMetalworker { template = VLSTopSpace2, }
+    vehicle VanMicheles { template = VLSTopSpace2, }
+    vehicle VanMobileMechanics { template = VLSTopSpace2, }
+    vehicle VanMooreMechanics { template = VLSTopSpace2, }
+    vehicle VanOldMill { template = VLSTopSpace2, }
+    vehicle VanOvoFarm { template = VLSTopSpace2, }
+    vehicle VanPennSHam { template = VLSTopSpace2, }
+    vehicle VanPlattAuto { template = VLSTopSpace2, }
+    vehicle VanPluggedInElectrics { template = VLSTopSpace2, }
+    vehicle VanRiversideFabrication { template = VLSTopSpace2, }
+    vehicle VanRosewoodworking { template = VLSTopSpace2, }
+    vehicle VanSchwabSheetMetal { template = VLSTopSpace2, }
+    vehicle VanSpiffo { template = VLSTopSpace2, }
+    vehicle VanTreyBaines { template = VLSTopSpace2, }
+    vehicle VanUncloggers { template = VLSTopSpace2, }
+    vehicle VanUtility { template = VLSTopSpace2, }
+    vehicle VanWPCarpentry { template = VLSTopSpace2, }
+    vehicle Van_Blacksmith { template = VLSTopSpace2, }
+    vehicle Van_BugWipers { template = VLSTopSpace2, }
+    vehicle Van_Charlemange_Beer { template = VLSTopSpace2, }
+    vehicle Van_CraftSupplies { template = VLSTopSpace2, }
+    vehicle Van_Glass { template = VLSTopSpace2, }
+    vehicle Van_HeritageTailors { template = VLSTopSpace2, }
+    vehicle Van_KnoxDisti { template = VLSTopSpace2, }
+    vehicle Van_Leather { template = VLSTopSpace2, }
+    vehicle Van_LectroMax { template = VLSTopSpace2, }
+    vehicle Van_Locksmith { template = VLSTopSpace2, }
+    vehicle Van_Masonry { template = VLSTopSpace2, }
+    vehicle Van_MassGenFac { template = VLSTopSpace2, }
+    vehicle Van_Perfick_Potato { template = VLSTopSpace2, }
+    vehicle Van_Transit { template = VLSTopSpace2, }
+    vehicle Van_VoltMojo { template = VLSTopSpace2, }
+    vehicle StepVan { template = VLSTopSpace3, }
+    vehicle StepVan_Blacksmith { template = VLSTopSpace3, }
+    vehicle StepVan_Butchers { template = VLSTopSpace3, }
+    vehicle StepVan_Cereal { template = VLSTopSpace3, }
+    vehicle StepVan_Citr8 { template = VLSTopSpace3, }
+    vehicle StepVan_CompleteRepairShop { template = VLSTopSpace3, }
+    vehicle StepVan_Florist { template = VLSTopSpace3, }
+    vehicle StepVan_Genuine_Beer { template = VLSTopSpace3, }
+    vehicle StepVan_Glass { template = VLSTopSpace3, }
+    vehicle StepVan_Heralds { template = VLSTopSpace3, }
+    vehicle StepVan_HuangsLaundry { template = VLSTopSpace3, }
+    vehicle StepVan_Jorgensen { template = VLSTopSpace3, }
+    vehicle StepVan_LouisvilleMotorShop { template = VLSTopSpace3, }
+    vehicle StepVan_LouisvilleSWAT { template = VLSTopSpace3, }
+    vehicle StepVan_MarineBites { template = VLSTopSpace3, }
+    vehicle StepVan_Masonry { template = VLSTopSpace3, }
+    vehicle StepVan_Mechanic { template = VLSTopSpace3, }
+    vehicle StepVan_MobileLibrary { template = VLSTopSpace3, }
+    vehicle StepVan_Plonkies { template = VLSTopSpace3, }
+    vehicle StepVan_Propane { template = VLSTopSpace3, }
+    vehicle StepVan_RandisPlants { template = VLSTopSpace3, }
+    vehicle StepVan_Scarlet { template = VLSTopSpace3, }
+    vehicle StepVan_SmartKut { template = VLSTopSpace3, }
+    vehicle StepVan_SouthEasternHosp { template = VLSTopSpace3, }
+    vehicle StepVan_SouthEasternPaint { template = VLSTopSpace3, }
+    vehicle StepVan_USL { template = VLSTopSpace3, }
+    vehicle StepVan_Zippee { template = VLSTopSpace3, }
+    vehicle StepVanAirportCatering { template = VLSTopSpace3, }
+    vehicle StepVanMail { template = VLSTopSpace3, }
+}

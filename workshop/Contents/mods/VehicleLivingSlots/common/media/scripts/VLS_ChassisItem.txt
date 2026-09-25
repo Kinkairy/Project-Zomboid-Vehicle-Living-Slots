@@ -17,4 +17,21 @@ module Base
         Fixer = Base.SheetMetal; MetalWelding=5;Mechanics=5,
         Fixer = Base.SmallSheetMetal=2; MetalWelding=5;Mechanics=5,
     }
+    item VLSTopFrame
+    {
+        DisplayName = Top Frame,
+        DisplayCategory = VehicleMaintenance,
+        ItemType = base:normal,
+        Icon = MetalPipe,
+        Weight = 0,
+        ConditionMax = 100,
+    }
+    fixing VLSTopFrameWelding
+    {
+        Require = Base.VLSTopFrame,
+        GlobalItem = Base.BlowTorch=2,
+        ConditionModifier = 1.2,
+        Fixer = Base.SheetMetal; MetalWelding=3;Mechanics=2,
+        Fixer = Base.SmallSheetMetal=2; MetalWelding=3;Mechanics=2,
+    }
 }

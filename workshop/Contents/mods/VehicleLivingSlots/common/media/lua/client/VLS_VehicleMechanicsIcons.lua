@@ -27,6 +27,15 @@ function VLS.getMechanicsPartName(part)
     return getText("IGUI_VehiclePart" .. part:getId())
 end
 local function hidden(part)
+    if VLS.isTopFramePart and VLS.isTopFramePart(part) then
+        local index=part:getId():match("([1-3])$")
+        local cupboard=part:getVehicle():getPartById(VLS.OVERHEAD_PART_IDS[tonumber(index)])
+        -- Keep an occupied old test cupboard reachable; no automatic item loss.
+        return VLS.hasTopFrame(cupboard) or (cupboard and cupboard:getInventoryItem()~=nil) or false
+    end
+    if VLS.isOverheadPart and VLS.isOverheadPart(part) then
+        return not part:getInventoryItem() and not VLS.hasTopFrame(part)
+    end
     local provider = providerFor(part)
     return provider and provider.hidden and provider.hidden(part) or false
 end
@@ -112,9 +121,12 @@ if not VLS.smallChestTooltipHookApplied then
     local originalTooltip = ISVehicleMechanics.doMenuTooltip
     function ISVehicleMechanics:doMenuTooltip(part, option, operation, itemType)
         local roof = VLSRoofCargo
-        if operation ~= "install" or itemType ~= "Base.Mov_SmallChest"
-                or not part or part:getId() ~= "VLSRoofSmallChest"
-                or not roof or not roof.isPart(part) then
+        local overhead = VLS.isOverheadPart and VLS.isOverheadPart(part)
+            and VLS.getEquipmentProfileByType(itemType)
+        local chest = itemType == "Base.Mov_SmallChest"
+            and part and part:getId() == "VLSRoofSmallChest"
+            and roof and roof.isPart(part)
+        if operation ~= "install" or not (chest or (overhead and overhead.overhead)) then
             return originalTooltip(self, part, option, operation, itemType)
         end
         -- nil omits only the native item's own 0/1 line, not tool requirements.
@@ -124,7 +136,8 @@ if not VLS.smallChestTooltipHookApplied then
             local typeToItem = VehicleUtils.getItems(self.playerNum)
             local available = #getCanonicalCandidates(typeToItem, itemType) > 0
             local line = " " .. (available and ISVehicleMechanics.ghs or ISVehicleMechanics.bhs)
-                .. getItemDisplayName(itemType) .. (available and " 1/1" or " 0/1") .. " <LINE>"
+                .. (overhead and Translator.getMoveableDisplayName(overhead.moveableName)
+                    or getItemDisplayName(itemType)) .. (available and " 1/1" or " 0/1") .. " <LINE>"
             local header = getText("Tooltip_craft_Needs") .. " : <LINE>"
             if tooltip.description:sub(1, #header) == header then
                 tooltip.description = header .. line .. tooltip.description:sub(#header + 1)
@@ -242,10 +255,18 @@ end
 
 -- A cached read-only view supplies display values to the ORIGINAL renderer.
 -- Never pass the view to Java APIs, actions, selection or networking.
+local function displayPart(part)
+    if VLS.isOverheadPart(part) and not part:getInventoryItem() then
+        local frame=VLS.getTopFramePart(part)
+        if frame and frame:getInventoryItem() then return frame end
+    end
+    return part
+end
 local function displayRow(row, part)
     local view = row.vlsMechanicsDisplayRow
     if not view or view.realPart ~= part then
-        local proxy = {getCondition=function() return VLS.getDisplayPartCondition(part) end}
+        local proxy = {getCondition=function() return VLS.getDisplayPartCondition(part) end,
+            getInventoryItem=function() return part:getInventoryItem() end}
         setmetatable(proxy, {__index=function(t,key)
             local value=part[key]
             if type(value)=="function" then
@@ -269,14 +290,49 @@ end
 -- Reindex after filtering and retain the selected ROW, never its stale number.
 local function refreshListRows(panel, list, savedField)
     if not list or not list.items then return end
+    -- Retain the native row for both halves of each top position. Only one is
+    -- visible; installation/removal must be able to restore its paired row.
+    local topRows = list.vlsTopRows or {}
+    list.vlsTopRows = topRows
+    local present = {}
+    for _, row in ipairs(list.items) do
+        local part = row.item and row.item.part
+        if part then
+            present[part:getId()] = true
+            if VLS.isTopFramePart(part) or VLS.isOverheadPart(part) then
+                topRows[part:getId()] = row
+            end
+        end
+    end
     local selected = list.items[list.selected or -1]
     local hovered = list.items[list.mouseoverselected or -1]
     local saved = list.items[panel[savedField] or -1]
     for i = #list.items, 1, -1 do
         local row = list.items[i]
         local part = row.item and row.item.part
-        if part and VLS.usesNormalizedPartCondition(part) then
-            if hidden(part) then list:removeItemByIndex(i)
+        if part and (VLS.usesNormalizedPartCondition(part)
+                or (VLS.isTopFramePart and VLS.isTopFramePart(part))) then
+            if hidden(part) then
+                local pairedId
+                if VLS.isTopFramePart(part) then
+                    pairedId = VLS.OVERHEAD_PART_IDS[tonumber(part:getId():match("([1-3])$"))]
+                elseif VLS.isOverheadPart(part) then
+                    pairedId = "VLSTopFrame" .. VLS.getOverheadIndex(part)
+                end
+                local paired = pairedId and topRows[pairedId]
+                if paired and not present[pairedId] and not hidden(paired.item.part) then
+                    -- Swap native rows in place, retaining this slot's position
+                    -- and selection. No full panel rebuild on each update.
+                    list.items[i] = paired
+                    paired.item.name = VLS.getMechanicsPartName(paired.item.part)
+                    present[pairedId] = true
+                    if selected == row then selected = paired end
+                    if hovered == row then hovered = paired end
+                    if saved == row then saved = paired end
+                else
+                    list:removeItemByIndex(i)
+                end
+                present[part:getId()] = nil
             else row.item.name = VLS.getMechanicsPartName(part) end
         end
     end
@@ -307,7 +363,8 @@ if not VLS.mechanicsIconHookApplied then
         local provider=part and providerFor(part)
         if provider and provider.prepare then provider.prepare(part) end
         local result=original(self,part,...)
-        if part and VLS.usesNormalizedPartCondition(part) then
+        if part and (VLS.usesNormalizedPartCondition(part)
+                or (VLS.isTopFramePart and VLS.isTopFramePart(part))) then
             applyFurnitureIcons(self,part)
             normalizeMenu(self,part,self.context)
         end
@@ -319,7 +376,8 @@ if not VLS.mechanicsDisplayHookApplied then
     local draw=ISVehicleMechanics.doDrawItem
     function ISVehicleMechanics:doDrawItem(y,row,alt)
         local part=row and row.item and row.item.part
-        if part and VLS.usesNormalizedPartCondition(part) then
+        if part and (VLS.usesNormalizedPartCondition(part)
+                or (VLS.isTopFramePart and VLS.isTopFramePart(part))) then
             if hidden(part) then return y end
             return draw(self,y,displayRow(row,part),alt)
         end
@@ -327,8 +385,12 @@ if not VLS.mechanicsDisplayHookApplied then
     end
     local init=ISVehicleMechanics.initParts
     function ISVehicleMechanics:initParts(...)
+        if self.listbox then self.listbox.vlsTopRows = nil end
+        if self.bodyworklist then self.bodyworklist.vlsTopRows = nil end
         local result=init(self,...)
         refreshRows(self)
+        local profile=VLS.getVehicleProfile and VLS.getVehicleProfile(self.vehicle)
+        if profile and profile.overheadParts then self:recalculGeneralCondition() end
         return result
     end
     local recalculate=ISVehicleMechanics.recalculGeneralCondition
@@ -337,19 +399,37 @@ if not VLS.mechanicsDisplayHookApplied then
         if not self.vehicle or not VLS.isSupportedVehicle(self.vehicle) then return result end
         local count=self.vehicle:getPartCount()
         local delta,removed=0,0
+        local hasOverhead,exactTotal=false,0
         for i=0,count-1 do
             local part=self.vehicle:getPartByIndex(i)
-            if hidden(part) then removed=removed+1
-            elseif part:getInventoryItem() then
-                delta=delta+VLS.getDisplayPartCondition(part)-part:getCondition()
+            local overhead=VLS.isOverheadPart and VLS.isOverheadPart(part)
+            local installed=part:getInventoryItem()
+            local frame=VLS.isTopFramePart and VLS.isTopFramePart(part)
+            hasOverhead=hasOverhead or overhead
+            if (hidden(part) and not frame) or ((overhead or frame) and not installed) then
+                removed=removed+1
+            elseif installed then
+                local condition=VLS.getDisplayPartCondition(part)
+                delta=delta+condition-part:getCondition()
+                exactTotal=exactTotal+condition
+            else
+                local types=part:getItemType()
+                exactTotal=exactTotal+((types and not types:isEmpty()) and 0 or part:getCondition())
             end
         end
-        if count>removed and (delta~=0 or removed>0) then
-            self.generalCondition=round((self.generalCondition*count+delta)/(count-removed),2)
+        if count>removed and (delta~=0 or removed>0 or hasOverhead) then
+            self.generalCondition=round((hasOverhead and exactTotal
+                or self.generalCondition*count+delta)/(count-removed),2)
             self.generalCondRGB=self:getConditionRGB(self.generalCondition)
         end
         refreshRows(self)
         return result
+    end
+    local detail=ISVehicleMechanics.renderPartDetail
+    if detail then
+        function ISVehicleMechanics:renderPartDetail(part,...)
+            return detail(self,displayPart(part),...)
+        end
     end
     local overlay=ISVehicleMechanics.renderCarOverlayTooltip
     function ISVehicleMechanics:renderCarOverlayTooltip(partProps,part,carType)

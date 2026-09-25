@@ -613,9 +613,9 @@
     },
     {
       "key": "IGUI_VLSChassisReduction",
-      "en": "Net vehicle weight reduction: %1. Cargo weight is unchanged.",
-      "cn": "车辆净减重：%1。货物重量不变。",
-      "ch": "車輛淨減重：%1。貨物重量不變。",
+      "en": "Vehicle weight reduction: %1. Scales with total vehicle and cargo weight.",
+      "cn": "车辆减重：%1。随整车及货物总重按比例变化。",
+      "ch": "車輛減重：%1。隨整車及貨物總重按比例變化。",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
     },
@@ -980,14 +980,6 @@
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
     },
     {
-      "key": "IGUI_VehiclePartVLSPantryCoffee",
-      "en": "Small Appliance",
-      "cn": "小电器",
-      "ch": "小電器",
-      "reviewed": true,
-      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
-    },
-    {
       "key": "ContextMenu_VLSPantryCoffeeMug",
       "en": "Make Coffee (Mug)",
       "cn": "泡咖啡（马克杯）",
@@ -1138,6 +1130,78 @@
       "ch": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "IGUI_VehiclePartCatVLSTopSpace",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSTopSpace",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSOverhead1",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSOverhead2",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSOverhead3",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "ItemName_Base.VLSTopFrame",
+      "en": "Top Frame",
+      "cn": "顶部框架",
+      "ch": "頂部框架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSTopFrame1",
+      "en": "Top Frame",
+      "cn": "顶部框架",
+      "ch": "頂部框架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSTopFrame2",
+      "en": "Top Frame",
+      "cn": "顶部框架",
+      "ch": "頂部框架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSTopFrame3",
+      "en": "Top Frame",
+      "cn": "顶部框架",
+      "ch": "頂部框架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
     }
   ]
 }

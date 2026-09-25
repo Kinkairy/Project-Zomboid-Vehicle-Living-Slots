@@ -2,5 +2,6 @@
   "Base.VLSFixedRoofRack": "行李架",
   "Base.VLSWindowArmor": "车窗护甲",
   "Base.VLSBumperArmor": "管材保险杠",
-  "ItemName_Base.VLSImprovedChassis": "改良底盘"
+  "ItemName_Base.VLSImprovedChassis": "改良底盘",
+  "ItemName_Base.VLSTopFrame": "顶部框架"
 }

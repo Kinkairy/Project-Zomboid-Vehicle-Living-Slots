@@ -7,5 +7,5 @@
     "visibility" "0"
     "title" "Mobile Living"
     "tags" "Build 42;Multiplayer;Vehicles"
-    "changenote" "3.9: Appliance, laundry, freezer selection, auxiliary power, water queue and model fixes; removes the obsolete toaster test slot."
+    "changenote" "3.9：小电器区改为通用顶部空间，修复小电器区占用合成菜单的问题。 / Replaced the small-appliance area with general-purpose overhead space and fixed small appliances taking over the crafting menu."
 }

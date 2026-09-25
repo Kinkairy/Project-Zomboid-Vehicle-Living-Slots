@@ -4,8 +4,11 @@ require "Vehicles/ISUI/ISVehiclePartMenu"
 local R=VLSRoofCargo
 local function install(chr,part)
     if not R.InstallTest(part:getVehicle(),part,chr) then return end
+    local spec=R.fabricationSpec(part)
+    local anchor=spec and spec.materials["Base.MetalBar"] and "Base.MetalBar"
+        or spec and spec.materials["Base.MetalPipe"] and "Base.MetalPipe"
     for _,entry in ipairs(R.inventoryEntries(chr)) do
-        if entry.item:getFullType()=="Base.MetalBar" then
+        if entry.item:getFullType()==anchor then
             ISVehiclePartMenu.onInstallPart(chr,part,entry.item)
             return
         end
@@ -23,7 +26,7 @@ local function recipeTooltip(chr,part)
     local spec=R.fabricationSpec(part)
     local status=R.materialStatus(chr,spec)
     local tip,line=requirementTooltip()
-    for _,ft in ipairs({"Base.MetalBar","Base.SmallSheetMetal","Base.Screws","Base.Tarp","Base.BlowTorch","Base.WeldingRods"}) do
+    for _,ft in ipairs({"Base.MetalBar","Base.MetalPipe","Base.SmallSheetMetal","Base.Screws","Base.Tarp","Base.BlowTorch","Base.WeldingRods"}) do
         local required=spec.materials[ft] or spec.uses[ft]
         if required then
             local count=status.counts[ft] or 0
@@ -136,6 +139,11 @@ if not R.menuRegistered then
         if UIManager.getSpeedControls():getCurrentGameSpeed()==0 then return end
         if self.chr:getVehicle() then return original(self,part,x,y) end
         original(self,part,x,y)
+        local frameRedirect=false
+        if VLS.isOverheadPart and VLS.isOverheadPart(part) and not part:getInventoryItem() then
+            local frame=VLS.getTopFramePart(part)
+            if frame and frame:getInventoryItem() then part=frame;frameRedirect=true end
+        end
         if not R.isActionPart(part) or not self.context then return end
         if R.legacy[part:getId()] then
             self.context:removeOptionByName(getText("IGUI_Install"))
@@ -148,6 +156,16 @@ if not R.menuRegistered then
             local item=part:getInventoryItem()
             if item:getCondition()>=item:getConditionMax() then
                 self.context:removeOptionByName(getText("ContextMenu_Repair"))
+            elseif frameRedirect then
+                local fixes=FixingManager.getFixes(item)
+                if fixes and not fixes:isEmpty() then
+                    local option=self.context:addOption(getText("ContextMenu_Repair"),nil,nil)
+                    local submenu=ISContextMenu:getNew(self.context)
+                    self.context:addSubMenu(option,submenu)
+                    for i=0,fixes:size()-1 do
+                        ISInventoryPaneContextMenu.buildFixingMenu(item,self.playerNum,fixes:get(i),i,option,submenu,part)
+                    end
+                end
             end
             self.context:removeOptionByName(getText("IGUI_Uninstall"))
             local option=self.context:addOption(getText("ContextMenu_Disassemble"),self.chr,dismantle,part)

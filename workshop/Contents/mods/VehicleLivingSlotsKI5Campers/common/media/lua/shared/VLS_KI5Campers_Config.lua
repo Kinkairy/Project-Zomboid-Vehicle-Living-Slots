@@ -33,7 +33,8 @@ for index, slotId in ipairs(SLOT_IDS) do
     VLS.UNIVERSAL_PART_BY_FREEZER[freezerId] = slotId
     VLS.allowedItems[slotId] = {}
     for fullType, equipmentProfile in pairs(VLS.equipmentProfiles) do
-        if equipmentProfile.capability ~= "weaponStorage" then
+        if equipmentProfile.capability ~= "weaponStorage" and not equipmentProfile.overhead
+                and equipmentProfile.capability ~= "pantry" then
             VLS.allowedItems[slotId][fullType] = true
         end
     end
@@ -61,8 +62,13 @@ end
 local function registerProfile(scriptName, positions)
     local slotIds = {}
     for index = 1, #positions do slotIds[index] = SLOT_IDS[index] end
+    local overheadParts = {}
+    for index = 1, #positions - 1 do overheadParts[index] = VLS.OVERHEAD_PART_IDS[index] end
     VLS.vehicleProfiles["Base." .. scriptName] = {
         kind = "ki5Camper",
+        overheadParts = overheadParts,
+        topFrameScale = #positions == 2 and 0.5 or #positions == 3 and 0.75 or 1,
+        topFrameReduction = #positions == 2 and 31.25 or #positions == 3 and 37.5 or 40.625,
         universalParts = slotIds,
         spacePassengers = livingAssignments(positions),
         waterTankParts = WATER_TANK_IDS,

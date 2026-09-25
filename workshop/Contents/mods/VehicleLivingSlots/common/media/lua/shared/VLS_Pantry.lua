@@ -4,9 +4,9 @@ require "VLS_InstallGuard"
 VLSPantry = VLSPantry or {}
 local P = VLSPantry
 P.VERSION = "3.9"
--- Keep the first test slot ID so saved appliances stay installed.
+-- All small appliances use the same framed overhead equipment positions.
 P.PART_ID = "VLSPantryCoffee"
-P.slots = { VLSPantryCoffee = {} }
+P.slots = { VLSPantryCoffee = {}, VLSOverhead1 = {}, VLSOverhead2 = {} }
 P.devices = {
     ["Base.Mov_CoffeeMaker"] = { itemType = "Base.Mov_CoffeeMaker", sprite = "appliances_cooking_01_56", entity = "Base.Coffee_Machine" },
     ["Base.Mov_Toaster"] = { itemType = "Base.Mov_Toaster", sprite = "appliances_cooking_01_32", entity = "Base.Toaster" },
@@ -43,14 +43,8 @@ function P.accepts(part, item)
 end
 
 function P.canInstall(part, item)
-    return part and part:getId() == P.PART_ID and P.accepts(part, item)
+    return P.accepts(part, item)
         and VLS.isInstallationEnabled(part, item)
-end
-
-function P.CreateEmpty(vehicle, part)
-    -- Only a newly created pantry slot is initialized; existing installed items
-    -- are restored by the engine's vehicle-part save/load implementation.
-    if P.isPart(part) then part:setInventoryItem(nil) end
 end
 
 function P.reason(character, vehicle, partId, itemId)
@@ -61,6 +55,7 @@ function P.reason(character, vehicle, partId, itemId)
     if not P.accepts(part, item) or (itemId ~= nil and item:getID() ~= itemId) then
         return "ContextMenu_VLSPantryMissing"
     end
+    if not VLS.hasTopFrame(part) then return "ContextMenu_VLSPantryMissing" end
     if item:getCondition() <= 0 then return "ContextMenu_VLSPantryBroken" end
     if not VLS.hasAuxBatteryPower(vehicle, VLS.getSmallApplianceDrainPerUse()) then return "ContextMenu_VLSNoAuxPower" end
 end
@@ -129,12 +124,17 @@ if not P.installHooksApplied then
     end
     local allowed = VLS.isAllowedItem
     function VLS.isAllowedItem(part, item)
-        if part and P.slots[part:getId()] then return P.canInstall(part, item) end
+        if part and P.slots[part:getId()] and P.resolveType(item) then return P.canInstall(part, item) end
         return allowed(part, item)
     end
-    VLS.allowedItems[P.PART_ID] = { ["Base.Mov_CoffeeMaker"] = true, ["Base.Mov_Toaster"] = true }
-    VLS.installationOptionProviders.pantry = function(part)
-        if P.isPart(part) then return "EnableSmallAppliances" end
+    for _,id in ipairs({"VLSPantryCoffee","VLSOverhead1","VLSOverhead2"}) do
+        VLS.allowedItems[id]=VLS.allowedItems[id] or {}
+        VLS.allowedItems[id]["Base.Mov_CoffeeMaker"]=true
+        VLS.allowedItems[id]["Base.Mov_Toaster"]=true
+    end
+    VLS.installationOptionProviders.pantry = function(part,itemOrType)
+        local kind=type(itemOrType)=="string" and itemOrType or P.resolveType(itemOrType)
+        if P.isPart(part) and P.devices[kind] then return "EnableSmallAppliances" end
     end
     VLS.mechanicsDisplayProviders.pantry = P.isPart
 end
