@@ -7,5 +7,5 @@
     "visibility" "0"
     "title" "Mobile Living"
     "tags" "Build 42;Multiplayer;Vehicles"
-    "changenote" "3.9：小电器区改为通用顶部空间，修复小电器区占用合成菜单的问题。 / Replaced the small-appliance area with general-purpose overhead space and fixed small appliances taking over the crafting menu."
+    "changenote" "3.10：新增 KI5 F700 系列车辆适配，优化维修界面与座位图。 / Added KI5 F700 vehicle support and improved the mechanics interface and seat layouts."
 }

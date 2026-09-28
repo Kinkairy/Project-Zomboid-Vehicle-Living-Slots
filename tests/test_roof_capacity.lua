@@ -10,7 +10,8 @@ local function test(name,fn)
     if ok then print("PASS "..name) else fail=fail+1;print("FAIL "..name..": "..tostring(e)) end
 end
 local function read(path) local f=assert(io.open(path));local s=f:read("*a");f:close();return s end
-VLS={equipmentProfiles={},supportedMoveableSprites={},installationOptionProviders={}}
+VLS={equipmentProfiles={},supportedMoveableSprites={},installationOptionProviders={},
+    getVehicleProfile=function(vehicle)return vehicle.profile end}
 package.loaded.VLS_Config=VLS
 local client=false
 isClient=function() return client end

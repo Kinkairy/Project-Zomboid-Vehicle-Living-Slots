@@ -14,6 +14,7 @@ local V={FREEZER_PART_BY_UNIVERSAL={},UNIVERSAL_PART_BY_FREEZER={},allowedItems=
 package.loaded.VLS_Config=V
 package.loaded.VLS_Propane=V
 V.MOD_ID="VehicleLivingSlots"
+V.OVERHEAD_PART_IDS={"VLSPantryCoffee","VLSOverhead1","VLSOverhead2"}
 local adapter=dofile(base.."shared/VLS_KI5Campers_Config.lua")
 package.loaded.VLS_KI5Campers_Config=adapter
 local file=assert(io.open(root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/42.20/mod.info"));local info=file:read("*a");file:close()

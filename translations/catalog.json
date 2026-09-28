@@ -1202,6 +1202,414 @@
       "ch": "頂部框架",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700RearLeftSpace",
+      "en": "Rear Left Space",
+      "cn": "左后空间",
+      "ch": "左後空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700RearRightSpace",
+      "en": "Rear Right Space",
+      "cn": "右后空间",
+      "ch": "右後空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700RearCenterSpace",
+      "en": "Rear Space",
+      "cn": "后部空间",
+      "ch": "後部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700Slot6",
+      "en": "Rear Right Space",
+      "cn": "右后空间",
+      "ch": "右後空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700Slot7",
+      "en": "Rear Space",
+      "cn": "后部空间",
+      "ch": "後部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700WaterTank2",
+      "en": "Auxiliary Water Tank",
+      "cn": "副水箱",
+      "ch": "副水箱",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSTopFrame4",
+      "en": "Top Frame",
+      "cn": "顶部框架",
+      "ch": "頂部框架",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSOverhead3",
+      "en": "Top Space",
+      "cn": "顶部空间",
+      "ch": "頂部空間",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat1",
+      "en": "Seat3",
+      "cn": "座位3",
+      "ch": "座位3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat2",
+      "en": "Seat4",
+      "cn": "座位4",
+      "ch": "座位4",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat3",
+      "en": "Seat5",
+      "cn": "座位5",
+      "ch": "座位5",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat4",
+      "en": "Seat6",
+      "cn": "座位6",
+      "ch": "座位6",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat5",
+      "en": "Seat7",
+      "cn": "座位7",
+      "ch": "座位7",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Seat6",
+      "en": "Seat8",
+      "cn": "座位8",
+      "ch": "座位8",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space1",
+      "en": "SeatP3",
+      "cn": "SeatP3",
+      "ch": "SeatP3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space2",
+      "en": "SeatP4",
+      "cn": "SeatP4",
+      "ch": "SeatP4",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space3",
+      "en": "SeatP5",
+      "cn": "SeatP5",
+      "ch": "SeatP5",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space4",
+      "en": "SeatP6",
+      "cn": "SeatP6",
+      "ch": "SeatP6",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space5",
+      "en": "SeatP7",
+      "cn": "SeatP7",
+      "ch": "SeatP7",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700Space6",
+      "en": "SeatP8",
+      "cn": "SeatP8",
+      "ch": "SeatP8",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat1",
+      "en": "Seat2",
+      "cn": "座位2",
+      "ch": "座位2",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace1",
+      "en": "SeatP2",
+      "cn": "SeatP2",
+      "ch": "SeatP2",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat2",
+      "en": "Seat3",
+      "cn": "座位3",
+      "ch": "座位3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace2",
+      "en": "SeatP3",
+      "cn": "SeatP3",
+      "ch": "SeatP3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat3",
+      "en": "Seat4",
+      "cn": "座位4",
+      "ch": "座位4",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace3",
+      "en": "SeatP4",
+      "cn": "SeatP4",
+      "ch": "SeatP4",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat4",
+      "en": "Seat5",
+      "cn": "座位5",
+      "ch": "座位5",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace4",
+      "en": "SeatP5",
+      "cn": "SeatP5",
+      "ch": "SeatP5",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat5",
+      "en": "Seat6",
+      "cn": "座位6",
+      "ch": "座位6",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace5",
+      "en": "SeatP6",
+      "cn": "SeatP6",
+      "ch": "SeatP6",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat6",
+      "en": "Seat7",
+      "cn": "座位7",
+      "ch": "座位7",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace6",
+      "en": "SeatP7",
+      "cn": "SeatP7",
+      "ch": "SeatP7",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat7",
+      "en": "Seat8",
+      "cn": "座位8",
+      "ch": "座位8",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace7",
+      "en": "SeatP8",
+      "cn": "SeatP8",
+      "ch": "SeatP8",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat8",
+      "en": "Seat9",
+      "cn": "座位9",
+      "ch": "座位9",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace8",
+      "en": "SeatP9",
+      "cn": "SeatP9",
+      "ch": "SeatP9",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat9",
+      "en": "Seat10",
+      "cn": "座位10",
+      "ch": "座位10",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace9",
+      "en": "SeatP10",
+      "cn": "SeatP10",
+      "ch": "SeatP10",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat10",
+      "en": "Seat11",
+      "cn": "座位11",
+      "ch": "座位11",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace10",
+      "en": "SeatP11",
+      "cn": "SeatP11",
+      "ch": "SeatP11",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat11",
+      "en": "Seat12",
+      "cn": "座位12",
+      "ch": "座位12",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace11",
+      "en": "SeatP12",
+      "cn": "SeatP12",
+      "ch": "SeatP12",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat12",
+      "en": "Seat13",
+      "cn": "座位13",
+      "ch": "座位13",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace12",
+      "en": "SeatP13",
+      "cn": "SeatP13",
+      "ch": "SeatP13",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat13",
+      "en": "Seat14",
+      "cn": "座位14",
+      "ch": "座位14",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace13",
+      "en": "SeatP14",
+      "cn": "SeatP14",
+      "ch": "SeatP14",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSeat14",
+      "en": "Seat15",
+      "cn": "座位15",
+      "ch": "座位15",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VLSF700BusSpace14",
+      "en": "SeatP15",
+      "cn": "SeatP15",
+      "ch": "SeatP15",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700WaterTank3",
+      "en": "Water Tank #3",
+      "cn": "水箱#3",
+      "ch": "水箱#3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700WaterTank4",
+      "en": "Water Tank #4",
+      "cn": "水箱#4",
+      "ch": "水箱#4",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSF700Battery3",
+      "en": "Battery #3",
+      "cn": "电瓶#3",
+      "ch": "電瓶#3",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
     }
   ]
 }

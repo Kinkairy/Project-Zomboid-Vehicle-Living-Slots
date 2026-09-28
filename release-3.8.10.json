@@ -8,6 +8,7 @@
   "runtime_sha256": "fc6718db06a3e84e7a121cfd2e5d6f74664aa640eb87f6d0fb7d571008beff2d",
   "runtime_file_count": 228,
   "files": {
+    "VehicleLivingSlots/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
     "VehicleLivingSlots/42.20/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlots/42.20/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlots/42.20/mod.info": "bb553d51127cf065826e83e3783a1acae3894cc547cfeaf8adaf579dc809ed4e",
@@ -192,7 +193,9 @@
     "VehicleLivingSlots/common/media/ui/vehicles/vls_vehicle_bed.png": "9c9546e5bfe2acc84d1cb875a4874238fe4b1a343555ae88891faeb207505855",
     "VehicleLivingSlots/common/media/ui/vehicles/vls_water_fill.png": "a5592e834349395bd5a93a12622b42a119e3da7660c1810bc07046ee8314a310",
     "VehicleLivingSlots/common/media/ui/vehicles/vls_water_transfer.png": "8998ebd2025c27070c4319ea35cdf906cbeaa05ed2b80eefc2dde076aebc8b2d",
+    "VehicleLivingSlots/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
     "VehicleLivingSlots/mod.info": "bb553d51127cf065826e83e3783a1acae3894cc547cfeaf8adaf579dc809ed4e",
+    "VehicleLivingSlotsKI5Campers/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
     "VehicleLivingSlotsKI5Campers/42.20/media/AnimSets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlotsKI5Campers/42.20/media/actiongroups/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "VehicleLivingSlotsKI5Campers/42.20/mod.info": "cdd8bab8af5e779c9dab233b37807b6a8f5a088cf117f57b4a4326f526600fd2",
@@ -231,26 +234,21 @@
     "VehicleLivingSlotsKI5Campers/common/media/ui/vehicles/mechanic overlay/Trailer87Scamp16_vls_water_tank_left_guide.png": "cd80cb318c008eb74b41c60c9ce1817c52dcf1300fa535f5e267e6c95518603c",
     "VehicleLivingSlotsKI5Campers/common/media/ui/vehicles/mechanic overlay/Trailer87Scamp16_vls_water_tank_right.png": "4f47fc32efff12186fb24176e270ea1c402c6bbc97bbd6dfeb25cd01d577e61a",
     "VehicleLivingSlotsKI5Campers/common/media/ui/vehicles/mechanic overlay/Trailer87Scamp16_vls_water_tank_right_guide.png": "bde2716bba1a6a6b735a0a8481ce914a72ce634e156984a8d61df59988091640",
-    "VehicleLivingSlotsKI5Campers/mod.info": "da953b18286d307b65be6435462b6a086ce727f2a9f6c8ba57aea646ebf15c79",
-    "VehicleLivingSlots/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
-    "VehicleLivingSlots/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
-    "VehicleLivingSlotsKI5Campers/42.20/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
-    "VehicleLivingSlotsKI5Campers/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a"
+    "VehicleLivingSlotsKI5Campers/icon.png": "7f23ad837681903d4527c7a4f079b16840cce5e3553ad174ba3928b47b45a02a",
+    "VehicleLivingSlotsKI5Campers/mod.info": "da953b18286d307b65be6435462b6a086ce727f2a9f6c8ba57aea646ebf15c79"
   },
-  "verification": {
+  "previous_release_verification": {
     "lua_suites": 14,
     "lua_cases": 1113,
     "failures": 0,
     "multiplayer": "Owner completed targeted gameplay tests; clean login and petrol uninstall/reinstall showed no new client/server errors on 2026-09-20",
-    "prior_unattributed_log": "Six early-connect duplicate-ID messages in a preceding client session had no VLS stack and did not recur in the targeted checks. Attribution remains unknown.",
-    "version_correction": {
-      "date": "2026-09-22",
-      "runtime_logic": "Owner-tested R6 unchanged; version metadata only",
-      "r6_package_sha256": "8d089d07728409132a55fbfb00dd6b1073d9307e734c51ea5cd5e498f1e9997c",
-      "owner_report": "All requested cargo, item-relocation and blocked-door gameplay checks passed before this metadata correction",
-      "nuc_deployment": "not performed by this Git update",
-      "workshop_upload": "not performed"
-    }
+    "prior_unattributed_log": "Six early-connect duplicate-ID messages in a preceding client session had no VLS stack and did not recur in the targeted checks. Attribution remains unknown."
+  },
+  "verification": {
+    "owner_r6_gameplay": "Owner reported all targeted cargo and seat tests passed before version correction.",
+    "nuc_3_8_10": "pending",
+    "workshop_uploaded": false,
+    "version_only_runtime_changes": 6
   },
   "hotfix": {
     "id": "VLS_3810_BED_CARGO_HF1",

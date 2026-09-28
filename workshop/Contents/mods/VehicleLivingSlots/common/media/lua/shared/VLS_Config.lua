@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.9"
-VLS.BUILD_ID = "release-3.9-feedback-fixes-test"
+VLS.VERSION = "3.10"
+VLS.BUILD_ID = "release-3.10-f700"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.OVERHEAD_CATEGORY_ID = VLS.CATEGORY_ID
 VLS.TOP_FRAME_PART_IDS = {"VLSTopFrame1", "VLSTopFrame2", "VLSTopFrame3"}
@@ -783,11 +783,11 @@ function VLS.getPartDisplayName(part, fallback)
         end
         if profile and profile.kind == "mediumVan" then
             if partId == VLS.UNIVERSAL_PART_ID then
-                return getText("IGUI_VLSLargeVanLeftLivingArea")
+                return getText("IGUI_VLSLargeVanFrontLeftSpace")
             elseif partId == VLS.LARGE_VAN_SLOT_2_ID then
-                return getText("IGUI_VLSLargeVanCenterLivingArea")
+                return getText("IGUI_VLSLargeVanFrontRightSpace")
             elseif partId == VLS.LARGE_VAN_SLOT_3_ID then
-                return getText("IGUI_VLSLargeVanRightLivingArea")
+                return getText("IGUI_VLSLargeVanRearSpace")
             end
         end
         if profile and profile.kind == "largeVan" then

@@ -27,6 +27,15 @@ def build(root,write=False):
     if actual!=[expected]:
         if not write:raise ValueError('Workshop description differs from reviewed catalog')
         path.write_text('\n'.join(expected if line.startswith('description=') else line for line in lines)+'\n')
+    addon=json.loads((root/'translations/f700-description.json').read_text())
+    assert addon['reviewed'] is True
+    description='description='+' / '.join(addon['descriptions'][key] for key in ('EN','CN','CH'))
+    for relative in ('mod.info','42.20/mod.info'):
+        path=root/'workshop/Contents/mods/VehicleLivingSlotsKI5F700'/relative
+        lines=path.read_text().splitlines()
+        if [line for line in lines if line.startswith('description=')]!=[description]:
+            if not write:raise ValueError('F700 description differs from catalog: '+relative)
+            path.write_text('\n'.join(description if line.startswith('description=') else line for line in lines)+'\n')
     return len(doc['entries']),len(groups)
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--write',action='store_true')

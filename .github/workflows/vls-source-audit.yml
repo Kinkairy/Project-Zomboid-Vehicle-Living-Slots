@@ -18,27 +18,21 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
           find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
           python3 tools/build_translations.py
-          python3 - <<'PY'
-          import hashlib, json
-          from pathlib import Path
-          manifest = json.loads(Path('release-3.9.json').read_text())
-          root = Path('workshop/Contents/mods')
-          files = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-                   for p in root.rglob('*') if p.is_file()}
-          assert files == manifest['files']
-          fingerprint = hashlib.sha256(''.join(value + '  ' + name + '\n'
-              for name, value in sorted(files.items())).encode()).hexdigest()
-          assert fingerprint == manifest['runtime_sha256']
-          print('Runtime manifest verified:', len(files), fingerprint)
-          PY
+          python3 tests/test_runtime_manifest.py
+          python3 tools/check_runtime_manifest.py --core-manifest-output "$RUNNER_TEMP/vls-candidate-core.json"
       - name: Source-only regression suites
         run: |
+          export LUA_PATH="$PWD/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/?.lua;$PWD/workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/?.lua;;"
           # These existing fixtures provide their own engine stubs. The separate
           # cargo suite below loads and checks the actual pinned native callback.
           for name in test_roof_capacity test_roof_cargo_damage test_vls_boundaries test_vls_chassis test_vls_lights test_vls_material_tiers test_vls_regressions test_vls_trailer_fridge; do
             lua5.1 -e 'package.loaded["Vehicles/Vehicles"] = true' "tests/$name.lua" .
           done
           lua5.1 -e 'package.loaded["Vehicles/Vehicles"] = true' tests/test_vls_boundaries.lua . . Base.Mov_TrailerFridge
+          lua5.1 tests/test_vls_f700_independent.lua . f700-first
+          lua5.1 tests/test_vls_f700_independent.lua . campers-first
+          lua5.1 tests/test_vls_f700_frames.lua .
+          python3 tests/test_vls_f700_scripts.py --base-manifest "$RUNNER_TEMP/vls-candidate-core.json"
       - name: Native cargo callback contract regression
         run: |
           python3 - <<'PY'

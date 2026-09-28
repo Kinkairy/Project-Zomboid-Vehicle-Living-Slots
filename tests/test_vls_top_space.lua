@@ -351,3 +351,5 @@ test("same open panel restores paired native rows through installation and remov
  end
 end)
 print("RESULT top-space tests="..passed.." failures=0 (native Lua bodies; mocked engine)")
+
+return {vehicle=vehicle,item=item,test=test,eq=eq,catalog=catalog}

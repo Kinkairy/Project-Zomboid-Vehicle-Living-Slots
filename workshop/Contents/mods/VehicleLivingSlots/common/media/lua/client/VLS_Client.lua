@@ -2229,7 +2229,14 @@ if not VLS.bedSeatUIHookApplied then
         local installed = seat ~= nil and self.vehicle
             and VLS.getInstalledUniversalPartForSeat(self.vehicle, seat) or nil
         self.vlsDisplayInstalledSeat = installed and seat or nil
+        local equipment = installed and not self.mouseOverExit
+            and not VLS.getInstalledBedPartForSeat(self.vehicle, seat)
+            and not self.vehicle:getCharacter(seat)
+        local richText = equipment and self.richText or nil
+        local ownRichRender = richText and rawget(richText, "render")
+        if richText then richText.render = function() end end
         local result = { pcall(vanillaPrerender, self) }
+        if richText then richText.render = ownRichRender end
         self.vlsDisplayInstalledSeat = nil
         if not result[1] then error(result[2]) end
 

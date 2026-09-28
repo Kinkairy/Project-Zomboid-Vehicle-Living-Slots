@@ -298,46 +298,63 @@ for id in pairs(R.allowed)do
   end)
  end
 end
--- Compare roof lists against the game's own packing recipes when native media is supplied.
+-- The approved roof slot accepts exactly seven packed tents. Run these checks
+-- in ordinary CI as well; when game media is supplied, compare native recipes.
+VLS.resolveEquipmentType=function(it)return it:getFullType() end
+local packedTents={
+ ["Base.CampingTentKit2_Packed"]=true,
+ ["Base.TentBlue_Packed"]=true,
+ ["Base.TentBrown_Packed"]=true,
+ ["Base.TentGreen_Packed"]=true,
+ ["Base.TentYellow_Packed"]=true,
+ ["Base.HideTent_Packed"]=true,
+ ["Base.ImprovisedTentKit_Packed"]=true,
+}
+local candidates={}
+for ft in pairs(packedTents)do candidates[ft]=true;candidates[ft:gsub('_Packed$','')]=true end
 if arg[2] then
- VLS.resolveEquipmentType=function(it)return it:getFullType() end
  local recipes=read(arg[2]..'/scripts/generated/recipes/recipes_sleepingbags_and_tents.txt')
- local nativeTents={}
+ local nativePacked={}
  for _,recipe in ipairs({'PackTent','UnpackTent'})do
   local body=assert(recipes:match('craftRecipe%s+'..recipe..'%s*(%b{})'))
   local inputs=assert(body:match('inputs%s*(%b{})'))
-  for ft in assert(inputs:match('%[([^%]]+)%]')):gmatch('[^;]+')do nativeTents[ft]=true end
- end
- for _,script in ipairs({'VLS_StepVanRoofRackAdjustment.txt','VLS_VehicleRoofAdapters.txt'})do
-  local body=assert(read(media..'scripts/'..script):match('part%s+VLSRoofTent%s*(%b{})'))
-  local types={}
-  for ft in assert(body:match('itemType%s*=%s*([^,]+),')):gmatch('[^;%s]+')do types[ft]=true end
-  -- The approved roof model accepts its configured packed tent, not every
-  -- tent in vanilla. Check script/Lua agreement and all native candidates.
-  test('configured roof tent is native and matches the runtime whitelist '..script,function()
-   local n=0
-   for ft in pairs(types)do assert(nativeTents[ft],'not a native tent: '..ft);assert(R.allowed.VLSRoofTent[ft]);n=n+1 end
-   assert(n>0)
-   for ft in pairs(R.allowed.VLSRoofTent)do assert(types[ft],'script omitted '..ft)end
-  end)
-  for ft in pairs(nativeTents)do
-   test('native tent validation without tools '..script..' '..ft,function()
-    local p=part('Base.StepVan','VLSRoofTent');local v=p.vehicle
-    function p:getItemType()return {contains=function(_,value)return types[value] or false end}end
-    v.parts[R.fixedId]={getInventoryItem=function()return item(R.fixedType)end}
-    local chr=character({materials={}});chr.inv.items={}
-    local tent=item(ft);chr.inv:AddItem(tent)
-    if not types[ft] then assert(not R.validateInstall(chr,p,tent,true));return end
-    assert(R.validateInstall(chr,p,tent,true))
-    eq(tent:getFullType(),ft) -- validation must not convert or replace the item
-    p.installed=tent;eq(R.validateInstall(chr,p,tent,true),false);p.installed=nil
-    local other=item('Base.SleepingBag');chr.inv:AddItem(other)
-    assert(not R.validateInstall(chr,p,other,true))
-    chr.inv:DoRemoveItem(tent);eq(R.validateInstall(chr,p,tent,true),false)
-    chr.inv:AddItem(tent);v.parts[R.fixedId]=nil
-    eq(R.validateInstall(chr,p,tent,true),false)
-   end)
+  for ft in assert(inputs:match('%[([^%]]+)%]')):gmatch('[^;]+')do
+   candidates[ft]=true
+   if ft:match('_Packed$') then nativePacked[ft]=true end
   end
+ end
+ test('all seven approved packed tents match current native packing recipes',function()
+  for ft in pairs(packedTents)do assert(nativePacked[ft],'missing native tent: '..ft)end
+  for ft in pairs(nativePacked)do assert(packedTents[ft],'new native packed tent: '..ft)end
+ end)
+end
+for _,script in ipairs({'VLS_StepVanRoofRackAdjustment.txt','VLS_VehicleRoofAdapters.txt'})do
+ local body=assert(read(media..'scripts/'..script):match('part%s+VLSRoofTent%s*(%b{})'))
+ local types={}
+ for ft in assert(body:match('itemType%s*=%s*([^,]+),')):gmatch('[^;%s]+')do types[ft]=true end
+ test('exact seven roof tents agree in script and runtime '..script,function()
+  local n=0
+  for ft in pairs(types)do assert(packedTents[ft]);assert(R.allowed.VLSRoofTent[ft]);n=n+1 end
+  eq(n,7)
+  for ft in pairs(packedTents)do assert(types[ft]);assert(R.allowed.VLSRoofTent[ft])end
+  for ft in pairs(R.allowed.VLSRoofTent)do assert(packedTents[ft])end
+ end)
+ for ft in pairs(candidates)do
+  test('packed tent validation without tools '..script..' '..ft,function()
+   local p=part('Base.StepVan','VLSRoofTent');local v=p.vehicle
+   function p:getItemType()return {contains=function(_,value)return types[value] or false end}end
+   v.parts[R.fixedId]={getInventoryItem=function()return item(R.fixedType)end}
+   local chr=character({materials={}});chr.inv.items={}
+   local tent=item(ft);chr.inv:AddItem(tent)
+   if not packedTents[ft] then assert(not types[ft]);assert(not R.validateInstall(chr,p,tent,true));return end
+   assert(R.validateInstall(chr,p,tent,true));eq(tent:getFullType(),ft)
+   p.installed=tent;eq(R.validateInstall(chr,p,tent,true),false);p.installed=nil
+   local other=item('Base.SleepingBag');chr.inv:AddItem(other)
+   assert(not R.validateInstall(chr,p,other,true))
+   chr.inv:DoRemoveItem(tent);eq(R.validateInstall(chr,p,tent,true),false)
+   chr.inv:AddItem(tent);v.parts[R.fixedId]=nil
+   eq(R.validateInstall(chr,p,tent,true),false)
+  end)
  end
 end
 -- Actual presentation provider delegates petrol state names to native item:getName.

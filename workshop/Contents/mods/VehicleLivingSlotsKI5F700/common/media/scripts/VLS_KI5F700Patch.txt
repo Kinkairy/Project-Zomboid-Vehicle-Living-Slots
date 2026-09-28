@@ -1,0 +1,3878 @@
+module Base
+{
+    template vehicle VLSKI5F700LivingSystem
+    {
+        template = VLSLargeVanLivingSystem/part/SeatBed,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanSlot2,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanSlot3,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanSlot4,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanSlot5,
+        template = VLSLargeVanLivingSystem/part/VLSUniversalFreezer,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSLargeVanLivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSLargeVanLivingSystem/part/VLSAuxBatterySlot,
+part VLSF700Slot6
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space6,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer6
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot7
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space7,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer7
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot8
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space8,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer8
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot9
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space9,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer9
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot10
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space10,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer10
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot11
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space11,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer11
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot12
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space12,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer12
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot13
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space13,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer13
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700Slot14
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                seat = VLSF700Space14,
+                capacity = 20,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSF700Freezer14
+        {
+            area = TruckBed,
+            category = nodisplay,
+            container
+            {
+                capacity = 5,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalFreezer,
+                soundMap = ContainerPut PutItemInFridge,
+                soundMap = ContainerTake PutItemInFridge,
+            }
+            lua { create = VLS.Create.UniversalFreezer, update = VLS.Update.UniversalFreezer, }
+        }
+part VLSF700WaterTank2
+        {
+            mechanicArea = Back,
+            area = GasTank,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+part VLSF700WaterTank3
+        {
+            mechanicArea = Back,
+            area = GasTank,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+part VLSF700WaterTank4
+        {
+            mechanicArea = Back,
+            area = GasTank,
+            category = VLSLiving,
+            itemType = Base.SmallGasTank;Base.NormalGasTank;Base.BigGasTank,
+            mechanicRequireKey = true,
+            durability = 5,
+            container
+            {
+                test = Vehicles.ContainerAccess.GasTank,
+                contentType = Water,
+                conditionAffectsCapacity = true,
+            }
+            lua
+            {
+                create = VLS.Create.VehicleWaterTank,
+                update = VLS.Update.VehicleWaterTank,
+            }
+            table install
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.VehicleWaterTankInstalled,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1 { tags = base:screwdriver, count = 1, keep = true, equip = secondary, }
+                    2 { tags = base:wrench, count = 1, keep = true, equip = primary, }
+                }
+                time = 500,
+                skills = Mechanics:5,
+                recipes = Basic Mechanics,
+                test = Vehicles.UninstallTest.Default,
+                requireEmpty = true,
+                complete = VLS.PartComplete.VehicleWaterTankUninstalled,
+            }
+        }
+part VLSF700Battery3
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Base.CarBattery1;Base.CarBattery2;Base.CarBattery3,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 2,
+            table install
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = Vehicles.InstallTest.Default,
+            }
+            table uninstall
+            {
+                items
+                {
+                    1
+                    {
+                        tags = base:screwdriver,
+                        count = 1,
+                        keep = true,
+                        equip = primary,
+                    }
+                }
+                time = 100,
+                test = VLS.F700Power.uninstallTest,
+            }
+        }
+part VLSTopFrame1
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.F700Frames.create,
+                init = VLS.F700Frames.init,
+                update = VLS.F700Frames.update,
+            }
+        }
+part VLSPantryCoffee
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame1,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSTopFrame2
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.F700Frames.create,
+                init = VLS.F700Frames.init,
+                update = VLS.F700Frames.update,
+            }
+        }
+part VLSOverhead1
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame2,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSTopFrame3
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.F700Frames.create,
+                init = VLS.F700Frames.init,
+                update = VLS.F700Frames.update,
+            }
+        }
+part VLSOverhead2
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame3,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+part VLSTopFrame4
+        {
+            category = VLSLiving,
+            area = TruckBed,
+            itemType = Base.VLSTopFrame,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = true,
+            durability = 5,
+            table install
+            {
+                items { 1 { type = Base.Wrench, count = 1, keep = true, equip = primary, } }
+                time = 400,
+                skills = MetalWelding:3;Mechanics:2,
+                test = VLSRoofCargo.InstallTest,
+            }
+            lua
+            {
+                create = VLS.F700Frames.create,
+                init = VLS.F700Frames.init,
+                update = VLS.F700Frames.update,
+            }
+        }
+part VLSOverhead3
+        {
+            mechanicArea = Back,
+            area = TruckBed,
+            category = VLSLiving,
+            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            specificItem = false,
+            mechanicRequireKey = true,
+            durability = 3,
+            container
+            {
+                capacity = 0,
+                conditionAffectsCapacity = false,
+                test = VLS.ContainerAccess.UniversalSlot,
+                soundMap = ContainerPut VehicleTrunkTransferItem,
+                soundMap = ContainerTake VehicleTrunkTransferItem,
+            }
+            lua
+            {
+                create = VLS.Create.UniversalSlot,
+                init = VLS.Init.UniversalSlot,
+                update = VLS.Update.UniversalSlot,
+            }
+            table install
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                requireInstalled = VLSTopFrame4,
+                test = Vehicles.InstallTest.Default,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+            table uninstall
+            {
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, } }
+                time = 200,
+                skills = Mechanics:1,
+                test = VLS.UninstallTest.UniversalSlot,
+                requireEmpty = true,
+                complete = VLS.PartComplete.UniversalSlot,
+            }
+        }
+    }
+    vehicle 87fordF700bank
+    {
+        seats = 9,
+        template = VLSKI5F700LivingSystem/part/SeatBed,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot6,
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot7,
+        template = VLSKI5F700LivingSystem/part/VLSUniversalFreezer,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer6,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer7,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank2,
+        template = VLSKI5F700LivingSystem/part/VLSAuxBatterySlot,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame1,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame2,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame4,
+        template = VLSKI5F700LivingSystem/part/VLSPantryCoffee,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead1,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead2,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead3,
+passenger FrontLeft
+		{
+			showPassenger = true,
+			hasRoof = true,
+
+			position inside
+			{
+				offset = 0.6222 0.0778 1.6222,
+				rotate = 0.0000 0.0000 0.0000,
+			}
+
+			position outside
+			{
+				offset = 1.4444 -1.3333 1.5111,
+				rotate = 0.0000 0.0000 0.0000,
+			}
+
+			door = DoorFrontLeft,
+			area = SeatFrontLeft,
+
+			switchSeat FrontRight
+			{
+				anim = Climb_WindowB,
+				rate = 0.23,
+				sound =,
+			}
+		
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+passenger FrontRight
+		{
+			showPassenger = true,
+			hasRoof = true,
+
+			position inside
+			{
+				offset = -0.6222 0.0778 1.6222,
+				rotate = 0.0000 0.0000 0.0000,
+			}
+
+			position outside
+			{
+				offset = -1.4667 -1.3333 1.5111,
+				rotate = 0.0000 0.0000 0.0000,
+			}
+
+			door = DoorFrontRight,
+			area = SeatFrontRight,
+
+			switchSeat FrontLeft
+			{
+				anim = Climb_WindowB,
+				rate = 0.23,
+				sound =,
+			}
+		
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger Bed
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = 0.6778 0.0556 0.1222, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger SpaceCenter
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = -0.6778 0.0556 0.1222, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger SpaceRight
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = 0.6778 0.0556 -0.6, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger VLSLargeVanSpace4
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = -0.6778 0.0556 -0.6, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger VLSLargeVanSpace5
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = 0.6778 0.0556 -1.3556, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger VLSF700Space6
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = -0.6778 0.0556 -1.3556, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space7 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+        passenger VLSF700Space7
+        {
+            area = TruckBed,
+            door = TrunkDoor,
+            hasRoof = true,
+            showPassenger = false,
+            position inside { offset = 0 0.0556 -2.15, rotate = 0.0 0.0 0.0, }
+            position outside { offset = -0.0111 -1.3333 -2.0556, rotate = 0.0 0.0 0.0, area = TruckBed, }
+            anim enter { anim = Climb_WindowA, rate = 0.33, }
+            anim idle { anim = Idle, rate = 1.0, }
+            anim exit { anim = Climb_WindowB, rate = 0.23, }
+            switchSeat FrontLeft { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat FrontRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat Bed { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceCenter { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat SpaceRight { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace4 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSLargeVanSpace5 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+            switchSeat VLSF700Space6 { anim = Climb_WindowB, rate = 0.23, sound = VehicleChangeSeat, }
+        }
+    }
+    vehicle 87fordF700swat
+    {
+        seats = 8,
+        template = VLSKI5F700LivingSystem/part/VLSUniversalFreezer,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer6,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank2,
+        template = VLSKI5F700LivingSystem/part/VLSAuxBatterySlot,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame1,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame2,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame4,
+        template = VLSKI5F700LivingSystem/part/VLSPantryCoffee,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead1,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead2,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead3,
+        template = VLSKI5F700LivingSystem/part/SeatBed,
+        part SeatBed
+        {
+            container { seat = P2, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP2, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP2
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = SeatBed,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot2,
+        part VLSLargeVanSlot2
+        {
+            container { seat = P3, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP3, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP3
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot2,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot3,
+        part VLSLargeVanSlot3
+        {
+            container { seat = P4, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP4, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP4
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot3,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot4,
+        part VLSLargeVanSlot4
+        {
+            container { seat = P5, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP5, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP5
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot4,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot5,
+        part VLSLargeVanSlot5
+        {
+            container { seat = P6, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP6, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP6
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot5,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot6,
+        part VLSF700Slot6
+        {
+            container { seat = P7, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP7, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP7
+        {
+            category = VLSLiving,
+            itemType = USMIL.Seat0,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot6,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+    }
+    vehicle 87fordB700school
+    {
+        seats = 15,
+        template = VLSKI5F700LivingSystem/part/VLSUniversalFreezer,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer6,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer7,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer8,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer9,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer10,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer11,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer12,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer13,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer14,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank2,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank3,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank4,
+        template = VLSKI5F700LivingSystem/part/VLSAuxBatterySlot,
+        template = VLSKI5F700LivingSystem/part/VLSF700Battery3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame1,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame2,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame4,
+        template = VLSKI5F700LivingSystem/part/VLSPantryCoffee,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead1,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead2,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead3,
+        template = VLSKI5F700LivingSystem/part/SeatBed,
+        part SeatBed
+        {
+            container { seat = P1, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP1, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP1
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = SeatBed,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot2,
+        part VLSLargeVanSlot2
+        {
+            container { seat = P2, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP2, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP2
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot2,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot3,
+        part VLSLargeVanSlot3
+        {
+            container { seat = P3, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP3, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP3
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot3,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot4,
+        part VLSLargeVanSlot4
+        {
+            container { seat = P4, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP4, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP4
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot4,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot5,
+        part VLSLargeVanSlot5
+        {
+            container { seat = P5, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP5, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP5
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot5,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot6,
+        part VLSF700Slot6
+        {
+            container { seat = P6, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP6, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP6
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot6,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot7,
+        part VLSF700Slot7
+        {
+            container { seat = P7, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP7, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP7
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot7,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot8,
+        part VLSF700Slot8
+        {
+            container { seat = P8, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP8, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP8
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot8,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot9,
+        part VLSF700Slot9
+        {
+            container { seat = P9, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP9, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP9
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot9,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot10,
+        part VLSF700Slot10
+        {
+            container { seat = P10, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP10, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP10
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot10,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot11,
+        part VLSF700Slot11
+        {
+            container { seat = P11, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP11, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP11
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot11,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot12,
+        part VLSF700Slot12
+        {
+            container { seat = P12, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP12, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP12
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot12,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot13,
+        part VLSF700Slot13
+        {
+            container { seat = P13, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP13, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP13
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot13,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot14,
+        part VLSF700Slot14
+        {
+            container { seat = P14, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP14, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP14
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot14,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        part DAMNGenerator
+        {
+            table uninstall { test = VLS.F700Roof.uninstallTest, }
+        }
+    }
+    vehicle 87fordB700prison
+    {
+        seats = 15,
+        template = VLSKI5F700LivingSystem/part/VLSUniversalFreezer,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer6,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer7,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer8,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer9,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer10,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer11,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer12,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer13,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer14,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank2,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank3,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank4,
+        template = VLSKI5F700LivingSystem/part/VLSAuxBatterySlot,
+        template = VLSKI5F700LivingSystem/part/VLSF700Battery3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame1,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame2,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame4,
+        template = VLSKI5F700LivingSystem/part/VLSPantryCoffee,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead1,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead2,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead3,
+        template = VLSKI5F700LivingSystem/part/SeatBed,
+        part SeatBed
+        {
+            container { seat = P1, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP1, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP1
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = SeatBed,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot2,
+        part VLSLargeVanSlot2
+        {
+            container { seat = P2, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP2, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP2
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot2,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot3,
+        part VLSLargeVanSlot3
+        {
+            container { seat = P3, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP3, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP3
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot3,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot4,
+        part VLSLargeVanSlot4
+        {
+            container { seat = P4, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP4, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP4
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot4,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot5,
+        part VLSLargeVanSlot5
+        {
+            container { seat = P5, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP5, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP5
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot5,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot6,
+        part VLSF700Slot6
+        {
+            container { seat = P6, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP6, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP6
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot6,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot7,
+        part VLSF700Slot7
+        {
+            container { seat = P7, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP7, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP7
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot7,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot8,
+        part VLSF700Slot8
+        {
+            container { seat = P8, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP8, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP8
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot8,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot9,
+        part VLSF700Slot9
+        {
+            container { seat = P9, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP9, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP9
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot9,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot10,
+        part VLSF700Slot10
+        {
+            container { seat = P10, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP10, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP10
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot10,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot11,
+        part VLSF700Slot11
+        {
+            container { seat = P11, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP11, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP11
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot11,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot12,
+        part VLSF700Slot12
+        {
+            container { seat = P12, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP12, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP12
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot12,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot13,
+        part VLSF700Slot13
+        {
+            container { seat = P13, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP13, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP13
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot13,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot14,
+        part VLSF700Slot14
+        {
+            container { seat = P14, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP14, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP14
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot14,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        part DAMNGenerator
+        {
+            table uninstall { test = VLS.F700Roof.uninstallTest, }
+        }
+    }
+    vehicle 87fordB700military
+    {
+        seats = 15,
+        template = VLSKI5F700LivingSystem/part/VLSUniversalFreezer,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer2,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer3,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer4,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanFreezer5,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer6,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer7,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer8,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer9,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer10,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer11,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer12,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer13,
+        template = VLSKI5F700LivingSystem/part/VLSF700Freezer14,
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanWaterTank,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank2,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank3,
+        template = VLSKI5F700LivingSystem/part/VLSF700WaterTank4,
+        template = VLSKI5F700LivingSystem/part/VLSAuxBatterySlot,
+        template = VLSKI5F700LivingSystem/part/VLSF700Battery3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame1,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame2,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame3,
+        template = VLSKI5F700LivingSystem/part/VLSTopFrame4,
+        template = VLSKI5F700LivingSystem/part/VLSPantryCoffee,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead1,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead2,
+        template = VLSKI5F700LivingSystem/part/VLSOverhead3,
+        template = VLSKI5F700LivingSystem/part/SeatBed,
+        part SeatBed
+        {
+            container { seat = P1, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP1, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP1
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = SeatBed,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot2,
+        part VLSLargeVanSlot2
+        {
+            container { seat = P2, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP2, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP2
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot2,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot3,
+        part VLSLargeVanSlot3
+        {
+            container { seat = P3, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP3, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP3
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot3,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot4,
+        part VLSLargeVanSlot4
+        {
+            container { seat = P4, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP4, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP4
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot4,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSLargeVanSlot5,
+        part VLSLargeVanSlot5
+        {
+            container { seat = P5, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP5, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP5
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSLargeVanSlot5,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot6,
+        part VLSF700Slot6
+        {
+            container { seat = P6, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP6, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP6
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot6,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot7,
+        part VLSF700Slot7
+        {
+            container { seat = P7, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP7, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP7
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot7,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot8,
+        part VLSF700Slot8
+        {
+            container { seat = P8, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP8, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP8
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot8,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot9,
+        part VLSF700Slot9
+        {
+            container { seat = P9, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP9, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP9
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot9,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot10,
+        part VLSF700Slot10
+        {
+            container { seat = P10, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP10, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP10
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot10,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot11,
+        part VLSF700Slot11
+        {
+            container { seat = P11, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP11, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP11
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot11,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot12,
+        part VLSF700Slot12
+        {
+            container { seat = P12, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP12, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP12
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot12,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot13,
+        part VLSF700Slot13
+        {
+            container { seat = P13, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP13, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP13
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot13,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        template = VLSKI5F700LivingSystem/part/VLSF700Slot14,
+        part VLSF700Slot14
+        {
+            container { seat = P14, }
+            lua { create = VLS.Create.UniversalSlot, init = VLS.F700Seats.initLiving, update = VLS.F700Seats.updateLiving, }
+            table install { requireUninstalled = SeatP14, test = VLS.F700Seats.installTest, complete = VLS.F700Seats.completeLiving, }
+            table uninstall { test = VLS.F700Seats.uninstallTest, complete = VLS.F700Seats.completeLiving, }
+        }
+        part SeatP14
+        {
+            category = VLSLiving,
+            itemType = Base.87fordB700Seat2,
+            specificItem = false,
+            mechanicArea = Back,
+            lua { create = Vehicles.Create.Default, init = VLS.F700Seats.initSeat, }
+table install
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.installTest,
+			    requireUninstalled = VLSF700Slot14,
+    complete = VLS.F700Seats.completeSeat,
+            }
+table uninstall
+			{
+				items
+				{
+					1
+					{
+						tags = Screwdriver,
+						count = 1,
+						keep = true,
+						equip = primary,
+					}
+				}
+				time = 300,
+				skills = Mechanics:1,
+				recipes = Intermediate Mechanics,
+				test = VLS.F700Seats.uninstallTest,
+				requireEmpty = true,
+			    complete = VLS.F700Seats.completeSeat,
+            }
+        }
+        part DAMNGenerator
+        {
+            table uninstall { test = VLS.F700Roof.uninstallTest, }
+        }
+    }
+}

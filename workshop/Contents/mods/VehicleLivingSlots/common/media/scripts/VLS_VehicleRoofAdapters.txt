@@ -350,7 +350,7 @@ module Base
         {
             category = Other,
             area = TruckBed,
-            itemType = Base.CampingTentKit2_Packed,
+            itemType = Base.CampingTentKit2_Packed;Base.TentBlue_Packed;Base.TentBrown_Packed;Base.TentGreen_Packed;Base.TentYellow_Packed;Base.HideTent_Packed;Base.ImprovisedTentKit_Packed,
             specificItem = false,
             mechanicRequireKey = false,
             setAllModelsVisible = true,

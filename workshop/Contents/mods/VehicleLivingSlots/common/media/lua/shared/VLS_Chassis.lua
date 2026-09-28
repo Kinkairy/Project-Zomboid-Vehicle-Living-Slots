@@ -77,7 +77,9 @@ function C.topCount(vehicle)
         return R.vehicleScripts[vehicle:getScript():getFullName()] and (C.TOP_COUNT[family] or 0) or 0
     end
     local profile=VLS.getVehicleProfile(vehicle)
-    return profile and profile.kind=="ki5Camper" and #(profile.overheadParts or {}) or 0
+    local count=profile and type(profile.overheadParts)=="table" and #profile.overheadParts or 0
+    -- Larger layouts keep their own frame adapter; this module owns three IDs.
+    return count<=#C.TOP_IDS and count or 0
 end
 
 -- Match native BaseVehicle.updateTotalMass: container capacity-weight plus
@@ -113,7 +115,8 @@ local function targets(vehicle, previewPart)
     local count=C.topCount(vehicle)
     if not family then
         local profile=VLS.getVehicleProfile(vehicle)
-        if not profile or profile.kind~="ki5Camper" or count==0 then return nil end
+        if not profile or count==0 or not finite(profile.topFrameReduction)
+            or profile.topFrameReduction<=0 or type(profile.universalParts)~="table" then return nil end
         -- The same per-position budget, calibrated to this trailer's native
         -- body plus full living cupboards and top cupboards; no rack/chassis bonus.
         topRate=profile.topFrameReduction/(base+50*(#profile.universalParts+count))

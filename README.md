@@ -1,4 +1,4 @@
-# Mobile Living 3.9
+# Mobile Living 3.10
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
@@ -9,6 +9,11 @@ Enable `VehicleLivingSlots` for supported vanilla vehicles. For KI5 campers,
 also enable `VehicleLivingSlotsKI5Campers` and install [Campers!](https://steamcommunity.com/sharedfiles/filedetails/?id=3670064951)
 and [that DAMN Library](https://steamcommunity.com/sharedfiles/filedetails/?id=3171167894).
 The Shasta models require Campers! v0.940b or later. KI5/DAMN assets are not bundled.
+For KI5 F700 vehicles, also enable VehicleLivingSlotsKI5F700 and install
+['87 Ford B700/F700 Trucks](https://steamcommunity.com/sharedfiles/filedetails/?id=3110911330)
+and that DAMN Library. The optional adapter supports the armored bank truck,
+SWAT van, and School, Prison and Military Buses.
+
 
 ## Vehicle equipment
 
@@ -21,6 +26,17 @@ The Shasta models require Campers! v0.940b or later. KI5/DAMN assets are not bun
 | KI5 Scamp 13 | 2 | 2 | Upstream layout |
 | KI5 Scamp 16 / Bambi 16 / Shasta Airflyte / Shasta Astrodome | 3 | 2 | Upstream layout |
 | KI5 Flying Cloud 22 | 4 | 2 | Upstream layout |
+| KI5 F700 armored bank truck | 7 | 2 | Upstream layout |
+| KI5 F700 SWAT van | 6 convertible rear seats | 2 | Upstream layout |
+| KI5 B700 School / Prison / Military Bus | 14 convertible rear seats | 4 | Upstream layout |
+
+F700 SWAT and Bus rear positions accept either their native driver-style seat
+or living equipment in a single mechanics row. The adapter preserves native
+passenger and entry/exit positions. All five vehicles have four overhead
+positions. Buses have two auxiliary batteries alongside the original starter
+battery, and reuse shared water, roof fuel-can and generator services.
+Vehicle-specific layouts stay in the optional adapters; common equipment
+behavior is supplied by the main module.
 
 The roof whitelist contains 106 vanilla script/paint/job variants, not 106
 separate vehicle models. Existing seats remain. Living positions accept supported
@@ -143,3 +159,20 @@ coffee-maker/toaster slot remains. DeRumba adaptation is deferred.
 The Workshop download and deployed test/client payload match the 235-file
 release manifest. Automated checks and targeted player tests do not constitute
 exhaustive gameplay or multiplayer certification.
+
+## Optional F700 adapter (0.1.0 source candidate)
+
+Enable `VehicleLivingSlotsKI5F700` alongside Mobile Living **3.9**, `87fordB700`
+and `damnlib`. Bank retains its original two seats and adds seven living positions.
+SWAT keeps its original eight passengers: each of the six rear seats has a separate
+living-space part. Both mechanics rows remain visible when empty, and only one
+side can be installed at a time. Original seats and beds remain usable; other
+living equipment does not become a seat. Both models have four overhead positions,
+two water tanks and auxiliary power. Bus conversion is not enabled.
+
+The independent adapter owns conversion, native transaction guards, per-vehicle
+seat binding and the paired UI. This increment leaves the core and Campers runtime
+files unchanged from the approved UI candidate. See [the design and audit](docs/F700-INDEPENDENT-ADAPTER.md).
+
+Source tests and native API checks are complete; deployment and multiplayer/gameplay
+acceptance remain pending. The server and client still run the earlier package.
