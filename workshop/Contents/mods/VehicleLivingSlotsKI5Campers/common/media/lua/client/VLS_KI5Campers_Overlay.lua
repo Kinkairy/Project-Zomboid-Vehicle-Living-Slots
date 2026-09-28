@@ -67,9 +67,9 @@ if not VLS.ki5WaterTankOverlayApplied then
             if mask.guide then
                 local anchor=anchors[prefix]
                 local cy=target.y+40
-                panel:drawLine(target.x,cy,215,cy,1,0.65,0.65,0.65)
-                if cy~=anchor[2] then panel:drawLine(215,cy,215,anchor[2],1,0.65,0.65,0.65) end
-                panel:drawLine(215,anchor[2],anchor[1],anchor[2],1,0.65,0.65,0.65)
+                panel:drawLine(nil,target.x,cy,215,cy,1,1,0.65,0.65,0.65)
+                if cy~=anchor[2] then panel:drawLine(nil,215,cy,215,anchor[2],1,1,0.65,0.65,0.65) end
+                panel:drawLine(nil,215,anchor[2],anchor[1],anchor[2],1,1,0.65,0.65,0.65)
             end
         end
         local ok,result=pcall(native,self)

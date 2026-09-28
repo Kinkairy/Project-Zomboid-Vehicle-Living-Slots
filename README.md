@@ -1,7 +1,16 @@
-# Mobile Living 3.10
+# Mobile Living 3.10.1
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
+
+## 3.10.1 mechanics-window fix
+
+Corrects the native `drawLine(texture, x, y, x2, y2, thickness, a, r, g, b)` calls
+in both KI5 adapters. Regression coverage loads the installed B42.21.0 wrapper
+and checks both addon load orders, all 11 vehicle models and draw-failure cleanup.
+The optional F700 adapter is now 0.1.1. Gameplay acceptance remains separate.
+
+See [3.10.1 release notes](docs/release-3.10.1.md).
 
 ## Installation
 

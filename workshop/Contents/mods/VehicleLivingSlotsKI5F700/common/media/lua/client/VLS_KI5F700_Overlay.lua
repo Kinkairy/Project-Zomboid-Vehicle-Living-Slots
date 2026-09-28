@@ -57,7 +57,7 @@ Events.OnGameStart.Add(register)
 local function line(panel,points)
     for i=2,#points do
         local p,q=points[i-1],points[i]
-        panel:drawLine(p[1],p[2],q[1],q[2],1,0.65,0.65,0.65)
+        panel:drawLine(nil,p[1],p[2],q[1],q[2],1,1,0.65,0.65,0.65)
     end
 end
 local function crop(panel,texture,source,target,a,r,g,b)

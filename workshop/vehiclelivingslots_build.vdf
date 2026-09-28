@@ -7,5 +7,5 @@
     "visibility" "0"
     "title" "Mobile Living"
     "tags" "Build 42;Multiplayer;Vehicles"
-    "changenote" "3.10：新增 KI5 F700 系列车辆适配，优化维修界面与座位图。 / Added KI5 F700 vehicle support and improved the mechanics interface and seat layouts."
+    "changenote" "3.10.1：修复 B42.21 中 KI5 房车、F700 与 B700 巴士维修界面反复报错。 / Fixed repeated mechanics-window errors for KI5 campers, F700 trucks and B700 buses on B42.21."
 }

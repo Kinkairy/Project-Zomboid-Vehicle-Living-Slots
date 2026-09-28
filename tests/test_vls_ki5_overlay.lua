@@ -19,6 +19,19 @@ for _,method in ipairs({'renderCarOverlay','isMouseOverPart'})do
  local last=assert(source:find('\nfunction ',first+10,true))
  assert(loadstring(source:sub(first,last-1),'@native.'..method))()
 end
+-- Use the installed game wrapper, including its Texture argument and line width.
+-- The Java boundary below records draw commands and validates the native types.
+ISUIElement = {}
+ISUITextureGetter = {instanceof=function() return false end}
+local function loadNativeMethod(file, signature)
+ local handle=assert(io.open(native..'/client/ISUI/'..file))
+ local code=handle:read('*a');handle:close()
+ local first=assert(code:find(signature,1,true))
+ local last=code:find('\nfunction ',first+10,true) or (#code+1)
+ assert(loadstring(code:sub(first,last-1),'@native.'..file))()
+end
+loadNativeMethod('ISUIElement.lua','function ISUIElement:drawLine(')
+loadNativeMethod('ISUITextureGetter.lua','function ISUITextureGetter.checkGetTexture(')
 assert(loadstring(fixture.registries.damn,'@native.DAMN_MechOverlay'))()
 package.loaded.DAMN_MechOverlay=true
 assert(loadstring(fixture.registries.f700,'@native.87fordB700MechanicsOverlay'))()
@@ -106,7 +119,14 @@ local function panelFor(name,parts)
   assert(tex and sx>=0 and sy>=0 and sx+sw<=tex:getWidth() and sy+sh<=tex:getHeight(),'invalid crop')
   self.draws[#self.draws+1]={tex.name,sx,sy,sw,sh,x,y,w,h,a,r,g,b,'crop'};self.commands[#self.commands+1]={'DRAW',self.draws[#self.draws]}
  end
- panel.drawLine=function(self,x,y,x2,y2,a,r,g,b)self.lines[#self.lines+1]={x,y,x2,y2,a,r,g,b};self.commands[#self.commands+1]={'LINE',self.lines[#self.lines]}end
+ panel.drawLine=ISUIElement.drawLine
+ panel.javaObject={DrawLine=function(_,texture,x,y,x2,y2,thickness,r,g,b,a)
+  assert(texture==nil,'expected argument of type Texture, got '..type(texture))
+  for _,value in ipairs({x,y,x2,y2,thickness,r,g,b,a})do assert(type(value)=='number')end
+  eq(thickness,1);eq(a,1);eq(r,0.65);eq(g,0.65);eq(b,0.65)
+  panel.lines[#panel.lines+1]={x,y,x2,y2,a,r,g,b}
+  panel.commands[#panel.commands+1]={'LINE',panel.lines[#panel.lines]}
+ end}
  panel.drawRectBorder=function(self,x,y,w,h,a,r,g,b)self.borders[#self.borders+1]={x,y,w,h,a,r,g,b};self.commands[#self.commands+1]={'BORDER',self.borders[#self.borders]}end
  return panel
 end
@@ -170,6 +190,15 @@ for _,entry in ipairs(variants)do
   end
   assert(seen,'missing component did not flash: '..name..' '..c[1])
  end
+ assert(#panel.lines>0,'no native connector calls: '..name)
+ -- A Java drawing failure must also restore the temporary texture hook.
+ local line=panel.javaObject.DrawLine
+ local textureDraw=panel.drawTextureScaledUniform
+ panel.javaObject.DrawLine=function()error('native line fault')end
+ eq(pcall(panel.renderCarOverlay,panel),false)
+ eq(panel.drawTextureScaledUniform,textureDraw)
+ panel.javaObject.DrawLine=line
+ clear(panel);panel:renderCarOverlay()
  -- Restore temporary draw hook on either native draw or crop failure.
  local oldCrop=panel.drawSubTexture
  panel.drawSubTexture=function()error('crop fault')end

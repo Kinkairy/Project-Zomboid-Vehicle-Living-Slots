@@ -2,11 +2,11 @@
 """Independent source boundaries and native-passenger preservation checks."""
 import argparse,hashlib,json,re,runpy
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--ki5-scripts',type=Path);p.add_argument('--repo',type=Path);p.add_argument('--base-manifest',type=Path,help='Explicit approved core/Campers manifest for a later source lineage');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--ki5-scripts',type=Path);p.add_argument('--repo',type=Path);p.add_argument('--base-manifest',type=Path,help='Explicit approved core/Campers manifest for a later source lineage');p.add_argument('--candidate',default='candidate-3.10.1.json');a=p.parse_args()
 here=Path(__file__).resolve()
 root=a.repo or (here.parents[1] if (here.parents[1]/'workshop').is_dir() else here.parents[2]/'mods/vehicle-living-slots')
 mods=root/'workshop/Contents/mods'
-verified,_=runpy.run_path(str(root/'tools/check_runtime_manifest.py'))['validate'](root)
+verified,_=runpy.run_path(str(root/'tools/check_runtime_manifest.py'))['validate'](root,a.candidate)
 base=json.loads(a.base_manifest.read_text())['files'] if a.base_manifest else verified['files']
 assert base==verified['files'],'Explicit core manifest does not match the verified candidate'
 for name,want in base.items():

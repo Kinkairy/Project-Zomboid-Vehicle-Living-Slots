@@ -2,8 +2,8 @@ local VLS = require "VLS_Config"
 if VLS.F700Adapter then return VLS.F700Adapter end
 local P = require "VLS_Pantry"
 -- An optional registration layer over the shared Mobile Living API.
-assert(VLS.VERSION == "3.10", "Mobile Living: KI5 F700 requires VLS 3.10")
-local A = {VERSION = "0.1.0", models = {
+assert(VLS.VERSION == "3.10.1", "Mobile Living: KI5 F700 requires VLS 3.10.1")
+local A = {VERSION = "0.1.1", models = {
     ["Base.87fordF700bank"] = true,
     ["Base.87fordF700swat"] = true,
 }}
@@ -90,5 +90,5 @@ function VLS.getPartDisplayName(part, fallback)
     end
     return baseName(part, fallback)
 end
-print("[VehicleLivingSlotsKI5F700] Adapter 0.1.0 on Workshop VLS 3.10: Bank living=7; SWAT pairs=6 tanks=2; Bus variants=3 pairs=14 tanks=4; overhead=4")
+print("[VehicleLivingSlotsKI5F700] Adapter 0.1.1 on Workshop VLS 3.10.1: Bank living=7; SWAT pairs=6 tanks=2; Bus variants=3 pairs=14 tanks=4; overhead=4")
 return A
