@@ -2,7 +2,7 @@
 """Independent source boundaries and native-passenger preservation checks."""
 import argparse,hashlib,json,re,runpy
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--ki5-scripts',type=Path);p.add_argument('--repo',type=Path);p.add_argument('--base-manifest',type=Path,help='Explicit approved core/Campers manifest for a later source lineage');p.add_argument('--candidate',default='candidate-3.10.1.json');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--ki5-scripts',type=Path);p.add_argument('--repo',type=Path);p.add_argument('--base-manifest',type=Path,help='Explicit approved core/Campers manifest for a later source lineage');p.add_argument('--candidate',default='candidate-3.10.2.json');a=p.parse_args()
 here=Path(__file__).resolve()
 root=a.repo or (here.parents[1] if (here.parents[1]/'workshop').is_dir() else here.parents[2]/'mods/vehicle-living-slots')
 mods=root/'workshop/Contents/mods'

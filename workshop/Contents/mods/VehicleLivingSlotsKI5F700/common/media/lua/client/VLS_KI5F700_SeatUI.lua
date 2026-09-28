@@ -197,14 +197,19 @@ function ISVehicleSeatUI:render()
         if paired then
             if bus or (self.mouseOverExit and self.mouseOverExit>=2) then self.mouseOverExit=nil end
             self.vlsSeatExitBottom=nil
-            local texture=self.joyfocus and joyTexture or exitTexture
+            local icon=self.joyfocus and joyTexture or exitTexture
+            local texture=icon
+            -- Match native drawing: controller icons wrap their current Texture.
+            if ISUITextureGetter and ISUITextureGetter.checkGetTexture then
+                texture=ISUITextureGetter.checkGetTexture(texture)
+            end
             if candidate~=nil and texture then
                 local w,h=texture:getWidth(),texture:getHeight()
                 local x,y=self.width/2-w/2,rearBottom+4
                 if bus then x,y=right+29+4,lastY-h/2 end
                 local shift=isKeyDown(Keyboard.KEY_LSHIFT) or isKeyDown(Keyboard.KEY_RSHIFT)
                 local hover=self:getMouseX()>=x and self:getMouseX()<x+w and self:getMouseY()>=y and self:getMouseY()<y+h
-                textureDraw(self,texture,x-texture:getOffsetX(),y-texture:getOffsetY(),1,(hover or shift or self.joyfocus) and 1 or 0.2,1,1,1)
+                textureDraw(self,icon,x-texture:getOffsetX(),y-texture:getOffsetY(),1,(hover or shift or self.joyfocus) and 1 or 0.2,1,1,1)
                 if not self.joyfocus and hover then self.mouseOverExit=candidate end
                 if not self.joyfocus and shift then
                     local fh=getTextManager():getFontHeight(UIFont.Large)

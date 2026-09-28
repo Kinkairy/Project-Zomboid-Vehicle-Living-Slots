@@ -207,6 +207,10 @@ function C.sync(vehicle,part)
     local t=targets(vehicle)
     if not t then return false end
     local current=vehicle:getInitialMass()
+    -- Native createPhysics assigns script mass after part initialization.
+    -- Keep this part registered and retry after physics initialization; never
+    -- write an inferred mass or consume the diagnostic for this normal state.
+    if current==0 and not vehicle:getController() then return false end
     if not acceptedInitial(current,t,part) then
         warn(vehicle,part,current,t)
         return false

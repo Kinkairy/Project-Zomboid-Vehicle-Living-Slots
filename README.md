@@ -1,7 +1,16 @@
-# Mobile Living 3.10.1
+# Mobile Living 3.10.2
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
+
+## 3.10.2 controller and initialization fix
+
+Resolves native controller icon getters before reading texture offsets in both
+seat-map paths. Defers vehicle callback registration until the native server
+module is available, and retries chassis/frame mass changes after native physics
+initialization. F700 advances to 0.1.2. Published to the existing Workshop item;
+268 independently downloaded files match this source. In-game acceptance remains
+separate. See [3.10.2 release notes](docs/release-3.10.2.md).
 
 ## 3.10.1 mechanics-window fix
 

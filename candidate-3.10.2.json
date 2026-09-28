@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "status": "released",
+  "published_manifest": "release-3.9.json",
+  "published_manifest_sha256": "4f33bb6abce73adac06fa2bb62c52de688366ca0d2eb985ee7c22051871f3ba6",
+  "published_runtime_sha256": "e18a82e7c643b30a372804cdb4e725c4b444e264df67e676354a844f3b17b3e2",
+  "addon_manifest": "release-f700-0.1.2.json",
+  "addon_runtime_sha256": "d9d2ac504306b8a12aace5bfef8ee47bc91e6220216f82d532ba6dd3df3df761",
+  "core_overrides": {
+    "VehicleLivingSlots/42.20/mod.info": {
+      "before": "6b7d6e083b3ae56d617d419bd6515bb8bc629c4df9c25b8f3c04b0236e5cd4cb",
+      "after": "85e6478bcf995c8ae1b8711c4d6fa2d28ee882d420ca2c6df9c728e8f524f1cf"
+    },
+    "VehicleLivingSlots/common/media/lua/client/VLS_Client.lua": {
+      "before": "a764771c4e2c0ee02206787a008725c03ed5455893369bffb99733e8282340c7",
+      "after": "f691b96f76aeef7d294788928bc9c9c63a28f396156e146bb48469504d90d471"
+    },
+    "VehicleLivingSlots/common/media/lua/client/VLS_SeatDisplay.lua": {
+      "before": "8602cb8c78031d1b0b0d4b9f9a945654a289c890338f688de17a65946d8dd197",
+      "after": "d61d7d0e2fb7075790a4078e96c89fccc2b506e4180fd7550bfe56ed3d06b2e9"
+    },
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Chassis.lua": {
+      "before": "07f52e5540c36f216f2df8881017bdd698836e519e658210cec15e8f3640ab5c",
+      "after": "967e86764b70bca0d44720d912dfd8bd3e54ba326031f923156191da02b59ee3"
+    },
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua": {
+      "before": "85e042eec5308c818da930fe6c1565fefc7f66c809cc855bc3fc7207052b272e",
+      "after": "cb7c20127cf1bc0db300098f412e7fd1e7eb7a948099cfa0ff38f9b00477fa6d"
+    },
+    "VehicleLivingSlots/common/media/lua/shared/VLS_RoofCargo.lua": {
+      "before": "05098d74ff20d2bc93d2b16b842faa1bceff92db67cc38e18b4fe432b2e7a382",
+      "after": "da6951209b816de9c28debbf30da90b0cf987663afc064e9e112ceec251e61a8"
+    },
+    "VehicleLivingSlots/common/media/scripts/VLS_StepVanRoofRackAdjustment.txt": {
+      "before": "e6f2ec2579ed6d9beb5011cf718e4d9d784c32be1d5ede7fc9819255fcf47a04",
+      "after": "2fe386f461ccadaacb549ffc91b756ad2be39add33ed3dcf9c2a41f2dd480b2f"
+    },
+    "VehicleLivingSlots/common/media/scripts/VLS_VehicleRoofAdapters.txt": {
+      "before": "ac0e0122e0849e9bff51eab3ab5849d44d9a4bc6903da3ad29c7eb5fa90ef37f",
+      "after": "340e6e5b3202d50612e070d9754995778ccd1c30b04c3c6d102d936d60446c6a"
+    },
+    "VehicleLivingSlots/mod.info": {
+      "before": "6b7d6e083b3ae56d617d419bd6515bb8bc629c4df9c25b8f3c04b0236e5cd4cb",
+      "after": "85e6478bcf995c8ae1b8711c4d6fa2d28ee882d420ca2c6df9c728e8f524f1cf"
+    }
+  },
+  "file_count": 268,
+  "runtime_sha256": "a19a2b240ad2b9db77834a623a83ee321bced96782fad1445eba7e0db7d56575",
+  "adapter_overrides": {
+    "VehicleLivingSlotsKI5Campers/42.20/mod.info": {
+      "before": "6032ddf01ae43c8f664aaef21ec47e7ef01c3b96a37899bb3429453dcc55da6a",
+      "after": "b337c3331ed7dfcc8df14983a89f32d0ee30f284f185a0a2009e41950d80c0e2"
+    },
+    "VehicleLivingSlotsKI5Campers/common/media/lua/client/VLS_KI5Campers_Overlay.lua": {
+      "before": "9b3b862ad24406a8c48fb12a20206f520bbec7d3d70f806f1433fd0a00afe257",
+      "after": "eda641e9e6076876a052d9cd480a05957dc1fad8c73d1485d5065b1c674f610b"
+    },
+    "VehicleLivingSlotsKI5Campers/common/media/lua/shared/VLS_KI5Campers_Config.lua": {
+      "before": "2f2530e3e3a8c6258eae0da3b65ae55e1e93d5b9d5ad6fa9f416cf2759c5edcb",
+      "after": "242f47c1fc9b9134006bc7ab399f5d6ff358d32aa0bf624d770bce5dd5145460"
+    },
+    "VehicleLivingSlotsKI5Campers/mod.info": {
+      "before": "f7858c20b51cb6da48d2ada1d986db5eca94c9d0b162cab91e74c0180bde9205",
+      "after": "e1f451f75297d397cbd76738b1a62a22f4a300e0ccd99cc2e87991df2d354f57"
+    }
+  },
+  "candidate_archive_sha256": "a394829e1d0111ba6483136baf432f175f04bfb9352fe97b86591805e9c34372",
+  "workshop_manifest": "2938310983666846217"
+}

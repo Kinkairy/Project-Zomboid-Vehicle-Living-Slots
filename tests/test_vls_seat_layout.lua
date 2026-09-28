@@ -20,10 +20,18 @@ function ISPanelJoypad:derive()return setmetatable({},{__index=self})end
 package.loaded['ISUI/ISPanelJoypad']=true
 ISCarMechanicsOverlay={CarList={}};Keyboard={KEY_LSHIFT=1,KEY_RSHIFT=2};local shiftDown=false;isKeyDown=function()return shiftDown end
 local textures={};getTexture=function(n)
- if not textures[n]then textures[n]={name=n,getOffsetX=function()return 0 end,getOffsetY=function()return 0 end,getWidth=function()return 24 end,getHeight=function()return 24 end,getWidthOrig=function()return 24 end,getHeightOrig=function()return 24 end}end
+ if not textures[n]then textures[n]={kind="Texture",name=n,getOffsetX=function()return 0 end,getOffsetY=function()return 0 end,getWidth=function()return 24 end,getHeight=function()return 24 end,getWidthOrig=function()return 24 end,getHeightOrig=function()return 24 end}end
  return textures[n]
 end
-Joypad={Texture={AButton=getTexture('A'),XButton=getTexture('X')}}
+isTable=function(o)return type(o)=='table' and o.kind~='Texture' end
+-- Use the actual B42 controller icon wrapper, not a Texture-shaped mock.
+dofile(native..'/shared/ISBaseObject.lua');package.loaded.ISBaseObject=true
+dofile(native..'/client/ISUI/ISUITextureGetter.lua');package.loaded['ISUI/ISUITextureGetter']=true
+getCore=function()return {getOptionControllerButtonStyleString=function()return 'fixture' end}end
+dofile(native..'/client/ISUI/Gamepad/JoypadIconTextureGetter.lua')
+Joypad={Texture={AButton=JoypadIconTextureGetter:new('A'),XButton=JoypadIconTextureGetter:new('X')}}
+Joypad.Texture.AButton:getTexture();Joypad.Texture.XButton:getTexture()
+check(Joypad.Texture.XButton.getOffsetX==nil,'native controller icon is not a Texture')
 local enters=0;ISVehicleMenu={moveItemsFromSeat=function()return false end,onEnter=function()enters=enters+1 end}
 dofile(native..'/client/Vehicles/ISUI/ISVehicleSeatUI.lua');package.loaded['Vehicles/ISUI/ISVehicleSeatUI']=true
 local originalRender=ISVehicleSeatUI.render
@@ -72,7 +80,7 @@ local function panel(name,templateOverride,extentsOverride)
  local p=setmetatable({vehicle=vehicle,width=263,height=500,mouseX=-1,mouseY=-1,character={getVehicle=function()return nil end},backgroundColor={r=0,g=0,b=0},images={},labels={},warnings={},playerNum=0},{__index=ISVehicleSeatUI})
  function p:getWidth()return self.width end;function p:getHeight()return self.height end;function p:setHeight(h)self.height=h end
  function p:getMouseX()return self.mouseX end;function p:getMouseY()return self.mouseY end
- function p:drawTextureScaledUniform(tex,x,y,scale,alpha)self.images[#self.images+1]={name=tex.name,x=x,y=y,alpha=alpha}end
+ function p:drawTextureScaledUniform(tex,x,y,scale,alpha)tex=ISUITextureGetter.checkGetTexture(tex);self.images[#self.images+1]={name=tex.name,x=x,y=y,alpha=alpha}end
  function p:drawTextCentre(label,x,y,r,g,b,a,font)self.labels[#self.labels+1]={label=label,x=x,y=y,r=r,font=font}end
  p.drawRect=noop;p.borders={};p.drawRectBorder=function(self,x,y,w,h)self.borders[#self.borders+1]={x=x,y=y,w=w,h=h}end;p.closeSelf=function(self)self.closed=true end
  local rt={setText=function(self,s)self.text=s end,render=function(self)p.warnings[#p.warnings+1]=self.text end}
@@ -159,7 +167,7 @@ f:prerender();check(#f.warnings==0,'F700 equipment red status suppressed');f:use
 -- Rear exit visibility and placement use actual native draw/click methods.
 local exitPath="media/ui/vehicles/vehicle_exit.png"
 local function exitImages(p)
- local result={};for _,im in ipairs(p.images)do if im.name==exitPath or im.name=='X' then result[#result+1]=im end end;return result
+ local result={};for _,im in ipairs(p.images)do if im.name==exitPath or im.name=='media/ui/controller/fixture_X.png' then result[#result+1]=im end end;return result
 end
 local function seated(name,template,extents)
  local p=panel(name,template,extents)
@@ -369,7 +377,7 @@ for _,width in ipairs({263,360})do for _,height in ipairs({500,650})do for _,off
  end end
  check(backgrounds==1,'Shift background follows relocated shortcut');shiftDown=false
  q.joyfocus=true;q.joypadSeat=2;q.images={};q:render();q:restored()
- local joy=exitImages(q);check(#joy==1 and joy[1].name=='X','controller shows only selected side exit')
+ local joy=exitImages(q);check(#joy==1 and joy[1].name=='media/ui/controller/fixture_X.png','controller shows only selected side exit')
  near(joy[1].y+12,left.y+32,'controller button follows driver exit height')
  q.joyfocus=nil;q.mouseX=right.x+32;q.mouseY=right.y+32
  q.vehicle.isExitBlocked=function(_,_,seat)q:restoredOutside();return seat==1 end

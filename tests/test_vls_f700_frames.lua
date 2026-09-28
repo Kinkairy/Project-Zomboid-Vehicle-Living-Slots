@@ -78,6 +78,14 @@ for _,name in ipairs({'Base.87fordF700bank','Base.87fordF700swat'})do
  frames[4].item=nil;txn.rollback();near(v.initial,950)
  v.initial=123;check(C.preview(frames[4])==nil,'foreign mass rejected');check(C.sync(v,frames[4])==false,'foreign mass untouched');near(v.initial,123)
  v.initial=950;v.cargo=0/0;check(C.preview(frames[4])==nil,'invalid cargo rejected');v.cargo=0
+ frames[1].item=item();v.initial=0;v.controller=nil
+ local messages={};local output=print;print=function(x)messages[#messages+1]=x end
+ local ok,err=pcall(function()check(C.sync(v,frames[1])==false,'pre-physics zero mass deferred')end);print=output
+ check(ok,err);check(#messages==0,'pre-physics zero mass is not an incompatibility warning');near(v.initial,0)
+ v.initial=950;v.controller={}
+ for i=1,30 do for _,f in ipairs(ticks)do f()end end
+ near(v.initial,950-950*40.625/nominal)
+ frames[1].item=nil;C.destroyed(v,frames[1]);near(v.initial,950)
  local oldName=v.name;v.name='Base.87fordF700box';check(not C.isPart(frames[4]),'unrequested model excluded');check(R.fabricationSpec(frames[4])==nil,'no recipe leaks');v.name=oldName
  isClient=function()return true end;check(C.prepareInstall(chr,frames[1],item())==nil,'client cannot commit server transaction');isClient=function()return false end
 end

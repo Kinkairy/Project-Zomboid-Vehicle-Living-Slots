@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.10.1"
-VLS.BUILD_ID = "release-3.10.1-f700"
+VLS.VERSION = "3.10.2"
+VLS.BUILD_ID = "release-3.10.2-f700"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.OVERHEAD_CATEGORY_ID = VLS.CATEGORY_ID
 VLS.TOP_FRAME_PART_IDS = {"VLSTopFrame1", "VLSTopFrame2", "VLSTopFrame3"}
@@ -2244,7 +2244,8 @@ VLS.installGenericCraftSurfaceActionHooks()
 -- Hook the original inside-access callback, not a list of vehicle names.
 -- Vehicle scripts keep their existing container.test; outside-only cargo stays
 -- outside-only. No script Load/rebinding, real seat count, or item mutation.
-require "Vehicles/Vehicles"
+-- Vehicles is populated by native server/shared loading. The lifecycle hooks
+-- below wait for ContainerAccess without requiring a server-only file here.
 VLS.CargoR6 = VLS.CargoR6 or {}
 local CargoR6 = VLS.CargoR6
 CargoR6.BUILD = "native-cargo-3.8.11-20260922"

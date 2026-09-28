@@ -9,7 +9,7 @@ local function eq(a,b,why)
     checks=checks+1
     assert(a==b, (why or "mismatch").." expected="..tostring(b).." got="..tostring(a))
 end
-local function event() return {Add=function() end,Remove=function() end} end
+local function event() local callbacks={};return {callbacks=callbacks,Add=function(fn)callbacks[#callbacks+1]=fn end,Remove=function()end}end
 Events=setmetatable({}, {__index=function(t,k) local e=event();rawset(t,k,e);return e end})
 LuaEventManager={AddEvent=function() end}
 dofile(vanilla)
@@ -17,12 +17,20 @@ local original=Vehicles.ContainerAccess.TruckBedOpenInside
 local exterior=Vehicles.ContainerAccess.TruckBed
 local open=Vehicles.ContainerAccess.TruckBedOpen
 local loaded={['Vehicles/Vehicles']=true}
-require=function(name) if loaded[name] then return loaded[name] end loaded[name]={};return loaded[name] end
+require=function(name) assert(name~='Vehicles/Vehicles','shared config must not require the server-only Vehicles file');if loaded[name] then return loaded[name] end loaded[name]={};return loaded[name] end
 getModInfoByID=function() return {getDir=function() return 'offline-fixture' end} end
 local runtime=root..'/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
+local nativeVehicles=Vehicles;Vehicles=nil
 dofile(runtime..'shared/VLS_Config.lua')
-local hook=Vehicles.ContainerAccess.TruckBedOpenInside
 local C=VLS.CargoR6
+eq(C.nativeTable,nil,'shared loading waits for native Vehicles')
+Vehicles=nativeVehicles
+local bootHook=false
+for _,fn in ipairs(Events.OnGameBoot.callbacks) do
+ if fn==C.installNativeHook then bootHook=true;fn() end
+end
+eq(bootHook,true,'native cargo hook is registered at game boot')
+local hook=Vehicles.ContainerAccess.TruckBedOpenInside
 local itemTypes={"Base.Mov_Cot","Base.Mattress"}
 for name in pairs(VLS.sleepingBagTypes) do itemTypes[#itemTypes+1]=name end
 table.sort(itemTypes)

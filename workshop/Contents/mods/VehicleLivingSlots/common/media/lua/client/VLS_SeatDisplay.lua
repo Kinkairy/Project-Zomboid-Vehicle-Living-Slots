@@ -232,7 +232,13 @@ local function install()
             end
             local shift=isKeyDown(Keyboard.KEY_LSHIFT) or isKeyDown(Keyboard.KEY_RSHIFT)
             for _,g in ipairs(exits) do
-                local texture=panel.joyfocus and joyExit or exitTexture
+                local icon=panel.joyfocus and joyExit or exitTexture
+                local texture=icon
+                -- B42 controller icons are texture getters. Resolve them exactly
+                -- as native ISUIElement does before reading cropped dimensions.
+                if ISUITextureGetter and ISUITextureGetter.checkGetTexture then
+                    texture=ISUITextureGetter.checkGetTexture(texture)
+                end
                 if g.seat~=nil and texture then
                     local w,h=texture:getWidthOrig(),texture:getHeightOrig()
                     local x,y=g.x-w/2,g.y-h/2
@@ -246,7 +252,7 @@ local function install()
                     end
                     local hover=panel:getMouseX()>=x and panel:getMouseX()<x+w
                         and panel:getMouseY()>=y and panel:getMouseY()<y+h
-                    draw(panel,texture,x-offsetX,y-offsetY,1,(hover or shift or panel.joyfocus) and 1 or 0.2,1,1,1)
+                    draw(panel,icon,x-offsetX,y-offsetY,1,(hover or shift or panel.joyfocus) and 1 or 0.2,1,1,1)
                     if not panel.joyfocus and hover then panel.mouseOverExit=g.seat end
                     if not panel.joyfocus and shift then
                         drawRect(panel,x+w/2-8,y+h/2-fontHeight/2,16,fontHeight,1,0.1,0.1,0.1)

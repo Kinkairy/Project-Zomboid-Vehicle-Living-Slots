@@ -570,6 +570,17 @@ for _,row in ipairs({{"Trailer87Scamp13",2},{"Trailer87Scamp16",3},{"Trailer61Ba
   local initial=v.initial;v.throwMass=true;eq(install(fp,c),false);near(v.initial,initial);eq(fp.installed,nil)
  end)
 end
+test("pre-physics zero mass defers quietly and retries when native mass is ready",function()
+ local p,v=setup();p.installed=item(C.TYPE);v.initial=0;v.controller=nil
+ local writes=v.massWrites or 0;local updates=v.recalculations
+ local messages={};local output=print;print=function(x)messages[#messages+1]=x end
+ local ok,err=pcall(function()for i=1,3 do eq(C.sync(v,p),false)end end);print=output
+ assert(ok,err);eq(#messages,0);eq(v.initial,0);eq(v.massWrites or 0,writes);eq(v.recalculations,updates)
+ v.initial=v.scriptMass;v.controller={}
+ for i=1,30 do for _,tick in ipairs(ticks)do tick()end end
+ assert(v.initial<v.scriptMass);local target=v.initial
+ C.sync(v,p);near(v.initial,target)
+end)
 print(string.format("RESULT chassis tests=%d passed=%d failures=%d (mocked engine; no live deployment)",passed+failed,passed,failed))
 if failed>0 then os.exit(1) end
 
