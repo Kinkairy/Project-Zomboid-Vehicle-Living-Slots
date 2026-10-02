@@ -1610,6 +1610,62 @@
       "ch": "電瓶#3",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "ContextMenu_VLSSolarVisualExtend",
+      "en": "Extend Solar Panels",
+      "cn": "伸出太阳能板",
+      "ch": "伸出太陽能板",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "ContextMenu_VLSSolarVisualRetract",
+      "en": "Retract Solar Panels",
+      "cn": "收回太阳能板",
+      "ch": "收回太陽能板",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ContextMenu.json"
+    },
+    {
+      "key": "IGUI_VehiclePartVLSSolarPanel",
+      "en": "Solar Panel",
+      "cn": "太阳能板",
+      "ch": "太陽能板",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json"
+    },
+    {
+      "key": "Base.VLSSolarPanelKit",
+      "en": "Folding Solar Panel Kit",
+      "cn": "折叠太阳能板套件",
+      "ch": "摺疊太陽能板套件",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/ItemName.json"
+    },
+    {
+      "key": "Recipe_AssembleVLSSolarPanelKit",
+      "en": "Assemble Folding Solar Panel Kit",
+      "cn": "组装折叠太阳能板套件",
+      "ch": "組裝摺疊太陽能板套件",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Recipes.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableSolarPanel",
+      "en": "Enable solar panel",
+      "cn": "启用太阳能板",
+      "ch": "啟用太陽能板",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "Sandbox_VehicleLivingSlots_EnableSolarPanel_tooltip",
+      "en": "Hide all solar panel models and controls and pause solar charging when disabled. Installed items and saved states are preserved; enabling restores them without charging for the disabled interval.",
+      "cn": "关闭时隐藏所有太阳能板模型及操作入口，暂停太阳能充电；保留已安装物品和保存状态。重新启用后恢复原状态，不补算关闭期间的充电。",
+      "ch": "關閉時隱藏所有太陽能板模型及操作入口，暫停太陽能充電；保留已安裝物品和儲存狀態。重新啟用後恢復原狀態，不補算關閉期間的充電。",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
     }
   ]
 }

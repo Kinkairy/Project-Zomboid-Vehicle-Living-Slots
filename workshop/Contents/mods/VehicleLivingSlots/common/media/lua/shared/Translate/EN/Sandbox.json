@@ -43,5 +43,7 @@
   "Sandbox_VehicleLivingSlots_EnableComboWasherDryers": "Enable cabin combo washer/dryers",
   "Sandbox_VehicleLivingSlots_EnableSmallAppliances": "Enable cabin small appliances",
   "Sandbox_VehicleLivingSlots_EnableComboWasherDryers_tooltip": "Disabling prevents new installations. Existing equipment remains usable and removable.",
-  "Sandbox_VehicleLivingSlots_EnableSmallAppliances_tooltip": "Disabling prevents new installations. Existing equipment remains usable and removable."
+  "Sandbox_VehicleLivingSlots_EnableSmallAppliances_tooltip": "Disabling prevents new installations. Existing equipment remains usable and removable.",
+  "Sandbox_VehicleLivingSlots_EnableSolarPanel": "Enable solar panel",
+  "Sandbox_VehicleLivingSlots_EnableSolarPanel_tooltip": "Hide all solar panel models and controls and pause solar charging when disabled. Installed items and saved states are preserved; enabling restores them without charging for the disabled interval."
 }

@@ -11,5 +11,7 @@
   "ContextMenu_VLSPantryMissing": "請先安裝對應的小電器",
   "ContextMenu_VLSPantryBroken": "已安裝的小電器已損壞",
   "ContextMenu_VLSPantryIngredients": "請隨身攜帶原版配方需要的材料",
-  "ContextMenu_VLSPantryMenuUnavailable": "暫時無法開啟電器製作選單"
+  "ContextMenu_VLSPantryMenuUnavailable": "暫時無法開啟電器製作選單",
+  "ContextMenu_VLSSolarVisualExtend": "伸出太陽能板",
+  "ContextMenu_VLSSolarVisualRetract": "收回太陽能板"
 }

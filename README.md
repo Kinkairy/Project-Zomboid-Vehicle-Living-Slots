@@ -1,7 +1,13 @@
-# Mobile Living 3.10.2
+# Mobile Living 3.11
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.
+
+## 3.11 rooftop solar update
+
+Added deployable rooftop solar panels with auxiliary-battery charging, direct-material installation and a sandbox switch; panels retract on vehicle movement. Improved roof-rack lighting and fixed native mechanics tool detection, multiplayer action arguments and mechanics-cheat compatibility.
+
+See [3.11 release notes](docs/release-3.11.md).
 
 ## 3.10.2 controller and initialization fix
 

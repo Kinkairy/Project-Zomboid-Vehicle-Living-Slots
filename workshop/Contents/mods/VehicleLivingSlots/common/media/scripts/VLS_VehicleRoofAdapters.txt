@@ -381,7 +381,7 @@ module Base
         mesh = VLS/VanRoofRack,
         texture = WorldItems/MetalBar_FullHalfQrt_Steel,
         scale = 1.0,
-        shader = VLSRoofBlackSteel,
+        shader = VLSRoofRackDetailR4,
         static = true,
     }
     model VLSVanRoofCoverModel
@@ -882,7 +882,7 @@ module Base
         mesh = VLS/SUVRoofRack,
         texture = WorldItems/MetalBar_FullHalfQrt_Steel,
         scale = 1.0,
-        shader = VLSRoofBlackSteel,
+        shader = VLSRoofRackDetailR4,
         static = true,
     }
     model VLSSUVRoofCoverModel
@@ -1087,7 +1087,7 @@ module Base
         mesh = VLS/PickUpVanRoofRack,
         texture = WorldItems/MetalBar_FullHalfQrt_Steel,
         scale = 1.0,
-        shader = VLSRoofBlackSteel,
+        shader = VLSRoofRackDetailR4,
         static = true,
     }
     model VLSPickUpVanRoofCoverModel

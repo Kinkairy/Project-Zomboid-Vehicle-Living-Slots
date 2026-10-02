@@ -1,0 +1,147 @@
+module Base
+{
+    item VLSSolarPanelKit
+    {
+        DisplayName = Folding Solar Panel Kit,
+        DisplayCategory = VehicleMaintenance,
+        ItemType = base:normal,
+        Icon = CarBatteryCharger,
+        Weight = 20,
+        ConditionMax = 100,
+        MechanicsItem = true,
+    }
+    template vehicle VLSSolarInstallationR6
+    {
+        part VLSSolarPanel
+        {
+            category = Other,
+            area = TruckBed,
+            itemType = Base.VLSSolarPanelKit,
+            specificItem = false,
+            mechanicRequireKey = false,
+            repairMechanic = false,
+            table install
+            {
+                time = 350,
+                skills = Electricity:3;Mechanics:2,
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }, 2 { tags = base:wrench, count = 1, keep = true, }, }
+                test = VLS.SolarInstallation.InstallTest,
+                requireInstalled = VLSFixedRoofRack,
+            }
+            table uninstall
+            {
+                time = 250,
+                skills = Electricity:3;Mechanics:2,
+                items { 1 { tags = base:screwdriver, count = 1, keep = true, equip = primary, }, 2 { tags = base:wrench, count = 1, keep = true, }, }
+                test = VLS.SolarInstallation.UninstallTest,
+            }
+            lua { create = VLS.SolarInstallation.Create, }
+        }
+    }
+    vehicle PickUpVan { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanBrickingIt { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanBuilder { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanCallowayLandscaping { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanHeltonMetalWorking { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanKimbleKonstruction { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanMarchRidgeConstruction { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanMccoy { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanMetalworker { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanWeldingbyCamille { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVanYingsWood { template! = VLSSolarInstallationR6, }
+    vehicle PickUpVan_Camo { template! = VLSSolarInstallationR6, }
+    vehicle SUV { template! = VLSSolarInstallationR6, }
+    vehicle StepVan { template! = VLSSolarInstallationR6, }
+    vehicle StepVanAirportCatering { template! = VLSSolarInstallationR6, }
+    vehicle StepVanMail { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Blacksmith { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Butchers { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Cereal { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Citr8 { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_CompleteRepairShop { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Florist { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Genuine_Beer { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Glass { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Heralds { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_HuangsLaundry { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Jorgensen { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_LouisvilleMotorShop { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_LouisvilleSWAT { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_MarineBites { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Masonry { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Mechanic { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_MobileLibrary { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Plonkies { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Propane { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_RandisPlants { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Scarlet { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_SmartKut { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_SouthEasternHosp { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_SouthEasternPaint { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_USL { template! = VLSSolarInstallationR6, }
+    vehicle StepVan_Zippee { template! = VLSSolarInstallationR6, }
+    vehicle Van { template! = VLSSolarInstallationR6, }
+    vehicle VanBeckmans { template! = VLSSolarInstallationR6, }
+    vehicle VanBrewsterHarbin { template! = VLSSolarInstallationR6, }
+    vehicle VanBuilder { template! = VLSSolarInstallationR6, }
+    vehicle VanCarpenter { template! = VLSSolarInstallationR6, }
+    vehicle VanCoastToCoast { template! = VLSSolarInstallationR6, }
+    vehicle VanDeerValley { template! = VLSSolarInstallationR6, }
+    vehicle VanFossoil { template! = VLSSolarInstallationR6, }
+    vehicle VanGardenGods { template! = VLSSolarInstallationR6, }
+    vehicle VanGardener { template! = VLSSolarInstallationR6, }
+    vehicle VanGreenes { template! = VLSSolarInstallationR6, }
+    vehicle VanJohnMcCoy { template! = VLSSolarInstallationR6, }
+    vehicle VanJonesFabrication { template! = VLSSolarInstallationR6, }
+    vehicle VanKerrHomes { template! = VLSSolarInstallationR6, }
+    vehicle VanKnobCreekGas { template! = VLSSolarInstallationR6, }
+    vehicle VanKnoxCom { template! = VLSSolarInstallationR6, }
+    vehicle VanKorshunovs { template! = VLSSolarInstallationR6, }
+    vehicle VanLouisvilleLandscaping { template! = VLSSolarInstallationR6, }
+    vehicle VanMail { template! = VLSSolarInstallationR6, }
+    vehicle VanMccoy { template! = VLSSolarInstallationR6, }
+    vehicle VanMechanic { template! = VLSSolarInstallationR6, }
+    vehicle VanMeltingPointMetal { template! = VLSSolarInstallationR6, }
+    vehicle VanMetalheads { template! = VLSSolarInstallationR6, }
+    vehicle VanMetalworker { template! = VLSSolarInstallationR6, }
+    vehicle VanMicheles { template! = VLSSolarInstallationR6, }
+    vehicle VanMobileMechanics { template! = VLSSolarInstallationR6, }
+    vehicle VanMooreMechanics { template! = VLSSolarInstallationR6, }
+    vehicle VanOldMill { template! = VLSSolarInstallationR6, }
+    vehicle VanOvoFarm { template! = VLSSolarInstallationR6, }
+    vehicle VanPennSHam { template! = VLSSolarInstallationR6, }
+    vehicle VanPlattAuto { template! = VLSSolarInstallationR6, }
+    vehicle VanPluggedInElectrics { template! = VLSSolarInstallationR6, }
+    vehicle VanRiversideFabrication { template! = VLSSolarInstallationR6, }
+    vehicle VanRosewoodworking { template! = VLSSolarInstallationR6, }
+    vehicle VanSchwabSheetMetal { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats { template! = VLSSolarInstallationR6, }
+    vehicle VanSeatsAirportShuttle { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Creature { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_LadyDelighter { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Mural { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Prison { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Space { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Trippy { template! = VLSSolarInstallationR6, }
+    vehicle VanSeats_Valkyrie { template! = VLSSolarInstallationR6, }
+    vehicle VanSpiffo { template! = VLSSolarInstallationR6, }
+    vehicle VanTreyBaines { template! = VLSSolarInstallationR6, }
+    vehicle VanUncloggers { template! = VLSSolarInstallationR6, }
+    vehicle VanUtility { template! = VLSSolarInstallationR6, }
+    vehicle VanWPCarpentry { template! = VLSSolarInstallationR6, }
+    vehicle Van_Blacksmith { template! = VLSSolarInstallationR6, }
+    vehicle Van_BugWipers { template! = VLSSolarInstallationR6, }
+    vehicle Van_Charlemange_Beer { template! = VLSSolarInstallationR6, }
+    vehicle Van_CraftSupplies { template! = VLSSolarInstallationR6, }
+    vehicle Van_Glass { template! = VLSSolarInstallationR6, }
+    vehicle Van_HeritageTailors { template! = VLSSolarInstallationR6, }
+    vehicle Van_KnoxDisti { template! = VLSSolarInstallationR6, }
+    vehicle Van_Leather { template! = VLSSolarInstallationR6, }
+    vehicle Van_LectroMax { template! = VLSSolarInstallationR6, }
+    vehicle Van_Locksmith { template! = VLSSolarInstallationR6, }
+    vehicle Van_Masonry { template! = VLSSolarInstallationR6, }
+    vehicle Van_MassGenFac { template! = VLSSolarInstallationR6, }
+    vehicle Van_Perfick_Potato { template! = VLSSolarInstallationR6, }
+    vehicle Van_Transit { template! = VLSSolarInstallationR6, }
+    vehicle Van_VoltMojo { template! = VLSSolarInstallationR6, }
+}

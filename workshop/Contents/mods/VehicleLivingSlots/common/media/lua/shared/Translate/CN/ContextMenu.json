@@ -11,5 +11,7 @@
   "ContextMenu_VLSPantryMissing": "请先安装对应的小电器",
   "ContextMenu_VLSPantryBroken": "已安装的小电器已损坏",
   "ContextMenu_VLSPantryIngredients": "请随身携带原版配方需要的材料",
-  "ContextMenu_VLSPantryMenuUnavailable": "暂时无法打开电器制作菜单"
+  "ContextMenu_VLSPantryMenuUnavailable": "暂时无法打开电器制作菜单",
+  "ContextMenu_VLSSolarVisualExtend": "伸出太阳能板",
+  "ContextMenu_VLSSolarVisualRetract": "收回太阳能板"
 }

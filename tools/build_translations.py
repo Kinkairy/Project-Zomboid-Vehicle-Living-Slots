@@ -21,7 +21,7 @@ def build(root,write=False):
             path.write_text(json.dumps(expected,ensure_ascii=False,indent=2)+'\n')
     metadata=json.loads((root/'translations/workshop-description.json').read_text())
     assert metadata['reviewed'] is True
-    expected='description='+'[hr]'.join(metadata['descriptions'][key] for key in ('CN','CH','EN'))
+    expected='description='+'[hr]'.join(metadata['descriptions'][key].replace('\n',r'\n') for key in ('CN','CH','EN'))
     path=root/'workshop/workshop.txt';lines=path.read_text().splitlines()
     actual=[line for line in lines if line.startswith('description=')]
     if actual!=[expected]:

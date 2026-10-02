@@ -11,5 +11,7 @@
   "ContextMenu_VLSPantryMissing": "Install the matching appliance first",
   "ContextMenu_VLSPantryBroken": "The installed appliance is broken",
   "ContextMenu_VLSPantryIngredients": "Carry the ingredients required by the original recipe",
-  "ContextMenu_VLSPantryMenuUnavailable": "The appliance crafting menu is unavailable"
+  "ContextMenu_VLSPantryMenuUnavailable": "The appliance crafting menu is unavailable",
+  "ContextMenu_VLSSolarVisualExtend": "Extend Solar Panels",
+  "ContextMenu_VLSSolarVisualRetract": "Retract Solar Panels"
 }

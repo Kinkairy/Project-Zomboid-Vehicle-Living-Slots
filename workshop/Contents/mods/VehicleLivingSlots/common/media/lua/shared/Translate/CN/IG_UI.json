@@ -68,5 +68,6 @@
   "IGUI_VehiclePartVLSOverhead3": "顶部空间",
   "IGUI_VehiclePartVLSTopFrame1": "顶部框架",
   "IGUI_VehiclePartVLSTopFrame2": "顶部框架",
-  "IGUI_VehiclePartVLSTopFrame3": "顶部框架"
+  "IGUI_VehiclePartVLSTopFrame3": "顶部框架",
+  "IGUI_VehiclePartVLSSolarPanel": "太阳能板"
 }

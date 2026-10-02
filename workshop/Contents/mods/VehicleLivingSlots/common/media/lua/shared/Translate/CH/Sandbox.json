@@ -43,5 +43,7 @@
   "Sandbox_VehicleLivingSlots_EnableComboWasherDryers": "啟用車內洗烘一體機",
   "Sandbox_VehicleLivingSlots_EnableSmallAppliances": "啟用車內小電器",
   "Sandbox_VehicleLivingSlots_EnableComboWasherDryers_tooltip": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。",
-  "Sandbox_VehicleLivingSlots_EnableSmallAppliances_tooltip": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。"
+  "Sandbox_VehicleLivingSlots_EnableSmallAppliances_tooltip": "關閉後禁止新增安裝；已有設備仍可使用及拆卸。",
+  "Sandbox_VehicleLivingSlots_EnableSolarPanel": "啟用太陽能板",
+  "Sandbox_VehicleLivingSlots_EnableSolarPanel_tooltip": "關閉時隱藏所有太陽能板模型及操作入口，暫停太陽能充電；保留已安裝物品和儲存狀態。重新啟用後恢復原狀態，不補算關閉期間的充電。"
 }

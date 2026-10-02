@@ -1,0 +1,1900 @@
+module Base
+{
+    /* R3 native bone attachments. Visual-only parts have no item/container. */
+    model VLSSolarR3_SUV_Fixed
+    {
+        mesh = VLSSolarVisualR3/SUV_Fixed,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_SUV_Driver
+    {
+        mesh = VLSSolarVisualR3/SUV_Driver,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = vehicle,
+        static = false,
+        attachment SolarLeft
+        {
+            bone = SolarLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarRight
+        {
+            bone = SolarRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleLeft
+        {
+            bone = SolarMiddleLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleRight
+        {
+            bone = SolarMiddleRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+    }
+    model VLSSolarR3_SUV_Left
+    {
+        mesh = VLSSolarVisualR3/SUV_Left,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_SUV_Right
+    {
+        mesh = VLSSolarVisualR3/SUV_Right,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_SUV_MiddleLeft
+    {
+        mesh = VLSSolarVisualR3/SUV_MiddleLeft,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_SUV_MiddleRight
+    {
+        mesh = VLSSolarVisualR3/SUV_MiddleRight,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    template vehicle VLSSolarR1_SUV
+    {
+        part VLSFixedRoofRack
+        {
+            model VLSSolarR1Case
+            {
+                file = VLSSolarR3_SUV_Fixed,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+        }
+        part VLSSolarR3Driver
+        {
+            category = nodisplay,
+            model VLSSolarR3Driver
+            {
+                file = VLSSolarR3_SUV_Driver,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+            anim Pose0
+            {
+                anim = VLSSolarR3_SUV_Pose0,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose1
+            {
+                anim = VLSSolarR3_SUV_Pose1,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose2
+            {
+                anim = VLSSolarR3_SUV_Pose2,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose3
+            {
+                anim = VLSSolarR3_SUV_Pose3,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose4
+            {
+                anim = VLSSolarR3_SUV_Pose4,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose5
+            {
+                anim = VLSSolarR3_SUV_Pose5,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose6
+            {
+                anim = VLSSolarR3_SUV_Pose6,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose7
+            {
+                anim = VLSSolarR3_SUV_Pose7,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose8
+            {
+                anim = VLSSolarR3_SUV_Pose8,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose9
+            {
+                anim = VLSSolarR3_SUV_Pose9,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose10
+            {
+                anim = VLSSolarR3_SUV_Pose10,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose11
+            {
+                anim = VLSSolarR3_SUV_Pose11,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose12
+            {
+                anim = VLSSolarR3_SUV_Pose12,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose13
+            {
+                anim = VLSSolarR3_SUV_Pose13,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose14
+            {
+                anim = VLSSolarR3_SUV_Pose14,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose15
+            {
+                anim = VLSSolarR3_SUV_Pose15,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose16
+            {
+                anim = VLSSolarR3_SUV_Pose16,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose17
+            {
+                anim = VLSSolarR3_SUV_Pose17,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose18
+            {
+                anim = VLSSolarR3_SUV_Pose18,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose19
+            {
+                anim = VLSSolarR3_SUV_Pose19,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose20
+            {
+                anim = VLSSolarR3_SUV_Pose20,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose21
+            {
+                anim = VLSSolarR3_SUV_Pose21,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose22
+            {
+                anim = VLSSolarR3_SUV_Pose22,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose23
+            {
+                anim = VLSSolarR3_SUV_Pose23,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose24
+            {
+                anim = VLSSolarR3_SUV_Pose24,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+        }
+        part VLSSolarR3Left
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Left
+            {
+                file = VLSSolarR3_SUV_Left,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3Right
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Right
+            {
+                file = VLSSolarR3_SUV_Right,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleLeft
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleLeft
+            {
+                file = VLSSolarR3_SUV_MiddleLeft,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleRight
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleRight
+            {
+                file = VLSSolarR3_SUV_MiddleRight,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+    }
+    model VLSSolarR3_PickUpVan_Fixed
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_Fixed,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_PickUpVan_Driver
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_Driver,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = vehicle,
+        static = false,
+        attachment SolarLeft
+        {
+            bone = SolarLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarRight
+        {
+            bone = SolarRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleLeft
+        {
+            bone = SolarMiddleLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleRight
+        {
+            bone = SolarMiddleRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+    }
+    model VLSSolarR3_PickUpVan_Left
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_Left,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_PickUpVan_Right
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_Right,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_PickUpVan_MiddleLeft
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_MiddleLeft,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_PickUpVan_MiddleRight
+    {
+        mesh = VLSSolarVisualR3/PickUpVan_MiddleRight,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    template vehicle VLSSolarR1_PickUpVan
+    {
+        part VLSFixedRoofRack
+        {
+            model VLSSolarR1Case
+            {
+                file = VLSSolarR3_PickUpVan_Fixed,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+        }
+        part VLSSolarR3Driver
+        {
+            category = nodisplay,
+            model VLSSolarR3Driver
+            {
+                file = VLSSolarR3_PickUpVan_Driver,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+            anim Pose0
+            {
+                anim = VLSSolarR3_PickUpVan_Pose0,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose1
+            {
+                anim = VLSSolarR3_PickUpVan_Pose1,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose2
+            {
+                anim = VLSSolarR3_PickUpVan_Pose2,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose3
+            {
+                anim = VLSSolarR3_PickUpVan_Pose3,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose4
+            {
+                anim = VLSSolarR3_PickUpVan_Pose4,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose5
+            {
+                anim = VLSSolarR3_PickUpVan_Pose5,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose6
+            {
+                anim = VLSSolarR3_PickUpVan_Pose6,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose7
+            {
+                anim = VLSSolarR3_PickUpVan_Pose7,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose8
+            {
+                anim = VLSSolarR3_PickUpVan_Pose8,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose9
+            {
+                anim = VLSSolarR3_PickUpVan_Pose9,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose10
+            {
+                anim = VLSSolarR3_PickUpVan_Pose10,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose11
+            {
+                anim = VLSSolarR3_PickUpVan_Pose11,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose12
+            {
+                anim = VLSSolarR3_PickUpVan_Pose12,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose13
+            {
+                anim = VLSSolarR3_PickUpVan_Pose13,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose14
+            {
+                anim = VLSSolarR3_PickUpVan_Pose14,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose15
+            {
+                anim = VLSSolarR3_PickUpVan_Pose15,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose16
+            {
+                anim = VLSSolarR3_PickUpVan_Pose16,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose17
+            {
+                anim = VLSSolarR3_PickUpVan_Pose17,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose18
+            {
+                anim = VLSSolarR3_PickUpVan_Pose18,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose19
+            {
+                anim = VLSSolarR3_PickUpVan_Pose19,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose20
+            {
+                anim = VLSSolarR3_PickUpVan_Pose20,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose21
+            {
+                anim = VLSSolarR3_PickUpVan_Pose21,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose22
+            {
+                anim = VLSSolarR3_PickUpVan_Pose22,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose23
+            {
+                anim = VLSSolarR3_PickUpVan_Pose23,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose24
+            {
+                anim = VLSSolarR3_PickUpVan_Pose24,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+        }
+        part VLSSolarR3Left
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Left
+            {
+                file = VLSSolarR3_PickUpVan_Left,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3Right
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Right
+            {
+                file = VLSSolarR3_PickUpVan_Right,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleLeft
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleLeft
+            {
+                file = VLSSolarR3_PickUpVan_MiddleLeft,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleRight
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleRight
+            {
+                file = VLSSolarR3_PickUpVan_MiddleRight,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+    }
+    model VLSSolarR3_StepVan_Fixed
+    {
+        mesh = VLSSolarVisualR3/StepVan_Fixed,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_StepVan_Driver
+    {
+        mesh = VLSSolarVisualR3/StepVan_Driver,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = vehicle,
+        static = false,
+        attachment SolarLeft
+        {
+            bone = SolarLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarRight
+        {
+            bone = SolarRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleLeft
+        {
+            bone = SolarMiddleLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleRight
+        {
+            bone = SolarMiddleRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+    }
+    model VLSSolarR3_StepVan_Left
+    {
+        mesh = VLSSolarVisualR3/StepVan_Left,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_StepVan_Right
+    {
+        mesh = VLSSolarVisualR3/StepVan_Right,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_StepVan_MiddleLeft
+    {
+        mesh = VLSSolarVisualR3/StepVan_MiddleLeft,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_StepVan_MiddleRight
+    {
+        mesh = VLSSolarVisualR3/StepVan_MiddleRight,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    template vehicle VLSSolarR1_StepVan
+    {
+        part VLSFixedRoofRack
+        {
+            model VLSSolarR1Case
+            {
+                file = VLSSolarR3_StepVan_Fixed,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+        }
+        part VLSSolarR3Driver
+        {
+            category = nodisplay,
+            model VLSSolarR3Driver
+            {
+                file = VLSSolarR3_StepVan_Driver,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+            anim Pose0
+            {
+                anim = VLSSolarR3_StepVan_Pose0,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose1
+            {
+                anim = VLSSolarR3_StepVan_Pose1,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose2
+            {
+                anim = VLSSolarR3_StepVan_Pose2,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose3
+            {
+                anim = VLSSolarR3_StepVan_Pose3,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose4
+            {
+                anim = VLSSolarR3_StepVan_Pose4,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose5
+            {
+                anim = VLSSolarR3_StepVan_Pose5,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose6
+            {
+                anim = VLSSolarR3_StepVan_Pose6,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose7
+            {
+                anim = VLSSolarR3_StepVan_Pose7,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose8
+            {
+                anim = VLSSolarR3_StepVan_Pose8,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose9
+            {
+                anim = VLSSolarR3_StepVan_Pose9,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose10
+            {
+                anim = VLSSolarR3_StepVan_Pose10,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose11
+            {
+                anim = VLSSolarR3_StepVan_Pose11,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose12
+            {
+                anim = VLSSolarR3_StepVan_Pose12,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose13
+            {
+                anim = VLSSolarR3_StepVan_Pose13,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose14
+            {
+                anim = VLSSolarR3_StepVan_Pose14,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose15
+            {
+                anim = VLSSolarR3_StepVan_Pose15,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose16
+            {
+                anim = VLSSolarR3_StepVan_Pose16,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose17
+            {
+                anim = VLSSolarR3_StepVan_Pose17,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose18
+            {
+                anim = VLSSolarR3_StepVan_Pose18,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose19
+            {
+                anim = VLSSolarR3_StepVan_Pose19,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose20
+            {
+                anim = VLSSolarR3_StepVan_Pose20,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose21
+            {
+                anim = VLSSolarR3_StepVan_Pose21,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose22
+            {
+                anim = VLSSolarR3_StepVan_Pose22,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose23
+            {
+                anim = VLSSolarR3_StepVan_Pose23,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose24
+            {
+                anim = VLSSolarR3_StepVan_Pose24,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+        }
+        part VLSSolarR3Left
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Left
+            {
+                file = VLSSolarR3_StepVan_Left,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3Right
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Right
+            {
+                file = VLSSolarR3_StepVan_Right,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleLeft
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleLeft
+            {
+                file = VLSSolarR3_StepVan_MiddleLeft,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleRight
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleRight
+            {
+                file = VLSSolarR3_StepVan_MiddleRight,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+    }
+    model VLSSolarR3_Van_Fixed
+    {
+        mesh = VLSSolarVisualR3/Van_Fixed,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_Van_Driver
+    {
+        mesh = VLSSolarVisualR3/Van_Driver,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = vehicle,
+        static = false,
+        attachment SolarLeft
+        {
+            bone = SolarLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarRight
+        {
+            bone = SolarRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleLeft
+        {
+            bone = SolarMiddleLeft,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+        attachment SolarMiddleRight
+        {
+            bone = SolarMiddleRight,
+            offset = 0 0 0,
+            rotate = 0 0 0,
+        }
+    }
+    model VLSSolarR3_Van_Left
+    {
+        mesh = VLSSolarVisualR3/Van_Left,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_Van_Right
+    {
+        mesh = VLSSolarVisualR3/Van_Right,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_Van_MiddleLeft
+    {
+        mesh = VLSSolarVisualR3/Van_MiddleLeft,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    model VLSSolarR3_Van_MiddleRight
+    {
+        mesh = VLSSolarVisualR3/Van_MiddleRight,
+        texture = VLSSolarVisualR1/Atlas,
+        scale = 1.0,
+        shader = basicEffect,
+        static = true,
+    }
+    template vehicle VLSSolarR1_Van
+    {
+        part VLSFixedRoofRack
+        {
+            model VLSSolarR1Case
+            {
+                file = VLSSolarR3_Van_Fixed,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+        }
+        part VLSSolarR3Driver
+        {
+            category = nodisplay,
+            model VLSSolarR3Driver
+            {
+                file = VLSSolarR3_Van_Driver,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+            anim Pose0
+            {
+                anim = VLSSolarR3_Van_Pose0,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose1
+            {
+                anim = VLSSolarR3_Van_Pose1,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose2
+            {
+                anim = VLSSolarR3_Van_Pose2,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose3
+            {
+                anim = VLSSolarR3_Van_Pose3,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose4
+            {
+                anim = VLSSolarR3_Van_Pose4,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose5
+            {
+                anim = VLSSolarR3_Van_Pose5,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose6
+            {
+                anim = VLSSolarR3_Van_Pose6,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose7
+            {
+                anim = VLSSolarR3_Van_Pose7,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose8
+            {
+                anim = VLSSolarR3_Van_Pose8,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose9
+            {
+                anim = VLSSolarR3_Van_Pose9,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose10
+            {
+                anim = VLSSolarR3_Van_Pose10,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose11
+            {
+                anim = VLSSolarR3_Van_Pose11,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose12
+            {
+                anim = VLSSolarR3_Van_Pose12,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose13
+            {
+                anim = VLSSolarR3_Van_Pose13,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose14
+            {
+                anim = VLSSolarR3_Van_Pose14,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose15
+            {
+                anim = VLSSolarR3_Van_Pose15,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose16
+            {
+                anim = VLSSolarR3_Van_Pose16,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose17
+            {
+                anim = VLSSolarR3_Van_Pose17,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose18
+            {
+                anim = VLSSolarR3_Van_Pose18,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose19
+            {
+                anim = VLSSolarR3_Van_Pose19,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose20
+            {
+                anim = VLSSolarR3_Van_Pose20,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose21
+            {
+                anim = VLSSolarR3_Van_Pose21,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose22
+            {
+                anim = VLSSolarR3_Van_Pose22,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose23
+            {
+                anim = VLSSolarR3_Van_Pose23,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+            anim Pose24
+            {
+                anim = VLSSolarR3_Van_Pose24,
+                animate = false,
+                loop = false,
+                reverse = false,
+                rate = 1.0,
+            }
+        }
+        part VLSSolarR3Left
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Left
+            {
+                file = VLSSolarR3_Van_Left,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3Right
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3Right
+            {
+                file = VLSSolarR3_Van_Right,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleLeft
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleLeft
+            {
+                file = VLSSolarR3_Van_MiddleLeft,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleLeft,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+        part VLSSolarR3MiddleRight
+        {
+            category = nodisplay,
+            parent = VLSSolarR3Driver,
+            model VLSSolarR3MiddleRight
+            {
+                file = VLSSolarR3_Van_MiddleRight,
+                offset = 0 0 0,
+                rotate = 0 0 0,
+                scale = 1.0,
+                attachmentParent = SolarMiddleRight,
+            }
+            lua
+            {
+                init = VLS.SolarVisualR1.InitVisual,
+            }
+        }
+    }
+    vehicle PickUpVan
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanBrickingIt
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanBuilder
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanCallowayLandscaping
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanHeltonMetalWorking
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanKimbleKonstruction
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanMarchRidgeConstruction
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanMccoy
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanMetalworker
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanWeldingbyCamille
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVanYingsWood
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle PickUpVan_Camo
+    {
+        template! = VLSSolarR1_PickUpVan,
+    }
+    vehicle SUV
+    {
+        template! = VLSSolarR1_SUV,
+    }
+    vehicle StepVan
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVanAirportCatering
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVanMail
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Blacksmith
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Butchers
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Cereal
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Citr8
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_CompleteRepairShop
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Florist
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Genuine_Beer
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Glass
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Heralds
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_HuangsLaundry
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Jorgensen
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_LouisvilleMotorShop
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_LouisvilleSWAT
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_MarineBites
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Masonry
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Mechanic
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_MobileLibrary
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Plonkies
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Propane
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_RandisPlants
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Scarlet
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_SmartKut
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_SouthEasternHosp
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_SouthEasternPaint
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_USL
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle StepVan_Zippee
+    {
+        template! = VLSSolarR1_StepVan,
+    }
+    vehicle Van
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanBeckmans
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanBrewsterHarbin
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanBuilder
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanCarpenter
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanCoastToCoast
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanDeerValley
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanFossoil
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanGardenGods
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanGardener
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanGreenes
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanJohnMcCoy
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanJonesFabrication
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanKerrHomes
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanKnobCreekGas
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanKnoxCom
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanKorshunovs
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanLouisvilleLandscaping
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMail
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMccoy
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMechanic
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMeltingPointMetal
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMetalheads
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMetalworker
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMicheles
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMobileMechanics
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanMooreMechanics
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanOldMill
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanOvoFarm
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanPennSHam
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanPlattAuto
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanPluggedInElectrics
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanRiversideFabrication
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanRosewoodworking
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSchwabSheetMetal
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeatsAirportShuttle
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Creature
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_LadyDelighter
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Mural
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Prison
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Space
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Trippy
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSeats_Valkyrie
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanSpiffo
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanTreyBaines
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanUncloggers
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanUtility
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle VanWPCarpentry
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Blacksmith
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_BugWipers
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Charlemange_Beer
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_CraftSupplies
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Glass
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_HeritageTailors
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_KnoxDisti
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Leather
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_LectroMax
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Locksmith
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Masonry
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_MassGenFac
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Perfick_Potato
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_Transit
+    {
+        template! = VLSSolarR1_Van,
+    }
+    vehicle Van_VoltMojo
+    {
+        template! = VLSSolarR1_Van,
+    }
+}

@@ -68,5 +68,6 @@
   "IGUI_VehiclePartVLSOverhead3": "Top Space",
   "IGUI_VehiclePartVLSTopFrame1": "Top Frame",
   "IGUI_VehiclePartVLSTopFrame2": "Top Frame",
-  "IGUI_VehiclePartVLSTopFrame3": "Top Frame"
+  "IGUI_VehiclePartVLSTopFrame3": "Top Frame",
+  "IGUI_VehiclePartVLSSolarPanel": "Solar Panel"
 }

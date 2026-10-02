@@ -132,3 +132,8 @@ option VehicleLivingSlots.EnableRoofPropaneShortcut = {
     translation = VehicleLivingSlots_EnableRoofPropaneShortcut,
 }
 
+option VehicleLivingSlots.EnableSolarPanel = {
+    type = boolean, default = true,
+    page = VehicleLivingSlots,
+    translation = VehicleLivingSlots_EnableSolarPanel,
+}

@@ -33,7 +33,7 @@ module Base
         mesh = VLS/RackBody,
         texture = WorldItems/MetalBar_FullHalfQrt_Steel,
         scale = 1.0,
-        shader = VLSRoofBlackSteel,
+        shader = VLSRoofRackDetailR4,
         static = true,
     }
     model VLSRoofToolCabinetModel
