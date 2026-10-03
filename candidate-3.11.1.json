@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "status": "source-candidate-not-deployed",
+  "published_manifest": "release-core-3.11.json",
+  "published_manifest_sha256": "566df3938432493a242bc7b7e835482cea66d5272a42c5d5703b8e0b8378866c",
+  "published_runtime_sha256": "528a0a425df844cd7d67d3e1cc672c973cb3ea2a62b75c08c1a26f7943251098",
+  "addon_manifest": "release-f700-3.11.1.json",
+  "addon_runtime_sha256": "486aa6fa44fffe18c548e4018f31a7fc1be27583c6d03db0b2414d175cd9b1d7",
+  "core_overrides": {
+    "VehicleLivingSlots/42.20/mod.info": {
+      "before": "64db6222b6f5ce0aa2ae9507a777727b36f767e81aee071d627db806d5caa88e",
+      "after": "75ae4879b20a36299f8debc338f99749dee8406b0ddd0d81479aa7622328b48b"
+    },
+    "VehicleLivingSlots/common/media/lua/client/VLS_Client.lua": {
+      "before": "f691b96f76aeef7d294788928bc9c9c63a28f396156e146bb48469504d90d471",
+      "after": "c62472464e34e19165d528c501b40843f7a19a3ef3287fa106d0369f981ec5f9"
+    },
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua": {
+      "before": "cb7c20127cf1bc0db300098f412e7fd1e7eb7a948099cfa0ff38f9b00477fa6d",
+      "after": "64d33c389e9f3858ab2cc6632a51a2e51e8f5f8419e68f83558825572f6063e6"
+    },
+    "VehicleLivingSlots/mod.info": {
+      "before": "64db6222b6f5ce0aa2ae9507a777727b36f767e81aee071d627db806d5caa88e",
+      "after": "75ae4879b20a36299f8debc338f99749dee8406b0ddd0d81479aa7622328b48b"
+    }
+  },
+  "adapter_overrides": {
+    "VehicleLivingSlotsKI5Campers/42.20/mod.info": {
+      "before": "a9834bcde9c1abd66e8af37e99daf6da46f5d42aa858ed2bf63461fd25aa562b",
+      "after": "688345ec795fcb5ad1cdcb606f7ba3c30ae062424d1d5657400d209c2540ada5"
+    },
+    "VehicleLivingSlotsKI5Campers/common/media/lua/shared/VLS_KI5Campers_Config.lua": {
+      "before": "242f47c1fc9b9134006bc7ab399f5d6ff358d32aa0bf624d770bce5dd5145460",
+      "after": "08b9100444ee57454e64ce5d67516afb4ab31aaf2fa97c9acab2e289b5dd68b5"
+    },
+    "VehicleLivingSlotsKI5Campers/mod.info": {
+      "before": "e29576bb07bd1d78c7adaf8b38491a2558ee3562bf5b271ff23b0f91304c787a",
+      "after": "080c97f58b4f96799ed28d13c3985e45adae5dd9e3fb0a767034a69223e9c92e"
+    }
+  },
+  "file_count": 308,
+  "runtime_sha256": "984a4cb08374b2cc74837a6a526fb486b88160de9ba58339de4b97982e11686d"
+}

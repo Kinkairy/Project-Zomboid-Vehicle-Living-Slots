@@ -2182,6 +2182,17 @@ if not VLS.clientHooksApplied then
     local vanillaMoveItemsFromSeat = ISVehicleMenu.moveItemsFromSeat
     local vanillaTransferSeatItems = ISVehicleMenu.transferSeatItems
     ISVehicleMenu.moveItemsFromSeat = function(playerObj, vehicle, seat, moveThem, doEnter)
+        -- A Camper appliance is displayed in a passenger-linked slot, but it
+        -- cannot be entered as a seat. Avoid native inventory relocation
+        -- planning for these UI-only queries; real seats and actions delegate.
+        if moveThem == false and doEnter == false then
+            local profile = VLS.getVehicleProfile(vehicle)
+            if profile and profile.kind == "ki5Camper"
+                    and VLS.getSpaceAssignmentForSeat(vehicle, seat)
+                    and not VLS.getInstalledBedPartForSeat(vehicle, seat) then
+                return false
+            end
+        end
         if not SeatR6.applies(vehicle) then
             return vanillaMoveItemsFromSeat(playerObj, vehicle, seat, moveThem, doEnter)
         end

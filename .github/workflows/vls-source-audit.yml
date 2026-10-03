@@ -19,7 +19,7 @@ jobs:
           find workshop/Contents/mods -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
           python3 tools/build_translations.py
           python3 tests/test_runtime_manifest.py
-          python3 tools/check_runtime_manifest.py --candidate candidate-3.11.json --core-manifest-output "$RUNNER_TEMP/vls-candidate-core.json"
+          python3 tools/check_runtime_manifest.py --candidate candidate-3.11.1.json --core-manifest-output "$RUNNER_TEMP/vls-candidate-core.json"
       - name: Source-only regression suites
         run: |
           export LUA_PATH="$PWD/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/?.lua;$PWD/workshop/Contents/mods/VehicleLivingSlotsKI5F700/common/media/lua/shared/?.lua;;"
@@ -32,7 +32,7 @@ jobs:
           lua5.1 tests/test_vls_f700_independent.lua . f700-first
           lua5.1 tests/test_vls_f700_independent.lua . campers-first
           lua5.1 tests/test_vls_f700_frames.lua .
-          python3 tests/test_vls_f700_scripts.py --candidate candidate-3.11.json --base-manifest "$RUNNER_TEMP/vls-candidate-core.json"
+          python3 tests/test_vls_f700_scripts.py --candidate candidate-3.11.1.json --base-manifest "$RUNNER_TEMP/vls-candidate-core.json"
       - name: Native cargo callback contract regression
         run: |
           python3 - <<'PY'

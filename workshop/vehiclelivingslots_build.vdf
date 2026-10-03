@@ -130,5 +130,5 @@ Supports B42.20 single-player, multiplayer and dedicated servers.
 [b]Workshop ID:[/b] 3791192579
 [b]Mod ID:[/b] VehicleLivingSlots"
   "visibility" "0"
-  "changenote" "3.11: Added deployable rooftop solar panels with auxiliary-battery charging, direct-material installation and a sandbox switch; panels retract on vehicle movement. Improved roof-rack lighting and fixed native mechanics tool detection, multiplayer action arguments and mechanics-cheat compatibility. / 3.11：新增可展开的车顶太阳能板，为车辆辅助电池充电，支持直接使用材料安装及沙盒开关，车辆移动时自动收回；改善行李架受光，修复原版维修工具识别、多人动作参数及机械作弊兼容。"
+  "changenote" "修复性能问题"
 }

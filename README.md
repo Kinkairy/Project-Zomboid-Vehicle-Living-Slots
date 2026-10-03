@@ -1,4 +1,4 @@
-# Mobile Living 3.11
+# Mobile Living 3.11.1
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.

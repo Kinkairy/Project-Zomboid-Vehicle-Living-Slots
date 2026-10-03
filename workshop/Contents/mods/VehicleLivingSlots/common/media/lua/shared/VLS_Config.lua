@@ -5,8 +5,8 @@ require "TimedActions/ISDeviceBatteryAction"
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.11"
-VLS.BUILD_ID = "release-3.11"
+VLS.VERSION = "3.11.1"
+VLS.BUILD_ID = "release-3.11.1"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.OVERHEAD_CATEGORY_ID = VLS.CATEGORY_ID
 VLS.TOP_FRAME_PART_IDS = {"VLSTopFrame1", "VLSTopFrame2", "VLSTopFrame3"}
