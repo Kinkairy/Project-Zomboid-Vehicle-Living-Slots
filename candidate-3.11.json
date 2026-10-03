@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "source-candidate-not-deployed",
+  "published_manifest": "release-core-3.11.json",
+  "published_manifest_sha256": "566df3938432493a242bc7b7e835482cea66d5272a42c5d5703b8e0b8378866c",
+  "published_runtime_sha256": "528a0a425df844cd7d67d3e1cc672c973cb3ea2a62b75c08c1a26f7943251098",
+  "addon_manifest": "release-f700-3.11.json",
+  "addon_runtime_sha256": "eacb3edb26162391c99173b9b797dc5657e240ce578b09d55f21d9f38123a949",
+  "core_overrides": {
+    "VehicleLivingSlots/common/media/lua/shared/VLS_Config.lua": {
+      "before": "cb7c20127cf1bc0db300098f412e7fd1e7eb7a948099cfa0ff38f9b00477fa6d",
+      "after": "c96483ed91b9fa88242f07113a110375348bcddb60842a1faff876df7bd80a89"
+    }
+  },
+  "adapter_overrides": {
+    "VehicleLivingSlotsKI5Campers/common/media/lua/shared/VLS_KI5Campers_Config.lua": {
+      "before": "242f47c1fc9b9134006bc7ab399f5d6ff358d32aa0bf624d770bce5dd5145460",
+      "after": "6710509fcb00e99955bd1851e0d9097e24e45da786d2d99cc34c57d84752e901"
+    }
+  },
+  "file_count": 308,
+  "runtime_sha256": "fe9d740df0e7a24e3419065b5fd39855bb9008fa59d87e6cfe24fae74413d231"
+}
