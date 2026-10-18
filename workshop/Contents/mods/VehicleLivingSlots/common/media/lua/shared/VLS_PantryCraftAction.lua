@@ -1,5 +1,6 @@
 local P = require "VLS_Pantry"
 local VLS = require "VLS_Config"
+local NativeContext = require "VLS_NativeContext"
 require "Entity/TimedActions/ISHandcraftAction"
 
 VLSPantryCraftAction = ISHandcraftAction:derive("VLSPantryCraftAction")
@@ -12,9 +13,10 @@ end
 function VLSPantryCraftAction:resolve()
     local choice = P.choices[self.choice]
     if self.finished or not choice or not integer(self.vehicleId)
-            or not integer(self.applianceId) then return nil end
+            or not integer(self.applianceId) or not integer(self.installationEpoch)
+            or self.installationEpoch < 0 then return nil end
     local vehicle = getVehicleById(self.vehicleId)
-    if not P.slots[self.partId] or P.reason(self.character, vehicle, self.partId, self.applianceId) then return nil end
+    if not P.slots[self.partId] or P.reason(self.character, vehicle, self.partId, self.applianceId, self.installationEpoch) then return nil end
     local item = vehicle:getPartById(self.partId):getInventoryItem()
     if P.resolveType(item) ~= choice.itemType then return nil end
     return vehicle
@@ -139,11 +141,21 @@ function VLSPantryCraftAction:performRecipe()
     return result
 end
 
+function VLSPantryCraftAction:stop()
+    self.finished = true
+    return ISHandcraftAction.stop(self)
+end
+
+function VLSPantryCraftAction:forceCancel()
+    self.finished = true
+    if ISHandcraftAction.forceCancel then return ISHandcraftAction.forceCancel(self) end
+end
+
 -- Only native constructor arguments are serialized, not arbitrary action fields.
 -- Preserve vehicle authority explicitly while the original action owns crafting.
 local nativeNew = ISHandcraftAction.new
 function VLSPantryCraftAction:new(character, vehicleId, partId, applianceId, choice,
-        manualInputs, items, recipeItem)
+        manualInputs, items, recipeItem, installationEpoch)
     local craftRecipe = P.recipe(choice)
     local o
     if craftRecipe then
@@ -155,6 +167,8 @@ function VLSPantryCraftAction:new(character, vehicleId, partId, applianceId, cho
         o.maxTime = 0
     end
     o.vehicleId, o.partId, o.applianceId, o.choice = vehicleId, partId, applianceId, choice
+    o.installationEpoch = NativeContext.creationEpoch(getVehicleById(vehicleId),
+        partId, applianceId, installationEpoch)
     -- Java conversion requires a table; nil/false mean native automatic inputs.
     -- Preserve the converted table from nativeNew only for actual manual inputs.
     if not manualInputs or not craftRecipe then o.manualInputs = nil end

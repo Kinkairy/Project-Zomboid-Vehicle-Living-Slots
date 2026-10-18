@@ -25,15 +25,18 @@ end
 test("unrelated trailer furniture rejected",function()
  assert(V.resolveEquipmentType(item("Moveables.Furniture","location_trailer_02_18"))~="Base.Mov_TrailerFridge")
 end)
-test("all existing mini-fridge slot whitelists include trailer fridge",function()
+-- Owner rule 2026-10-17: both small fridges are top-space equipment.
+test("mini fridge and trailer fridge share every top-space whitelist",function()
  for _,rel in ipairs({"VehicleLivingSlots/common/media/scripts/VLS_VanPatch.txt","VehicleLivingSlots/common/media/scripts/VLS_StepVanWaterPatch.txt","VehicleLivingSlotsKI5Campers/common/media/scripts/VLS_KI5CampersPatch.txt"})do
   local f=assert(io.open(root.."/workshop/Contents/mods/"..rel));local s=f:read("*a");f:close()
-  local seen=0
-  for line in s:gmatch("[^\n]+")do
-   if line:find("itemType",1,true) and line:find("Base.Mov_FridgeMini;",1,true)then assert(line:find("Base.Mov_TrailerFridge;",1,true));seen=seen+1 end
-  end
-  assert(seen>0)
+  assert(not s:find("Base.Mov_FridgeMini;",1,true) and not s:find("Base.Mov_TrailerFridge;",1,true),rel)
  end
+ local f=assert(io.open(root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/scripts/VLS_ZTopSpaceVehicles.txt"));local s=f:read("*a");f:close()
+ local seen=0
+ for line in s:gmatch("[^\n]+")do
+  if line:find("itemType",1,true) and line:find("Base.Mov_FridgeMini;",1,true)then assert(line:find("Base.Mov_TrailerFridge;",1,true));seen=seen+1 end
+ end
+ assert(seen>0)
 end)
 test("universal slot accepts trailer fridge but weapon slot does not",function()
  local v={getScriptName=function()return "Base.StepVan"end}

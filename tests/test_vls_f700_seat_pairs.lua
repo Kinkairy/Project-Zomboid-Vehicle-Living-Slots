@@ -114,7 +114,8 @@ local pair=profile.seatPairs[1];local seat,space=v.parts[pair.seat],v.parts[pair
 local function remove(part)check(ISUninstallVehiclePart:new(chr,part,200):complete(),true)end
 local original=seat.item;remove(seat)
 -- Reject wrong native items at the final transaction boundary, including cheat mode.
-local wrong=T.item("Base.Mov_FridgeMini");inv.items[wrong]=true
+-- Living-space furniture (owner rule 2026-10-17 moved the mini fridge to the top space).
+local wrong=T.item("Base.Mov_BlueComboWasherDryer");inv.items[wrong]=true
 chr.isMechanicsCheat=function()return true end
 check(ISInstallVehiclePart:new(chr,seat,wrong,200):isValid(),false)
 check(ISInstallVehiclePart:new(chr,seat,wrong,200):complete(),false);check(inv.items[wrong],true)

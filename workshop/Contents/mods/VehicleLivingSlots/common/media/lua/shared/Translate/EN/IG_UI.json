@@ -69,5 +69,6 @@
   "IGUI_VehiclePartVLSTopFrame1": "Top Frame",
   "IGUI_VehiclePartVLSTopFrame2": "Top Frame",
   "IGUI_VehiclePartVLSTopFrame3": "Top Frame",
-  "IGUI_VehiclePartVLSSolarPanel": "Solar Panel"
+  "IGUI_VehiclePartVLSSolarPanel": "Solar Panel",
+  "IGUI_VLS_NoInstallableItem": "No installable item for this space"
 }

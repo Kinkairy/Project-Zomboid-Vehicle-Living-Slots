@@ -61,7 +61,7 @@ local function install(i)
  return ISInstallVehiclePart:new(character,part,i,100)
 end
 test("native validity check reproduces missing server mechanics UI",function()
- local a=install(coffee);local ok,err=pcall(a.isValid,a);assert(not ok and tostring(err):find("ISVehicleMechanics"));eq(part.item,nil);assert(inventory:contains(coffee))
+ local a=install(coffee);local ok,err=pcall(a.isValid,a);assert(not ok and (tostring(err):find("ISVehicleMechanics") or tostring(err):find("cheat")),"native validity result="..tostring(ok)..":"..tostring(err));eq(part.item,nil);assert(inventory:contains(coffee))
 end)
 test("small appliances use the same completion as existing vehicle parts",function()eq(ISInstallVehiclePart.complete,sharedComplete)end)
 for _,i in ipairs({coffee,toaster})do

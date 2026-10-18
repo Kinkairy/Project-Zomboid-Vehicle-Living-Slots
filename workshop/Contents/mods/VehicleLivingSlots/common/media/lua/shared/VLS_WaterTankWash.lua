@@ -1,4 +1,5 @@
 require "VLS_Config"
+local NativeContext = require "VLS_NativeContext"
 require "TimedActions/ISWashYourself"
 require "TimedActions/ISWashClothing"
 require "TimedActions/ISTakeWaterAction"
@@ -17,15 +18,17 @@ local function integer(value)
         and value==math.floor(value)
 end
 
-function W.resolve(character,vehicleId,partId,tankId,requirePosition)
+function W.resolve(character,vehicleId,partId,tankId,requirePosition,installationEpoch)
     if not VLS.isWaterTankShortcutEnabled() or not character or character:isDead() or character:getVehicle()
             or not integer(vehicleId) or not integer(tankId)
             or type(partId)~="string" or partId=="" then return nil end
     local vehicle=getVehicleById(vehicleId)
     if not vehicle or vehicle:isRemovedFromWorld() or not vehicle:isStopped()
             or not VLS.isSupportedVehicle(vehicle) then return nil end
+    local context=NativeContext.identity(vehicle,partId,tankId,installationEpoch)
+    if not context then return nil end
     local tank,part=VLS.getInstalledWaterTank(vehicle,partId)
-    if not tank or not part or part:getId()~=partId or tank:getID()~=tankId then return nil end
+    if tank~=context.item or part~=context.part then return nil end
     if requirePosition and not VLS.isPlayerAtWaterTankInlet(vehicle,part,character) then return nil end
     local fluid=tank:getFluidContainer()
     if not fluid or not VLS.isPureWaterFluid(fluid) or not fluid:canPlayerEmpty() then return nil end
@@ -64,7 +67,9 @@ local function refreshClothing(action)
 end
 
 local function resolveAction(action)
-    return W.resolve(action.character,action.vehicleId,action.partId,action.tankId,true)
+    if action.vlsCancelled or not integer(action.installationEpoch)
+            or action.installationEpoch < 0 then return nil end
+    return W.resolve(action.character,action.vehicleId,action.partId,action.tankId,true,action.installationEpoch)
 end
 
 local function syncTank(vehicle,part,tank)
@@ -81,7 +86,7 @@ local function sinkFor(action,budget)
     local sink={used=0}
     function sink:getFluidAmount()
         if budget then return budget end
-        local _,_,_,fluid=W.resolve(action.character,action.vehicleId,action.partId,action.tankId,false)
+        local _,_,_,fluid=W.resolve(action.character,action.vehicleId,action.partId,action.tankId,false,action.installationEpoch)
         return fluid and math.max(0,math.floor(fluid:getAmount())) or 0
     end
     function sink:useFluid(amount)
@@ -168,9 +173,10 @@ end
 function VLSWashYourselfFromTank:complete()
     return completeWash(self,ISWashYourself.complete,true)
 end
-function VLSWashYourselfFromTank:new(character,vehicleId,partId,tankId)
+function VLSWashYourselfFromTank:new(character,vehicleId,partId,tankId,installationEpoch)
     local o=ISBaseTimedAction.new(self,character)
     o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId
+    o.installationEpoch=NativeContext.creationEpoch(getVehicleById(vehicleId),partId,tankId,installationEpoch)
     o.forceProgressBar=true
     o.maxTime=o:getDuration()
     return o
@@ -193,9 +199,10 @@ end
 function VLSWashClothingFromTank:complete()
     return completeWash(self,ISWashClothing.complete,false)
 end
-function VLSWashClothingFromTank:new(character,vehicleId,partId,tankId,item)
+function VLSWashClothingFromTank:new(character,vehicleId,partId,tankId,item,installationEpoch)
     local o=ISBaseTimedAction.new(self,character)
-    o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId;o.item=item
+    o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId
+    o.installationEpoch=NativeContext.creationEpoch(getVehicleById(vehicleId),partId,tankId,installationEpoch);o.item=item
     o.sink=sinkFor(o)
     o.forceProgressBar=true
     o.maxTime=o:getDuration()
@@ -253,7 +260,7 @@ function VLSTakeWaterFromTank:start()
 end
 
 function VLSTakeWaterFromTank:transferFluid(amount)
-    if isClient() or not amount or amount<=0 then return end
+    if self.vlsFinished or isClient() or not amount or amount<=0 then return end
     local vehicle,part,tank,fluid=resolveAction(self)
     if not vehicle then return end
     local moved=0
@@ -281,15 +288,25 @@ end
 VLSTakeWaterFromTank.stopSound=ISTakeWaterAction.stopSound
 VLSTakeWaterFromTank.stop=ISTakeWaterAction.stop
 VLSTakeWaterFromTank.perform=ISTakeWaterAction.perform
-VLSTakeWaterFromTank.complete=ISTakeWaterAction.complete
+function VLSTakeWaterFromTank:complete()
+    if self.vlsFinished or self.vlsCompleting or not resolveAction(self) then return false end
+    self.vlsCompleting=true
+    local ok,result=pcall(ISTakeWaterAction.complete,self)
+    self.vlsCompleting=false
+    self.vlsFinished=true
+    if not ok then error(result,0) end
+    return result
+end
 VLSTakeWaterFromTank.serverStart=ISTakeWaterAction.serverStart
 VLSTakeWaterFromTank.animEvent=ISTakeWaterAction.animEvent
 VLSTakeWaterFromTank.getDuration=ISTakeWaterAction.getDuration
-function VLSTakeWaterFromTank:new(character,vehicleId,partId,tankId,item)
-    local vehicle,_,_,fluid=W.resolve(character,vehicleId,partId,tankId,true)
+function VLSTakeWaterFromTank:new(character,vehicleId,partId,tankId,item,installationEpoch)
+    installationEpoch=NativeContext.creationEpoch(getVehicleById(vehicleId),partId,tankId,installationEpoch)
+    local vehicle,_,_,fluid=W.resolve(character,vehicleId,partId,tankId,true,installationEpoch)
     local o=nativeTakeWaterNew(self,character,item,waterEndpoint(fluid),
         fluid~=nil and fluid:contains(Fluid.TaintedWater) or false)
     o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId
+    o.installationEpoch=NativeContext.creationEpoch(getVehicleById(vehicleId),partId,tankId,installationEpoch)
     o.waterObject=vehicle
     return o
 end
@@ -333,12 +350,28 @@ function VLSCleanBandageFromTank:complete()
     end
     return result==true
 end
-function VLSCleanBandageFromTank:new(character,vehicleId,partId,tankId,item,recipe)
+function VLSCleanBandageFromTank:new(character,vehicleId,partId,tankId,item,recipe,installationEpoch)
     local o=ISBaseTimedAction.new(self,character)
     o.vehicleId=vehicleId;o.partId=partId;o.tankId=tankId
+    o.installationEpoch=NativeContext.creationEpoch(getVehicleById(vehicleId),partId,tankId,installationEpoch)
     o.item=item;o.result=recipe:getResult():getType();o.recipe=recipe
     o.maxTime=o:getDuration()
     return o
 end
+
+local function cancellation(adapter,native)
+    function adapter:stop()
+        self.vlsCancelled=true
+        return native.stop(self)
+    end
+    function adapter:forceCancel()
+        self.vlsCancelled=true
+        if native.forceCancel then return native.forceCancel(self) end
+    end
+end
+cancellation(VLSWashYourselfFromTank,ISWashYourself)
+cancellation(VLSWashClothingFromTank,ISWashClothing)
+cancellation(VLSTakeWaterFromTank,ISTakeWaterAction)
+cancellation(VLSCleanBandageFromTank,ISCleanBandage)
 
 return W

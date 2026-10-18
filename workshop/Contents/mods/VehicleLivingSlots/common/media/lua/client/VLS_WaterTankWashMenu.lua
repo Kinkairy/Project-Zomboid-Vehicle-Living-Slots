@@ -57,7 +57,7 @@ local function makeProxy(character,vehicle,part,tank,fluid)
     container:setCanPlayerEmpty(true)
     container:copyFluidsFrom(fluid)
     GameEntityFactory.AddComponent(proxy,true,container)
-    W.menuProxies[proxy]={vehicle=vehicle:getId(),part=part:getId(),tank=tank:getID(),clean=not fluid:contains(Fluid.TaintedWater)}
+    W.menuProxies[proxy]={vehicle=vehicle:getId(),part=part:getId(),tank=tank:getID(),installationEpoch=part:getModData().vlsNativeEpoch or 0,clean=not fluid:contains(Fluid.TaintedWater)}
     return proxy
 end
 
@@ -71,25 +71,25 @@ local function installNativeConstructors()
     function ISTakeWaterAction:new(character, item, waterObject, waterTaintedCL)
         local info=proxyInfo(waterObject)
         if not info then return takeWaterNew(self,character,item,waterObject,waterTaintedCL) end
-        return VLSTakeWaterFromTank:new(character,info.vehicle,info.part,info.tank,item)
+        return VLSTakeWaterFromTank:new(character,info.vehicle,info.part,info.tank,item,info.installationEpoch)
     end
     local washYourselfNew=ISWashYourself.new
     function ISWashYourself:new(character, sink)
         local info=proxyInfo(sink)
         if not info then return washYourselfNew(self,character,sink) end
-        return VLSWashYourselfFromTank:new(character,info.vehicle,info.part,info.tank)
+        return VLSWashYourselfFromTank:new(character,info.vehicle,info.part,info.tank,info.installationEpoch)
     end
     local washClothingNew=ISWashClothing.new
     function ISWashClothing:new(character, sink, item, bloodAmount, dirtAmount, noSoap)
         local info=proxyInfo(sink)
         if not info then return washClothingNew(self,character,sink,item,bloodAmount,dirtAmount,noSoap) end
-        return VLSWashClothingFromTank:new(character,info.vehicle,info.part,info.tank,item)
+        return VLSWashClothingFromTank:new(character,info.vehicle,info.part,info.tank,item,info.installationEpoch)
     end
     local cleanBandageNew=ISCleanBandage.new
     function ISCleanBandage:new(character, item, waterObject, recipe)
         local info=proxyInfo(waterObject)
         if not info then return cleanBandageNew(self,character,item,waterObject,recipe) end
-        return VLSCleanBandageFromTank:new(character,info.vehicle,info.part,info.tank,item,recipe)
+        return VLSCleanBandageFromTank:new(character,info.vehicle,info.part,info.tank,item,recipe,info.installationEpoch)
     end
 end
 

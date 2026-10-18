@@ -1,4 +1,13 @@
-# Mobile Living 3.11.1
+# Mobile Living 3.12
+
+## 3.12 shared framework refactor
+
+Refactored the shared framework for installation, power, water supply and equipment checks; classified living and overhead spaces using vanilla furniture dimensions and expanded furniture and appliance support; fixed roof-light flicker and F700 fuel-can operations, and reduced roof-rack collision wear.
+
+Furniture installation now follows vanilla movability, dimensions and placement properties. Existing small appliances in living spaces remain usable; once removed, reinstall them according to the new overhead-space rules. See the [bilingual3.12 release notes](docs/release-3.12.md) and space lists in the Workshop description.
+
+Rear living-space zombie concealment is deferred as TODO. This release does not implement invisibility; the retained cabin file only removes marked curtain objects left by the withdrawn test.
+
 
 Vehicle living equipment for Project Zomboid **B42.20**, including multiplayer
 and dedicated servers. Workshop item: **3791192579**.

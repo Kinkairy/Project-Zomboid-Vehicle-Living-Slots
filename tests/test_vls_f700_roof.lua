@@ -41,12 +41,25 @@ for _,model in ipairs({"Base.87fordB700school","Base.87fordB700prison","Base.87f
     contains=function(_,kind)return kind==Fluid.Petrol end,canPlayerEmpty=function()return true end,
     adjustAmount=function(self,n)self.amount=n end}
    local it=item(identity,"Base.PetrolCan",fluid)
-   local part={getInventoryItem=function()return it end,getArea=function()return "Roofrack" end}
+   local part={md={},item=it,getId=function()return id end,getVehicle=function()return v end,
+     getInventoryItem=function(self)return self.item end,getArea=function()return "Roofrack" end,
+     getModData=function(self)return self.md end,getItemContainer=function()return nil end}
    v.parts[id]=part;return it,fluid,part
   end
   local a,fa,pa=add("DAMNGasCanOne",11,2.5);local b,fb,pb=add("DAMNGasCanTwo",12,7.25)
   eq(F.getPart(v,"VLSRoofPetrol1"),pa);eq(F.getPart(v,"VLSRoofPetrol2"),pb);eq(F.getPart(v,"VLSRoofPetrol3"),nil)
   local source=F.capture(v);near(source:getPipedFuelAmount(),9.75)
+   v.transmitPartModData=function()end
+   local policy=require("VLS_NativeInstallation").bind(V)
+   local original=pb.item
+   local before=assert(policy.captureIdentity(pb))
+   pb.item=nil;policy.finishIdentity(pb,before)
+   eq(pb.md.vlsNativeEpoch,1)
+   before=assert(policy.captureIdentity(pb)) -- empty native part must also be tracked
+   pb.item=original;policy.finishIdentity(pb,before)
+   eq(pb.md.vlsNativeEpoch,2)
+   near(source:getPipedFuelAmount(),2.5) -- same item after real observer transitions
+   source=F.capture(v);near(source:getPipedFuelAmount(),9.75)
   source:setPipedFuelAmount(5);near(fa.amount,0);near(fb.amount,5)
   source:setPipedFuelAmount(0);near(fa.amount+fb.amount,0)
   fa.amount=2;fb.amount=4;source=F.capture(v)

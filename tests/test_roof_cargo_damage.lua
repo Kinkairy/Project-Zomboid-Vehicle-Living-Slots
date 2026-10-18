@@ -97,9 +97,10 @@ for _,name in ipairs({'Base.StepVan','Base.Van','Base.VanSeats','Base.SUV','Base
     test(name..' rack takes greatest front/rear loss; contents retained',function()
         local v=newVehicle(name);local rack=v:add(R.fixedId);local original=rack.item
         D.Init(v);impact(v,12,8)
-        same(rack:getCondition(),91);same(rack.damageCalls,1)
+        -- 12 loss x 0.40 rack scale (owner request 2026-10-17; was 0.80 -> 91).
+        same(rack:getCondition(),96);same(rack.damageCalls,1)
         same(rack.item,original);same(#rack.item.contents,1);same(rack.removalCalls,0)
-        D.Update(v);same(rack:getCondition(),91)
+        D.Update(v);same(rack:getCondition(),96)
     end)
 end
 test('zero-condition rack stays installed and retains stored contents',function()
@@ -134,7 +135,8 @@ end)
 test('late installed rack starts after pending impact',function()
     local v=newVehicle();local p=v:add(R.fixedId);p.item=nil
     D.Init(v);p.item=makeItem();impact(v,20,0);same(p:getCondition(),100)
-    impact(v,10,0);same(p:getCondition(),92)
+    -- 10 loss x 0.40 rack scale (owner request 2026-10-17; was 92).
+    impact(v,10,0);same(p:getCondition(),96)
 end)
 test('source rebase prevents maintenance loss being forwarded',function()
     local v=newVehicle();local p=v:add(R.fixedId);D.Init(v)
@@ -194,7 +196,8 @@ test("one real impact is settled once across tick, rack and mechanics entries",f
     local action={vehiclePart=source,after=95}
     ISFixVehiclePartAction.complete(action);advanceArmor();D.Update(v);D.Update(v)
     same(source:getCondition(),95);same(armor:getCondition(),90)
-    same(rack:getCondition(),92);same(armor.damageCalls,1);same(rack.damageCalls,1)
+    -- 10 loss x 0.40 rack scale (owner request 2026-10-17; was 92).
+    same(rack:getCondition(),96);same(armor.damageCalls,1);same(rack.damageCalls,1)
 end)
 test("native maintenance exception still rebases damage before rethrow",function()
     local v,source,armor,rack=armorVehicle("EngineDoor","VLSBumperFront")

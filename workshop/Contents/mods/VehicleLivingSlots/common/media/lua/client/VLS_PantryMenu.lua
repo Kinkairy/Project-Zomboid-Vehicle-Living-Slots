@@ -36,7 +36,8 @@ local function uiSource(character, vehicle, partId)
     scriptInfo:setOriginalScript(script)
     GameEntityFactory.AddComponent(object, scriptInfo)
     local source = { object = object, bench = bench, vehicle = vehicle,
-        partId = partId, itemId = item:getID(), character = character }
+        partId = partId, itemId = item:getID(), character = character,
+        installationEpoch = vehicle:getPartById(partId):getModData().vlsNativeEpoch or 0 }
     P.uiSources[object] = source
     return source
 end
@@ -127,7 +128,7 @@ if not P.uiHooksApplied then
         local source = P.uiSources[self.isoObject]
         if not source then return nativeUpdate(self) end
         ISCollapsableWindow.update(self)
-        if P.reason(self.player, source.vehicle, source.partId, source.itemId) then
+        if P.reason(self.player, source.vehicle, source.partId, source.itemId, source.installationEpoch) then
             self:close()
             return false
         end
@@ -168,7 +169,7 @@ if not P.uiHooksApplied then
         local part = source.vehicle:getPartById(source.partId)
         local choice = P.choiceForRecipe(craftRecipe, source.partId, part and part:getInventoryItem())
         return VLSPantryCraftAction:new(character, source.vehicle:getId(), source.partId,
-            source.itemId, choice or "", manualInputs, items, recipeItem)
+            source.itemId, choice or "", manualInputs, items, recipeItem, source.installationEpoch)
     end
 end
 

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "version": "3.12",
+  "status": "released",
+  "published_manifest": "release-core-3.12.json",
+  "published_manifest_sha256": "60f85cc791b117feaf74b1e6c00fe203085fc2efef1dca5123ac440b168debca",
+  "published_runtime_sha256": "048c4ef65c66301c8739f406c80cb0ebb3a4155d869b88a19caac800a56c0638",
+  "addon_manifest": "release-f700-3.12.json",
+  "addon_runtime_sha256": "444aa6efdc21c678c63fab453b406426b55d9130fa609573eddd5007db5a8966",
+  "core_overrides": {},
+  "adapter_overrides": {},
+  "file_count": 317,
+  "runtime_sha256": "566634e4b9af6add973cae458e98d0d7fce3d6478e23ee601c8e293f7f490c27"
+}

@@ -22,24 +22,31 @@ for n = 0, 3 do
         eq(V.getEquipmentProfile(item).capacity, 20)
     end)
 end
-test("all living-space variants accept only the combo laundry machine", function()
+-- Owner request 2026-10-17: vanilla washers and dryers join the combo machine
+-- in the living space, all run by the one laundry executor.
+local washer, dryer = "Moveables.appliances_laundry_01_4", "Moveables.appliances_laundry_01_12"
+test("all living-space variants accept the combo, washer and dryer", function()
     for _, rel in ipairs({"VehicleLivingSlots/common/media/scripts/VLS_VanPatch.txt",
             "VehicleLivingSlots/common/media/scripts/VLS_StepVanWaterPatch.txt",
             "VehicleLivingSlotsKI5Campers/common/media/scripts/VLS_KI5CampersPatch.txt"}) do
         local f = assert(io.open(root .. "/workshop/Contents/mods/" .. rel))
         local source = f:read("*a"); f:close()
-        assert(not source:find("Moveables.appliances_laundry_01_",1,true))
         local seen = 0
         for line in source:gmatch("[^\n]+") do
-            if line:find("itemType",1,true) and line:find("Base.Mov_FridgeMini;",1,true) then
-                assert(line:find(combo .. ";",1,true)); seen=seen+1
+            if line:find("itemType",1,true) and line:find("Base.Mov_Cot;",1,true) then
+                assert(line:find(combo .. ";",1,true) and line:find(washer,1,true)
+                    and line:find(dryer,1,true), rel); seen=seen+1
             end
         end
         assert(seen>0)
     end
-    for _, n in ipairs({4,5,6,7,12,13,14,15}) do
-        eq(V.getEquipmentProfileByType("Moveables.appliances_laundry_01_"..n),nil)
-    end
+    local w, d = V.getEquipmentProfileByType(washer), V.getEquipmentProfileByType(dryer)
+    eq(w.capability, "laundryCombo"); eq(#w.laundryModes, 1); eq(w.laundryModes[1], "laundryWasher")
+    eq(d.capability, "laundryCombo"); eq(#d.laundryModes, 1); eq(d.laundryModes[1], "laundryDryer")
+    eq(w.capacity, 20); eq(w.containerType, "clothingwasher"); eq(d.containerType, "clothingdryer")
+    eq(w.containerOpenSound, V.getEquipmentProfileByType(combo).containerOpenSound)
+    for _, n in ipairs({5,6,7}) do eq(V.supportedMoveableSprites["appliances_laundry_01_"..n], washer) end
+    for _, n in ipairs({13,14,15}) do eq(V.supportedMoveableSprites["appliances_laundry_01_"..n], dryer) end
 end)
 
 SandboxVars = {VehicleLivingSlots={}}
@@ -175,7 +182,7 @@ local profileMode
 V.ensureUniversalContainerProfile=function(p)profileMode=V.getLaundryMode(p)end
 dofile(media .. "server/VLS_ApplianceServer.lua")
 local function toggle(active)
-    return V.Server.toggleLaundry(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,
+    return V.Server.toggleLaundry(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,
         item=equipment.id,active=active})
 end
 test("washer rejects missing tank without changing clothes or draining power", function()
@@ -215,7 +222,7 @@ end)
 test("dryer finishes without any installed tank", function()
     local lookup=V.getInstalledWaterTank
     V.getInstalledWaterTank=function()return nil end
-    assert(V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,
+    assert(V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,
         item=equipment.id,mode="dryer"}))
     eq(data.vlsLaundryMode,"laundryDryer")
     clothing.wet=100
@@ -227,7 +234,7 @@ test("dryer finishes without any installed tank", function()
     V.getInstalledWaterTank=lookup
 end)
 test("lost power pauses and manual restart resumes remaining cycle", function()
-    assert(V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,
+    assert(V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,
         item=equipment.id,mode="washer"}))
     water=10;charge=1
     assert(toggle(true))
@@ -252,7 +259,7 @@ test("repeated activation does not restart or double charge an active cycle",fun
     assert(toggle(true));eq(data.vlsLaundryRemaining,remaining);eq(charge,before)
 end)
 test("mode change stops old cycle and repeated mode request preserves new cycle",function()
-    local args={vehicle=7,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="dryer"}
+    local args={vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="dryer"}
     local beforeWater=water;assert(V.Server.setLaundryMode(player,args))
     eq(profileMode,"laundryDryer");eq(data.vlsLaundryActive,false)
     eq(data.vlsLaundryRemaining,0);eq(water,beforeWater)
@@ -261,12 +268,12 @@ test("mode change stops old cycle and repeated mode request preserves new cycle"
 end)
 test("bad mode and stale equipment descriptors do not mutate the machine",function()
     for _,mode in ipairs({"", "washing", {}, false}) do
-        assert(not V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode=mode}))
+        assert(not V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode=mode}))
     end
-    assert(not V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,item=999,mode="washer"}))
+    assert(not V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,item=999,mode="washer"}))
     eq(data.vlsLaundryMode,"laundryDryer")
     local old=player.getVehicle;player.getVehicle=function()return nil end
-    assert(not toggle(true));assert(not V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="washer"}))
+    assert(not toggle(true));assert(not V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="washer"}))
     player.getVehicle=old
 end)
 test("broken or replaced machine stops without delivering a free cycle",function()
@@ -276,7 +283,7 @@ test("broken or replaced machine stops without delivering a free cycle",function
     events.minute();eq(data.vlsLaundryActive,false);eq(charge,before)
 end)
 test("water loss pauses washing and resumes only after replenishment",function()
-    assert(V.Server.setLaundryMode(player,{vehicle=7,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="washer"}))
+    assert(V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part=V.UNIVERSAL_PART_ID,item=equipment.id,mode="washer"}))
     water=10;charge=1;assert(toggle(true));events.minute();water=0
     local before=charge;local remaining=data.vlsLaundryRemaining;events.minute()
     eq(charge,before);eq(data.vlsLaundryRemaining,remaining);eq(data.vlsLaundryPaused,true)

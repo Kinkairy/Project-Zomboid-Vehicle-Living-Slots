@@ -51,6 +51,7 @@ local function setup(tv)
  getCurrentSquare=function()return square end,sendObjectChange=noop,addMechanicsItem=noop}
  local v={transmitPartItem=noop,transmitPartCondition=noop,getMechanicalID=function()return 9 end}
  local p={managed=tv,item=nil,condition=100,signals=0,currentTVPresets={name="latest companion TV presets"},getVehicle=function()return v end}
+ function p:getId()return self.managed and "SeatBed" or "Radio" end
  function p:getInventoryItem()return self.item end
  function p:setInventoryItem(it)self.item=it end
  function p:getContainerContentAmount()return 0 end
@@ -108,7 +109,8 @@ dofile(native.."/client/Vehicles/ISUI/ISVehicleSeatUI.lua")
 package.loaded["Vehicles/ISUI/ISVehicleSeatUI"]=true
 local textures={}
 getTexture=function(name)
- if not textures[name]then textures[name]={name=name,getWidth=function()return 24 end,getHeight=function()return 24 end}end
+ if not textures[name]then textures[name]={name=name,getWidth=function()return 24 end,getHeight=function()return 24 end,
+   getWidthOrig=function()return 24 end,getHeightOrig=function()return 24 end}end
  return textures[name]
 end
 Joypad={Texture={AButton=getTexture("A")}};Keyboard={};isKeyDown=function()return false end
@@ -190,11 +192,15 @@ end}
 dofile(root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/client/VLS_KI5Campers_Overlay.lua")
 for _,name in ipairs({"Airflyte","Astrodome"})do
  test("Shasta "..name.." masks and hit rectangles agree",function()
-  local ys={};local p={vehicle={getScriptName=function()return "Base.Trailer61"..name end}}
+  local ys={};local key="Base.Trailer61"..name
+  ISCarMechanicsOverlay.CarList[key]={imgPrefix="Trailer61shasta"..name.."_"}
+  local p={vehicle={getScriptName=function()return key end,
+   getScript=function()return {getCarMechanicsOverlay=noop}end},drawLine=noop}
+  function p:drawSubTexture(t,sx,sy,sw,sh,x,y)ys[#ys+1]=y end
   function p:drawTextureScaledUniform(t,x,y)ys[#ys+1]=y end
   local raw=p.drawTextureScaledUniform
   ISVehicleMechanics.renderCarOverlay(p);eq(p.drawTextureScaledUniform,raw)
-  for i=1,4 do eq(ys[i],330)end;eq(ys[5],10)
+  for i,y in ipairs({384,484,384,484})do eq(ys[i],y)end;eq(ys[5],10)
   eq(registered.VLSKI5CamperWaterTank1.vehicles["Trailer61shasta"..name.."_"].y,384)
   failOverlay=true;eq(pcall(ISVehicleMechanics.renderCarOverlay,p),false);failOverlay=false
   eq(p.drawTextureScaledUniform,raw)
@@ -226,7 +232,7 @@ for _,name in ipairs({"Airflyte","Astrodome"})do
   p.getMouseX=function(self)return self.mx end;p.getMouseY=function(self)return self.my end
   local rects={}
   p.drawTextureScaledUniform=function(_,texture,x,y)
-   if x>=0 and x<263 and y>=0 and y<500 then rects[#rects+1]={x=x,y=y}end
+   if texture.name:find("icon_vehicle_",1,true) and x>=0 and x<263 and y>=0 and y<500 then rects[#rects+1]={x=x,y=y}end
   end
   p:render();eq(#rects,#ids-1)
   for i,r in ipairs(rects)do

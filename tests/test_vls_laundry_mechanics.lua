@@ -43,7 +43,8 @@ ISContextMenu={getNew=function(_,parent)return menu(parent.root or parent)end}
 local itemTypes={"Base.Mov_TrailerFridge","Base.Mov_BlueComboWasherDryer"}
 local list={size=function()return #itemTypes end,get=function(_,i)return itemTypes[i+1]end}
 local part={getInventoryItem=function()return nil end,getItemType=function()return list end,
- getId=function()return "SeatBed" end}
+ getId=function()return "SeatBed" end,
+ getVehicle=function()return {getScriptName=function()return "Base.StepVan" end}end}
 local function item(ft,sprite)
  return {kind="Moveable",getFullType=function()return ft end,
  getWorldSprite=function()return sprite end,getScriptItem=function()return nil end,

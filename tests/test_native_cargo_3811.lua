@@ -17,7 +17,8 @@ local original=Vehicles.ContainerAccess.TruckBedOpenInside
 local exterior=Vehicles.ContainerAccess.TruckBed
 local open=Vehicles.ContainerAccess.TruckBedOpen
 local loaded={['Vehicles/Vehicles']=true}
-require=function(name) assert(name~='Vehicles/Vehicles','shared config must not require the server-only Vehicles file');if loaded[name] then return loaded[name] end loaded[name]={};return loaded[name] end
+local nativeRequire=require
+require=function(name) assert(name~='Vehicles/Vehicles','shared config must not require the server-only Vehicles file');if loaded[name] then return loaded[name] end return nativeRequire(name) end
 getModInfoByID=function() return {getDir=function() return 'offline-fixture' end} end
 local runtime=root..'/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
 local nativeVehicles=Vehicles;Vehicles=nil

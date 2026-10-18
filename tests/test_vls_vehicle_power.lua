@@ -79,7 +79,10 @@ v.getId=function()return 7 end;v.getSquare=function()return {} end
 v.transmitPartModData=function()end;v.transmitPartItem=function()end
 local ids={"Microwave","Fridge","TV","Combo"};local parts={}
 for i,cap in ipairs({"cooking","cooling","television","laundryCombo"})do
- local data={};local item={cap=cap,getID=function()return i end,getCondition=function()return 100 end}
+ -- Real items name their type; profile parameters come from that type.
+ local fullType=({cooking="Base.Mov_Microwave",cooling="Base.Mov_FridgeMini",laundryCombo="Base.Mov_BlueComboWasherDryer"})[cap]
+ local data={};local item={cap=cap,getID=function()return i end,getCondition=function()return 100 end,
+  getFullType=function()return fullType end,getScriptItem=function()return nil end}
  parts[ids[i]]={getId=function()return ids[i] end,getInventoryItem=function()return item end,
   getVehicle=function()return v end,getModData=function()return data end,
   getItemContainer=function()return nil end,getCondition=function()return 100 end}
@@ -100,9 +103,9 @@ package.loaded.VLS_Config=V
 V.installGenericCraftSurfaceActionHooks=nil
 dofile(path.."server/VLS_ApplianceServer.lua")
 test("four active devices debit one shared battery once per running unit",function()
- assert(V.Server.toggleMicrowave(player,{vehicle=7,part="Microwave",item=1,active=true,timer=300,temperature=90}))
- assert(V.Server.setLaundryMode(player,{vehicle=7,part="Combo",item=4,mode="dryer"}))
- assert(V.Server.toggleLaundry(player,{vehicle=7,part="Combo",item=4,active=true}))
+ assert(V.Server.toggleMicrowave(player,{vehicle=7,epoch=0,part="Microwave",item=1,active=true,timer=300,temperature=90}))
+ assert(V.Server.setLaundryMode(player,{vehicle=7,epoch=0,part="Combo",item=4,mode="dryer"}))
+ assert(V.Server.toggleLaundry(player,{vehicle=7,epoch=0,part="Combo",item=4,active=true}))
  hours=hours+1/60;eventHandlers.minute()
  local expected=1-V.getMicrowaveDrainPerMinute()-V.getFridgeDrainPerMinute()
   -V.getTelevisionDrainPerMinute()-V.getLaundryDrainPerMinute("laundryDryer")

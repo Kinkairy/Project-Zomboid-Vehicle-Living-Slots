@@ -62,9 +62,12 @@ local function fixture(targetTank)
  local a,b=item(1,10,'tainted'),item(2,0)
  local v={id=42,parts={},sent=0,charge=1}
  function v:getId()return self.id end
+  function v:getPartById(id)return self.parts[id]end
  function v:transmitPartItem()self.sent=self.sent+1 end
  v.transmitPartModData=noop;v.transmitPartUsedDelta=noop
- local tank={getId=function()return 'Tank' end,it=targetTank and b or a,water=targetTank}
+ local tank={md={},getId=function()return 'Tank' end,it=targetTank and b or a,water=targetTank,
+   getVehicle=function()return v end,getInventoryItem=function(self)return self.it end,
+   getModData=function(self)return self.md end,getItemContainer=function()return nil end}
  v.parts.Tank=tank
  local carried=targetTank and a or b;carried.carried=true
  local inventory={getItemWithIDRecursiv=function(_,id)return carried and carried.id==id and carried or nil end}
@@ -80,6 +83,7 @@ end
 getSpecificPlayer=function()return current end
 getPlayer=function()error('server must never use local player fallback')end
 VLS={VERSION='3.8.8',Server={},isSupportedVehicle=function(v)return v and v.id==42 end,
+ isManagedPart=function(p)return p and p:getId()=='Tank' end,
  getVehicleFluidItem=function(v,id)local p=v.parts[id];return p and p.it,p end,
  isWaterTankPart=function(p)return p and p.water or false end,syncVehicleWaterTank=noop,
  isPureWaterFluid=function(f)return f.amount>0 and (f.kind=='water' or f.kind=='tainted')end,
@@ -88,7 +92,7 @@ VLS={VERSION='3.8.8',Server={},isSupportedVehicle=function(v)return v and v.id==
  getWaterPurificationCost=function(a)return a/10 end,
  canAcceptNormalizedWater=function(f,a)return not f.refuse and not f.locked and f.amount+a<=f.cap end}
 local powerConfig=assert(io.open(path.."shared/VLS_Config.lua")):read("*a")
-local powerSource=assert(powerConfig:match("(VLS.VehiclePower =.-)function VLS.getInstalledWaterBottlePart"))
+local powerSource=assert(powerConfig:match("(local VehiclePower = require.-)function VLS.getInstalledWaterBottlePart"))
 local batteryGetter=VLS.getAuxBatteryPart
 assert(loadstring(powerSource))()
 VLS.getAuxBatteryPart=batteryGetter

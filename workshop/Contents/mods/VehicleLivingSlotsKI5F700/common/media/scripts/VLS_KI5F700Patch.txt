@@ -19,7 +19,7 @@ part VLSF700Slot6
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -29,8 +29,6 @@ part VLSF700Slot6
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -70,7 +68,7 @@ part VLSF700Slot7
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -80,8 +78,6 @@ part VLSF700Slot7
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -121,7 +117,7 @@ part VLSF700Slot8
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -131,8 +127,6 @@ part VLSF700Slot8
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -172,7 +166,7 @@ part VLSF700Slot9
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -182,8 +176,6 @@ part VLSF700Slot9
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -223,7 +215,7 @@ part VLSF700Slot10
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -233,8 +225,6 @@ part VLSF700Slot10
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -274,7 +264,7 @@ part VLSF700Slot11
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -284,8 +274,6 @@ part VLSF700Slot11
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -325,7 +313,7 @@ part VLSF700Slot12
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -335,8 +323,6 @@ part VLSF700Slot12
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -376,7 +362,7 @@ part VLSF700Slot13
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -386,8 +372,6 @@ part VLSF700Slot13
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -427,7 +411,7 @@ part VLSF700Slot14
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_FridgeMini;Base.Mov_TrailerFridge;Base.Mov_BlueComboWasherDryer;Base.Mov_SmallPineCabinet;Base.Mov_ModernCounter;Base.Mov_WoodenCounter;Base.Mov_SteelCounter;Base.Mov_BirchCounter;Base.Mov_OakCounter;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_WhiteCounter;Base.WaterDispenserBottle;Base.TvAntique;Base.TvBlack;Base.TvWideScreen,
+            itemType = Base.Mov_Cot;Base.Mattress;Base.SleepingBag_RedPlaid;Base.SleepingBag_BluePlaid;Base.SleepingBag_Green;Base.SleepingBag_GreenPlaid;Base.SleepingBag_Camo;Base.SleepingBag_Cheap_Green;Base.SleepingBag_Cheap_Blue;Base.SleepingBag_Cheap_Green2;Base.SleepingBag_Spiffo;Base.SleepingBag_HighQuality_Brown;Base.SleepingBag_Hide;Base.WaterDispenserBottle;Base.Mov_BirchCounter;Base.Mov_BlueComboWasherDryer;Base.Mov_DarkCounter;Base.Mov_GreenCounter;Base.Mov_ModernCounter;Base.Mov_OakCounter;Base.Mov_SteelCounter;Base.Mov_WhiteCounter;Base.Mov_WoodenCounter;Base.TvAntique;Base.Mov_GreenOven;Base.Mov_GreyOven;Base.Mov_RedOven;Base.Mov_ModernOven;Base.Mov_IndustrialOven;Base.Mov_DeepFryer;Base.Mov_BrownDishwasher;Base.Mov_MetalDishwasher;Moveables.appliances_laundry_01_4;Moveables.appliances_laundry_01_12;Base.Mov_WhiteFridge;Base.Mov_BlueFridge;Base.Mov_SteelFridge;Base.Mov_GreenFridge;Base.Mov_IndustrialFridge;Base.Mov_PlainFridge;Base.Mov_RedFridge;Base.Mov_WhiteIndustrialFridge;Base.Mov_ChestFreezer;Moveables.carpentry_01_60;Moveables.carpentry_01_61;Moveables.carpentry_01_62;Moveables.carpentry_02_17;Moveables.carpentry_02_25;Moveables.carpentry_02_33;Moveables.carpentry_02_64;Moveables.carpentry_02_104;Moveables.constructedobjects_01_44;Moveables.crafted_04_88;Moveables.crafted_04_92;Moveables.crafted_05_20;Moveables.crafted_05_25;Moveables.crafted_05_44;Moveables.furniture_shelving_01_9;Moveables.furniture_shelving_01_17;Base.Mov_OakShelves;Moveables.furniture_shelving_01_44;Base.Mov_BirchDrawersMirror;Moveables.furniture_storage_01_64;Base.Mov_MetalLocker;Base.Mov_BlueWallLocker;Base.Mov_YellowWallLocker;Base.Mov_LongTable,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -437,8 +421,6 @@ part VLSF700Slot14
                 capacity = 20,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua { create = VLS.Create.UniversalSlot, init = VLS.Init.UniversalSlot, update = VLS.Update.UniversalSlot, }
             table install
@@ -682,7 +664,7 @@ part VLSPantryCoffee
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            itemType = Base.Mov_CoffeeMaker;Base.Mov_FridgeMini;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_SmallPineCabinet;Base.Mov_Toaster;Base.Mov_TrailerFridge;Base.TvBlack;Base.TvWideScreen;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.carpentry_02_0;Moveables.carpentry_02_4;Moveables.carpentry_02_8;Moveables.carpentry_02_68;Moveables.crafted_05_32;Moveables.crafted_05_50;Base.Mov_CabinetMedical;Moveables.furniture_shelving_01_1;Moveables.furniture_shelving_01_19;Base.Mov_MetalWallShelves;Moveables.furniture_shelving_01_32;Moveables.furniture_shelving_01_34;Moveables.furniture_shelving_01_36;Base.Mov_WhiteFancyDrawers;Base.Mov_FancyChestnutDrawers;Base.Mov_DarkFancyDrawers;Base.Mov_BirchDrawers;Base.Mov_SmallTable;Base.Mov_SmallChest;Base.Mov_OakRoundTable;Base.Mov_LightRoundTable;Moveables.furniture_tables_high_01_12;Base.Mov_RoundTable;Base.Mov_FancyTable;Base.Mov_FancyDarkTable;Moveables.furniture_tables_high_01_21;Moveables.furniture_tables_high_01_23;Base.Mov_FancyLowTable;Base.Mov_BrownLowTable;Moveables.furniture_tables_low_01_16;Base.Mov_BlackLowModernTable;Base.Mov_PlasticLowTable;Moveables.location_trailer_02_18,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -691,8 +673,6 @@ part VLSPantryCoffee
                 capacity = 0,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua
             {
@@ -719,6 +699,25 @@ part VLSPantryCoffee
                 complete = VLS.PartComplete.UniversalSlot,
             }
         }
+
+part VLSTopFreezer1
+{
+    area = TruckBed,
+    category = nodisplay,
+    container
+    {
+        capacity = 5,
+        conditionAffectsCapacity = false,
+        test = VLS.ContainerAccess.UniversalFreezer,
+        soundMap = ContainerPut PutItemInFridge,
+        soundMap = ContainerTake PutItemInFridge,
+    }
+    lua
+    {
+        create = VLS.Create.UniversalFreezer,
+        update = VLS.Update.UniversalFreezer,
+    }
+}
 part VLSTopFrame2
         {
             category = VLSLiving,
@@ -747,7 +746,7 @@ part VLSOverhead1
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            itemType = Base.Mov_CoffeeMaker;Base.Mov_FridgeMini;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_SmallPineCabinet;Base.Mov_Toaster;Base.Mov_TrailerFridge;Base.TvBlack;Base.TvWideScreen;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.carpentry_02_0;Moveables.carpentry_02_4;Moveables.carpentry_02_8;Moveables.carpentry_02_68;Moveables.crafted_05_32;Moveables.crafted_05_50;Base.Mov_CabinetMedical;Moveables.furniture_shelving_01_1;Moveables.furniture_shelving_01_19;Base.Mov_MetalWallShelves;Moveables.furniture_shelving_01_32;Moveables.furniture_shelving_01_34;Moveables.furniture_shelving_01_36;Base.Mov_WhiteFancyDrawers;Base.Mov_FancyChestnutDrawers;Base.Mov_DarkFancyDrawers;Base.Mov_BirchDrawers;Base.Mov_SmallTable;Base.Mov_SmallChest;Base.Mov_OakRoundTable;Base.Mov_LightRoundTable;Moveables.furniture_tables_high_01_12;Base.Mov_RoundTable;Base.Mov_FancyTable;Base.Mov_FancyDarkTable;Moveables.furniture_tables_high_01_21;Moveables.furniture_tables_high_01_23;Base.Mov_FancyLowTable;Base.Mov_BrownLowTable;Moveables.furniture_tables_low_01_16;Base.Mov_BlackLowModernTable;Base.Mov_PlasticLowTable;Moveables.location_trailer_02_18,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -756,8 +755,6 @@ part VLSOverhead1
                 capacity = 0,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua
             {
@@ -784,6 +781,25 @@ part VLSOverhead1
                 complete = VLS.PartComplete.UniversalSlot,
             }
         }
+
+part VLSTopFreezer2
+{
+    area = TruckBed,
+    category = nodisplay,
+    container
+    {
+        capacity = 5,
+        conditionAffectsCapacity = false,
+        test = VLS.ContainerAccess.UniversalFreezer,
+        soundMap = ContainerPut PutItemInFridge,
+        soundMap = ContainerTake PutItemInFridge,
+    }
+    lua
+    {
+        create = VLS.Create.UniversalFreezer,
+        update = VLS.Update.UniversalFreezer,
+    }
+}
 part VLSTopFrame3
         {
             category = VLSLiving,
@@ -812,7 +828,7 @@ part VLSOverhead2
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            itemType = Base.Mov_CoffeeMaker;Base.Mov_FridgeMini;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_SmallPineCabinet;Base.Mov_Toaster;Base.Mov_TrailerFridge;Base.TvBlack;Base.TvWideScreen;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.carpentry_02_0;Moveables.carpentry_02_4;Moveables.carpentry_02_8;Moveables.carpentry_02_68;Moveables.crafted_05_32;Moveables.crafted_05_50;Base.Mov_CabinetMedical;Moveables.furniture_shelving_01_1;Moveables.furniture_shelving_01_19;Base.Mov_MetalWallShelves;Moveables.furniture_shelving_01_32;Moveables.furniture_shelving_01_34;Moveables.furniture_shelving_01_36;Base.Mov_WhiteFancyDrawers;Base.Mov_FancyChestnutDrawers;Base.Mov_DarkFancyDrawers;Base.Mov_BirchDrawers;Base.Mov_SmallTable;Base.Mov_SmallChest;Base.Mov_OakRoundTable;Base.Mov_LightRoundTable;Moveables.furniture_tables_high_01_12;Base.Mov_RoundTable;Base.Mov_FancyTable;Base.Mov_FancyDarkTable;Moveables.furniture_tables_high_01_21;Moveables.furniture_tables_high_01_23;Base.Mov_FancyLowTable;Base.Mov_BrownLowTable;Moveables.furniture_tables_low_01_16;Base.Mov_BlackLowModernTable;Base.Mov_PlasticLowTable;Moveables.location_trailer_02_18,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -821,8 +837,6 @@ part VLSOverhead2
                 capacity = 0,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua
             {
@@ -849,6 +863,25 @@ part VLSOverhead2
                 complete = VLS.PartComplete.UniversalSlot,
             }
         }
+
+part VLSTopFreezer3
+{
+    area = TruckBed,
+    category = nodisplay,
+    container
+    {
+        capacity = 5,
+        conditionAffectsCapacity = false,
+        test = VLS.ContainerAccess.UniversalFreezer,
+        soundMap = ContainerPut PutItemInFridge,
+        soundMap = ContainerTake PutItemInFridge,
+    }
+    lua
+    {
+        create = VLS.Create.UniversalFreezer,
+        update = VLS.Update.UniversalFreezer,
+    }
+}
 part VLSTopFrame4
         {
             category = VLSLiving,
@@ -877,7 +910,7 @@ part VLSOverhead3
             mechanicArea = Back,
             area = TruckBed,
             category = VLSLiving,
-            itemType = Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Base.Mov_CoffeeMaker;Base.Mov_Toaster,
+            itemType = Base.Mov_CoffeeMaker;Base.Mov_FridgeMini;Base.Mov_Microwave;Base.Mov_Microwave2;Base.Mov_SmallPineCabinet;Base.Mov_Toaster;Base.Mov_TrailerFridge;Base.TvBlack;Base.TvWideScreen;Moveables.fixtures_counters_01_144;Moveables.fixtures_counters_01_148;Moveables.fixtures_counters_01_152;Moveables.fixtures_counters_01_156;Moveables.fixtures_counters_01_16;Moveables.fixtures_counters_01_20;Moveables.fixtures_counters_01_24;Moveables.fixtures_counters_01_28;Moveables.carpentry_02_0;Moveables.carpentry_02_4;Moveables.carpentry_02_8;Moveables.carpentry_02_68;Moveables.crafted_05_32;Moveables.crafted_05_50;Base.Mov_CabinetMedical;Moveables.furniture_shelving_01_1;Moveables.furniture_shelving_01_19;Base.Mov_MetalWallShelves;Moveables.furniture_shelving_01_32;Moveables.furniture_shelving_01_34;Moveables.furniture_shelving_01_36;Base.Mov_WhiteFancyDrawers;Base.Mov_FancyChestnutDrawers;Base.Mov_DarkFancyDrawers;Base.Mov_BirchDrawers;Base.Mov_SmallTable;Base.Mov_SmallChest;Base.Mov_OakRoundTable;Base.Mov_LightRoundTable;Moveables.furniture_tables_high_01_12;Base.Mov_RoundTable;Base.Mov_FancyTable;Base.Mov_FancyDarkTable;Moveables.furniture_tables_high_01_21;Moveables.furniture_tables_high_01_23;Base.Mov_FancyLowTable;Base.Mov_BrownLowTable;Moveables.furniture_tables_low_01_16;Base.Mov_BlackLowModernTable;Base.Mov_PlasticLowTable;Moveables.location_trailer_02_18,
             specificItem = false,
             mechanicRequireKey = true,
             durability = 3,
@@ -886,8 +919,6 @@ part VLSOverhead3
                 capacity = 0,
                 conditionAffectsCapacity = false,
                 test = VLS.ContainerAccess.UniversalSlot,
-                soundMap = ContainerPut VehicleTrunkTransferItem,
-                soundMap = ContainerTake VehicleTrunkTransferItem,
             }
             lua
             {
@@ -914,6 +945,25 @@ part VLSOverhead3
                 complete = VLS.PartComplete.UniversalSlot,
             }
         }
+
+part VLSTopFreezer4
+{
+    area = TruckBed,
+    category = nodisplay,
+    container
+    {
+        capacity = 5,
+        conditionAffectsCapacity = false,
+        test = VLS.ContainerAccess.UniversalFreezer,
+        soundMap = ContainerPut PutItemInFridge,
+        soundMap = ContainerTake PutItemInFridge,
+    }
+    lua
+    {
+        create = VLS.Create.UniversalFreezer,
+        update = VLS.Update.UniversalFreezer,
+    }
+}
     }
     vehicle 87fordF700bank
     {

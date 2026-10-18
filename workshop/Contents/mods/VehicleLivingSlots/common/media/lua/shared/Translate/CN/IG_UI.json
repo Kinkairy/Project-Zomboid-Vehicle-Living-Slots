@@ -69,5 +69,6 @@
   "IGUI_VehiclePartVLSTopFrame1": "顶部框架",
   "IGUI_VehiclePartVLSTopFrame2": "顶部框架",
   "IGUI_VehiclePartVLSTopFrame3": "顶部框架",
-  "IGUI_VehiclePartVLSSolarPanel": "太阳能板"
+  "IGUI_VehiclePartVLSSolarPanel": "太阳能板",
+  "IGUI_VLS_NoInstallableItem": "没有适合此空间的可安装物品"
 }

@@ -1,4 +1,5 @@
 require "VLS_Config"
+local Installation = require("VLS_NativeInstallation").bind(VLS)
 require "Vehicles/TimedActions/ISInstallVehiclePart"
 require "Vehicles/TimedActions/ISUninstallVehiclePart"
 
@@ -18,7 +19,7 @@ VLSTelevisionUninstallVehiclePart =
 function VLSTelevisionUninstallVehiclePart:complete()
     local item=self.part and self.part:getInventoryItem()
     if not isVLSTelevision(self.part,item)
-            or not VLS.canUninstallManagedPart(self.part) then return false end
+            or not Installation.canUninstall(self.part) then return false end
     VLS.copyTelevisionStateToItem(self.part,item)
     -- Native removal copies this slot's presets into the item. The active TV
     -- uses its companion device, so supply those same current presets through
@@ -33,15 +34,7 @@ if not VLS.installGuardApplied then
 
     local vanillaIsValid = ISInstallVehiclePart.isValid
     function ISInstallVehiclePart:isValid()
-        if not VLS.isInstallationEnabled(self.part, self.item) then return false end
-        -- Only the furniture and battery slots have VLS-specific item rules.
-        -- The large-van water tank deliberately uses the original gas-tank
-        -- itemType/mechanic-type matcher, so the vanilla action must remain
-        -- authoritative for it.
-        local allowed = self.part and VLS.allowedItems[self.part:getId()]
-        if allowed and not VLS.isAllowedItem(self.part, self.item) then
-            return false
-        end
+        if not Installation.canInstall(self.part, self.item) then return false end
         return vanillaIsValid(self)
     end
 
@@ -49,14 +42,19 @@ if not VLS.installGuardApplied then
     -- Recheck here so a queued action cannot consume anything after disabling.
     local vanillaComplete = ISInstallVehiclePart.complete
     function ISInstallVehiclePart:complete()
-        if not VLS.isInstallationEnabled(self.part, self.item) then return false end
-        return vanillaComplete(self)
+        if not Installation.canInstall(self.part, self.item) then return false end
+        return Installation.observeCompletion(self, vanillaComplete)
     end
 
     local vanillaUninstallIsValid = ISUninstallVehiclePart.isValid
     function ISUninstallVehiclePart:isValid()
-        if not VLS.canUninstallManagedPart(self.part) then return false end
+        if not Installation.canUninstall(self.part) then return false end
         return vanillaUninstallIsValid(self)
+    end
+
+    local vanillaUninstallComplete = ISUninstallVehiclePart.complete
+    function ISUninstallVehiclePart:complete()
+        return Installation.observeCompletion(self, vanillaUninstallComplete)
     end
 
     local vanillaUninstallNew = ISUninstallVehiclePart.new

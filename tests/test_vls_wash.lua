@@ -81,16 +81,20 @@ end
 local function tank(amount)
  local fluid=water(amount)
  local t={id=7,fluid=fluid,getID=function(self)return self.id end,getFluidContainer=function(self)return self.fluid end,syncItemFields=noop}
- local p={getId=function()return "Tank"end}
+ local data={vlsNativeEpoch=0}
+ local p={getId=function()return "Tank"end,getModData=function()return data end,getItemContainer=function()return nil end}
  local v={id=42,tank=t,part=p,stopped=true,removed=false,sync=0}
  function v:getId()return self.id end
+ function v:getPartById(id)return id=="Tank" and self.part or nil end
+ function p:getVehicle()return v end
+ function p:getInventoryItem()return v.tank end
  function v:isRemovedFromWorld()return self.removed end
  function v:isStopped()return self.stopped end
  function v:transmitPartItem()self.sync=self.sync+1 end
  v.transmitPartModData=noop
  vehicles[42]=v;return v,t,fluid
 end
-VLS={isSupportedVehicle=function(v)return v.id==42 end,
+VLS={isManagedPart=function(p)return p and p:getId()=="Tank" end,isSupportedVehicle=function(v)return v.id==42 end,
  getInstalledWaterTank=function(v,id)if id=="Tank"then return v.tank,v.part end end,
  isPlayerAtWaterTankInlet=function(v,p,c)return c.near end,
  isPureWaterFluid=function(f)return f.water and f.amount>0 end,
@@ -138,7 +142,7 @@ for _,fail in ipairs({false,true}) do
   a=wash(c,it);a.getJobDelta=function()return 0.25 end;source=a.sink
   eq(pcall(a.update,a),not fail);eq(a.sink,source);eq(it.delta,0.25)
   if not fail then eq(c.metabolic,"heavy")end
-  a=setmetatable({character=c,vehicleId=42,partId="Tank",tankId=7,item=it,
+  a=setmetatable({character=c,vehicleId=42,partId="Tank",tankId=7,installationEpoch=0,item=it,
    waterObject={fixture="source"},getJobDelta=function()return 0.5 end},
    {__index=VLSCleanBandageFromTank})
   source=a.waterObject
@@ -486,6 +490,41 @@ test("Fill All survives MP full-container sync and advances the native queue",fu
  ISTimedActionQueue=savedQueue;Base.perform=savedPerform;ISBaseObject=savedBaseObject
 end)
 
+test("actual native callbacks preserve old tank generation across same-ID reinstall",function()
+ local _,proxy,f=fetch(false);queue={}
+ local garment=clothing(current);local target=bottle(current,0,1)
+ cached.onWashYourself(current,proxy,nil)
+ cached.onWashClothing(current,proxy,nil,{garment},nil)
+ cached.onTakeWater({},proxy,nil,target,0)
+ local recipe={getResult=function()return {getType=function()return "Base.Bandage"end}end,getTimeToMake=function()return 10 end}
+ queue[#queue+1]=ISCleanBandage:new(current,garment,proxy,recipe)
+ eq(#queue,4)
+ local roundtrip=dofile(root.."/tests/net_action_roundtrip.lua")
+ local classes={VLSWashYourselfFromTank,VLSWashClothingFromTank,VLSTakeWaterFromTank,VLSCleanBandageFromTank}
+ vehicles[42].part:getModData().vlsNativeEpoch=1
+ for i,a in ipairs(queue)do
+  eq(a.installationEpoch,0)
+  local remote=roundtrip(classes[i],path.."shared/VLS_WaterTankWash.lua",a)
+  eq(remote.installationEpoch,0);eq(remote:isValid(),false);eq(remote:complete(),false)
+ end
+ eq(f.amount,20);eq(target.fluid.amount,0);eq(garment.wetness,0)
+ queue={};cached.onWashYourself(current,proxy,nil)
+ eq(queue[1].installationEpoch,0);eq(queue[1]:complete(),false)
+ -- Rebuild native menu from the current tank, without replacing any resource.
+ ISWorldObjectContextMenu.fetchVars={c=0,storeWater={}};hooks.pre[1](0,{options={}},{},false)
+ local fresh=ISWorldObjectContextMenu.fetchVars.storeWater[1];queue={};cached.onWashYourself(current,fresh,nil)
+ eq(queue[1].installationEpoch,1);assert(queue[1]:complete());eq(f.amount,17)
+ eq(queue[1]:complete(),false);eq(f.amount,17)
+end)
+test("outside queued cancellations and missing server generations cannot consume water",function()
+ local c=char();local v,t,f=tank(20);local a=body(c)
+ a:forceCancel();eq(a:isValid(),false);eq(a:complete(),false);eq(f.amount,20)
+ local old=isServer;isServer=function()return true end
+ local missing=VLSWashYourselfFromTank:new(c,42,"Tank",7)
+ eq(missing.installationEpoch,-1);eq(missing:complete(),false);eq(f.amount,20)
+ isServer=old
+end)
+
 -- Actual vehicle/tank registration, without granting every fixture a water tank.
 package.path=path.."shared/?.lua;"..root.."/workshop/Contents/mods/VehicleLivingSlotsKI5Campers/common/media/lua/shared/?.lua;"..package.path
 package.loaded["Entity/TimedActions/ISHandcraftAction"]=true
@@ -508,7 +547,9 @@ for name,profile in pairs(VLS.vehicleProfiles)do
   covered=covered+1
   test("actual water equipment menu "..name.." "..partId,function()
    current=menuCharacter();local v,t,f=tank(20)
-   local part={getId=function()return partId end,getInventoryItem=function()return v.tank end}
+   local partData={vlsNativeEpoch=0}
+   local part={getId=function()return partId end,getInventoryItem=function()return v.tank end,
+    getVehicle=function()return v end,getModData=function()return partData end,getItemContainer=function()return nil end}
    v.parts={[partId]=part};v.getScriptName=function()return name end
    v.getPartById=function(self,id)return self.parts[id]end
    t.ft="Base.NormalGasTank2";t.getFullType=function(self)return self.ft end

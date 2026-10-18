@@ -2,21 +2,31 @@
 local VLS = require "VLS_Config"
 require "VLS_RoofCargo"
 require "TimedActions/ISTakeFuel"
+local Context = require "VLS_NativeContext"
 local F = {}
 VLS.RoofFuel = F
 function F.enabled()
     local settings = SandboxVars and SandboxVars.VehicleLivingSlots
     return not settings or settings.EnableRoofPetrolShortcut ~= false
 end
-function F.getPart(vehicle, id)
+function F.resolvePart(vehicle, id)
     if not vehicle or not VLSRoofCargo.vehicleScripts[vehicle:getScript():getFullName()]
             or type(id) ~= "string" or not id:match("^VLSRoofPetrol[123]$") then return nil end
-    local part = vehicle:getPartById(id)
+    return vehicle:getPartById(id)
+end
+function F.getPart(vehicle, id)
+    local part = F.resolvePart(vehicle, id)
     local item = part and part:getInventoryItem()
     if item and (item:getFullType() == "Base.PetrolCan" or item:getFullType() == "Base.JerryCan")
             and item:getFluidContainer() then
         return part, item, item:getFluidContainer()
     end
+end
+-- Resolve through the registered endpoint adapter first: KI5 aliases refer to
+-- original DAMN parts, whose real ID owns the installation generation.
+local function partIdentity(vehicle, id, itemId, epoch)
+    local part = F.getPart(vehicle, id)
+    return part and Context.partIdentity(vehicle, part:getId(), itemId, epoch)
 end
 function F.canReach(player, vehicle, part)
     return F.enabled() and player and not player:isDead() and not player:getVehicle()
@@ -32,12 +42,19 @@ end
 -- The native pump action owns inventory limits, timing, animations, progress
 -- and adding petrol to the portable container. This endpoint only debits the
 -- same installed native FluidContainers; it holds no duplicate fuel store.
-function F.source(vehicle, roofId1, roofId2, roofId3)
-    local source = {vlsRoofVehicle=vehicle, ids={roofId1, roofId2, roofId3}}
+function F.source(vehicle, roofId1, roofId2, roofId3, roofEpoch1, roofEpoch2, roofEpoch3)
+    local source = {vlsRoofVehicle=vehicle, ids={roofId1, roofId2, roofId3},
+        epochs={roofEpoch1, roofEpoch2, roofEpoch3}}
+    function source:matches(index, item)
+        local epoch = self.epochs[index]
+        return item and item:getID() == self.ids[index]
+            and type(epoch) == "number" and epoch >= 0 and epoch == math.floor(epoch)
+            and partIdentity(vehicle, "VLSRoofPetrol"..index, self.ids[index], epoch) ~= nil
+    end
     function source:getServicePart()
         for i=1,3 do
             local part, item = F.getPart(vehicle, "VLSRoofPetrol"..i)
-            if item and item:getID() == self.ids[i] then return part end
+            if self:matches(i, item) then return part end
         end
     end
     function source:getSquare()
@@ -49,7 +66,7 @@ function F.source(vehicle, roofId1, roofId2, roofId3)
         if not F.enabled() then return end
         for i=1,3 do
             local part, item, fluid = F.getPart(vehicle, "VLSRoofPetrol"..i)
-            if item and item:getID()==self.ids[i] and F.isPetrol(fluid) and fluid:canPlayerEmpty() then
+            if self:matches(i, item) and F.isPetrol(fluid) and fluid:canPlayerEmpty() then
                 callback(part, item, fluid)
             end
         end
@@ -83,12 +100,14 @@ function F.source(vehicle, roofId1, roofId2, roofId3)
     return source
 end
 function F.capture(vehicle)
-    local ids={}
+    local ids,epochs={},{}
     for i=1,3 do
         local _,item=F.getPart(vehicle,"VLSRoofPetrol"..i)
         ids[i]=item and item:getID() or -1
+        local identity=item and partIdentity(vehicle,"VLSRoofPetrol"..i,ids[i])
+        epochs[i]=identity and identity.installationEpoch or -1
     end
-    return F.source(vehicle,ids[1],ids[2],ids[3])
+    return F.source(vehicle,ids[1],ids[2],ids[3],epochs[1],epochs[2],epochs[3])
 end
 local nativeNew = ISTakeFuel.new
 VLSRoofFuelAction = ISTakeFuel:derive("VLSRoofFuelAction")
@@ -158,20 +177,24 @@ function VLSRoofFuelAction:complete()
     return ISTakeFuel.complete(self)
 end
 -- Explicit primitive identities survive native NetTimedAction reconstruction.
-function VLSRoofFuelAction:new(character, vehicle, petrolCan, roofId1, roofId2, roofId3)
-    local source=F.source(vehicle,roofId1,roofId2,roofId3)
+function VLSRoofFuelAction:new(character, vehicle, petrolCan, roofId1, roofId2, roofId3, roofEpoch1, roofEpoch2, roofEpoch3)
+    roofEpoch1=Context.creationEpoch(vehicle,"VLSRoofPetrol1",roofId1,roofEpoch1,partIdentity)
+    roofEpoch2=Context.creationEpoch(vehicle,"VLSRoofPetrol2",roofId2,roofEpoch2,partIdentity)
+    roofEpoch3=Context.creationEpoch(vehicle,"VLSRoofPetrol3",roofId3,roofEpoch3,partIdentity)
+    local source=F.source(vehicle,roofId1,roofId2,roofId3,roofEpoch1,roofEpoch2,roofEpoch3)
     source.targetItem=petrolCan
     local o=nativeNew(self,character,source,petrolCan)
     o.vehicle,o.petrolCan=vehicle,petrolCan
     o.roofId1,o.roofId2,o.roofId3=roofId1,roofId2,roofId3
+    o.roofEpoch1,o.roofEpoch2,o.roofEpoch3=roofEpoch1,roofEpoch2,roofEpoch3
     return o
 end
 -- Keep the original onTakeFuelNew callback, including walking, transferring,
 -- equipping, Fill All sequencing and returning containers to their bags.
 ISTakeFuel.new = function(self, character, fuelStation, petrolCan)
     if type(fuelStation)=="table" and fuelStation.vlsRoofVehicle then
-        local ids=fuelStation.ids
-        return VLSRoofFuelAction:new(character,fuelStation.vlsRoofVehicle,petrolCan,ids[1],ids[2],ids[3])
+        local ids,epochs=fuelStation.ids,fuelStation.epochs
+        return VLSRoofFuelAction:new(character,fuelStation.vlsRoofVehicle,petrolCan,ids[1],ids[2],ids[3],epochs[1],epochs[2],epochs[3])
     end
     return nativeNew(self,character,fuelStation,petrolCan)
 end

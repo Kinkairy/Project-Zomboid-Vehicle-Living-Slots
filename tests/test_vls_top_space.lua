@@ -1,7 +1,30 @@
 -- Top-space contract and real B42 native install/uninstall bodies; engine objects mocked.
-local root,native=assert(arg[1]),assert(arg[2])
+local root,native=assert(arg[1]),assert(arg[2], 'native Lua root or --policy-only required')
+local policyOnly=native=='--policy-only' 
 local media=root.."/workshop/Contents/mods/VehicleLivingSlots/common/media/"
+package.path=media..'lua/shared/?.lua;'..package.path
+unpack=unpack or table.unpack
 local function noop()end
+-- Native metadata fixture only. Values mirror local original-tile evidence for
+-- eight admitted overhead families; retired entries remain policy mocks, not
+-- claims that their original tile metadata has been independently probed.
+local catalog=require 'VLS_OverheadCatalog'
+local spriteByType,registered={},{}
+for _,entry in ipairs(catalog)do
+ spriteByType[entry.type]=entry.sprites[1]
+ for _,name in ipairs(entry.sprites)do registered[name]={capacity=50,kind='counter',surface=false}end
+end
+registered.fixtures_counters_01_5={capacity=50,kind='counter',surface=true}
+spriteByType['Base.Mov_ModernCounter']='fixtures_counters_01_5'
+getTimestampMs=function()return 10000 end
+getSprite=function(name)return registered[name]end
+IsoObject={new=function()return {
+ setSprite=function(o,s)o.sprite=s end,getSprite=function(o)return o.sprite end,
+ createContainersFromSpriteProperties=noop,getContainerCount=function()return 1 end,
+ getContainerByIndex=function(o)return {
+ getCapacity=function()return o.sprite.capacity end,getType=function()return o.sprite.kind end,
+ getOpenSound=noop,getCloseSound=noop,getPutSound=noop,getTakeSound=noop}end,
+ isGenericCraftingSurface=function(o)return o.sprite.surface end}end}
 local function eq(a,b)assert(a==b,tostring(a).." ~= "..tostring(b))end
 local passed=0
 local function test(name,fn)fn();passed=passed+1;print("PASS "..name)end
@@ -12,7 +35,7 @@ local V=dofile(media.."lua/shared/VLS_Config.lua");package.loaded.VLS_Config=V
 instanceof=function(o,k)return o and (k=="InventoryItem" or o.kind==k)end
 getText=function(k)return k end
 local function item(t,s)
- local o={kind="Moveable",type=t,sprite=s,condition=100,id=99}
+ local o={kind="Moveable",type=t,sprite=s or spriteByType[t],condition=100,id=99}
  function o:getFullType()return self.type end
  function o:getScriptItem()return nil end
  function o:getWorldSprite()return self.sprite end
@@ -34,6 +57,8 @@ local function container()
 end
 local function vehicle(name)
  local v={parts={},name=name}
+ function v:getId()return 17 end
+ v.transmitPartModData=noop
  function v:getScriptName()return self.name end
  function v:getPartById(id)return self.parts[id]end
  function v:getPartCount()return #self.order end
@@ -55,10 +80,10 @@ local function vehicle(name)
  end
  return v,part
 end
-local catalog=require "VLS_OverheadCatalog"
 local ordinary=item("Base.Mov_ModernCounter")
 
-test("top slots share living category and offer only eight matching straight cupboards",function()
+-- Owner rule 2026-10-17: top slots offer every top-space furniture family.
+test("top slots share living category and offer only top-space furniture",function()
  eq(V.OVERHEAD_CATEGORY_ID,V.CATEGORY_ID)
  local f=assert(io.open(media.."scripts/VLS_ZTopSpaceVehicles.txt"));local script=f:read("*a");f:close()
  eq(script:find("category = VLSTopSpace",1,true),nil)
@@ -67,13 +92,20 @@ test("top slots share living category and offer only eight matching straight cup
   if entry.installable then permitted[entry.type]=true;count=count+1 end
  end
  eq(count,8)
+ local spaces=dofile(media.."lua/shared/VLS_SpaceCatalog.lua")
+ local function top(name)
+  local entry=spaces.furniture[name]
+  return (entry and entry.space or spaces.spaces[name])=="top"
+ end
+ local length
  for row in script:gmatch("itemType = ([^\n]+),")do
   local n=0
   if row~="Base.VLSTopFrame" then
-   for name in row:gmatch("[^;]+")do assert(permitted[name] or name=="Base.Mov_CoffeeMaker" or name=="Base.Mov_Toaster",name);n=n+1 end
-   eq(n,10)
+   for name in row:gmatch("[^;]+")do assert(permitted[name] or name=="Base.Mov_CoffeeMaker" or name=="Base.Mov_Toaster" or top(name),name);n=n+1 end
+   length=length or n;eq(n,length)
   end
  end
+ assert(length and length>10,length)
 end)
 
 for _,name in ipairs({"Base.SUV","Base.PickUpVan","Base.Van","Base.StepVan"})do
@@ -96,7 +128,9 @@ for _,name in ipairs({"Base.SUV","Base.PickUpVan","Base.Van","Base.StepVan"})do
      eq(V.isInstallationEnabled(p,cabinet),entry.installable)
      eq(V.isGenericCraftSurfaceEquipment(cabinet),false)
      p.item=cabinet;V.ensureUniversalContainerProfile(p)
-     eq(p.container:getCapacity(),50);eq(p.container:getType(),"overhead")
+     eq(p.container:getCapacity(),50);eq(p.container:getType(),"counter")
+     eq(p.container:getOpenSound(),nil);eq(p.container:getCloseSound(),nil)
+     eq(p.container:getPutSound(),nil);eq(p.container:getTakeSound(),nil)
      eq(V.getPartDisplayName(p),"native-cupboard-name")
      eq(V.ContainerAccess.UniversalSlot(v,p,{getVehicle=function()return v end}),true)
      eq(V.ContainerAccess.UniversalSlot(v,p,{getVehicle=function()return nil end}),false)
@@ -126,6 +160,36 @@ test("cabinet sandbox option gates new installation only",function()
  eq(V.getInstalledPart(v,p.id),p);eq(V.canUninstallManagedPart(p),true)
  SandboxVars=nil
 end)
+test("support frame and retired recognition remain installation-only gates",function()
+ local v,make=vehicle("Base.StepVan");local profile=V.getVehicleProfile(v)
+ local frames,slots={},{}
+ for n,id in ipairs(profile.overheadParts)do frames[n]=make("VLSTopFrame"..n);slots[n]=make(id)end
+ local cupboard=item(catalog[1].type)
+ for n,p in ipairs(slots)do eq(V.isInstallationEnabled(p,cupboard),false)end
+ frames[2].item=item("Base.VLSTopFrame")
+ eq(V.isInstallationEnabled(slots[2],cupboard),true)
+ eq(V.isInstallationEnabled(slots[1],cupboard),false);eq(V.isInstallationEnabled(slots[3],cupboard),false)
+ for _,entry in ipairs(catalog)do
+  if not entry.installable then eq(V.isInstallationEnabled(slots[2],item(entry.type)),false)end
+ end
+ slots[2].item=cupboard;frames[2].item=nil
+ eq(V.ContainerAccess.UniversalSlot(v,slots[2],{getVehicle=function()return v end}),true)
+ eq(V.canUninstallManagedPart(slots[2]),true)
+end)
+test("unrelated storage appliances retain four explicit sounds; nonstorage denies cargo",function()
+ for _,typ in ipairs({'Base.Mov_Microwave','Base.Mov_Microwave2','Base.Mov_FridgeMini','Base.Mov_TrailerFridge','Base.Mov_BlueComboWasherDryer'})do
+  local it=item(typ);local profile=assert(V.getEquipmentProfile(it));assert(profile.capacity>0)
+  for _,key in ipairs({'containerOpenSound','containerCloseSound','containerPutSound','containerTakeSound'})do assert(type(profile[key])=='string' and profile[key]~='',typ..key)end
+  assert(V.isStorageEquipment(it))
+ end
+ for _,typ in ipairs({'Base.WaterDispenserBottle','Base.TvAntique','Base.TvBlack','Base.TvWideScreen','Base.SleepingBag_RedPlaid','Base.Mov_CoffeeMaker','Base.Mov_Toaster'})do
+  eq(V.isStorageEquipment(item(typ)),false)
+ end
+end)
+if policyOnly then
+ print("RESULT top-space policy tests="..passed.." failures=0 (full Config; mock metadata). Native transaction/UI tests NOT RUN: requires installed Lua root.")
+ return
+end
 -- Verify the accepted native mechanical transaction against an actual top part.
 ISBaseTimedAction={}
 function ISBaseTimedAction:derive(n)local c={Type=n};c.__index=c;setmetatable(c,{__index=self});return c end

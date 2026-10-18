@@ -26,6 +26,7 @@ ContainerButtonIcons={clothingwasher="washer-icon",clothingdryer="dryer-icon"}
 VLS={getInstalledPart=function(v,id)return v==vehicle and id=="SeatBed" and part or nil end,
  getEquipmentCapability=function()return "laundryCombo" end,
  getLaundryMode=function()return data.vlsLaundryMode or "laundryWasher" end,
+ getLaundryModes=function()return {"laundryWasher","laundryDryer"} end,
  hasAuxBatteryPower=function()return true end,getLaundryDrainPerMinute=function()return .0004 end,
  getInstalledWaterTank=function()return nil end}
 local commands={}

@@ -1,13 +1,21 @@
 require "VLS_Config"
+local NativeContext = require "VLS_NativeContext"
 require "Fluids/ISFluidContainer"
 require "Fluids/ISFluidUtil"
 require "Fluids/ISFluidTransferAction"
 
 local constructingEndpoints
 
+local function integer(value)
+    return type(value) == "number" and value == value
+        and value ~= math.huge and value ~= -math.huge
+        and value == math.floor(value)
+end
+
+
 VLSVehicleFluidContainer = ISFluidContainer:derive("VLSVehicleFluidContainer")
 
-function VLSVehicleFluidContainer:new(fluidObject, character, vehicle, fluidItem, part)
+function VLSVehicleFluidContainer:new(fluidObject, character, vehicle, fluidItem, part, installationEpoch)
     local o = ISFluidContainer.new(self, fluidObject)
     -- ISFluidUtil accepts only the vanilla public container contract. Keep
     -- that contract while carrying narrowly scoped vehicle identity data.
@@ -18,54 +26,52 @@ function VLSVehicleFluidContainer:new(fluidObject, character, vehicle, fluidItem
     o.vlsVehicleId = vehicle:getId()
     o.vlsFluidItemId = fluidItem:getID()
     o.vlsFluidPartId = part:getId()
+    local context = NativeContext.fluid(character, vehicle, part:getId(),
+        fluidItem:getID(), installationEpoch)
+    o.vlsInstallationEpoch = context and context.installationEpoch or installationEpoch
     return o
 end
 
 function VLSVehicleFluidContainer:copy()
-    local playerObj = self.vlsCharacter or getSpecificPlayer(self.vlsPlayerNum)
+    -- Copy the pinned identity, even if it is stale. Looking up the current item
+    -- here would let a closed generation silently acquire a replacement FC.
+    local o = ISFluidContainer.new(VLSVehicleFluidContainer, self:getFluidObject())
+    o.Type = "ISFluidContainer"
+    o.vlsVehicleFluidEndpoint = true
+    o.vlsPlayerNum, o.vlsCharacter = self.vlsPlayerNum, self.vlsCharacter
+    o.vlsVehicleId, o.vlsFluidPartId = self.vlsVehicleId, self.vlsFluidPartId
+    o.vlsFluidItemId, o.vlsInstallationEpoch = self.vlsFluidItemId, self.vlsInstallationEpoch
+    return o
+end
+
+local function resolveVehicleContainer(container, character)
+    if not container or not container.vlsVehicleFluidEndpoint
+            or container.Type ~= "ISFluidContainer"
+            or not integer(container.vlsVehicleId) or not integer(container.vlsFluidItemId)
+            or not integer(container.vlsInstallationEpoch)
+            or container.vlsInstallationEpoch < 0 then return nil end
+    local playerObj = character or container.vlsCharacter or getSpecificPlayer(container.vlsPlayerNum)
     local vehicle = playerObj and playerObj:getVehicle()
-    local fluidItem, part
-    if vehicle then
-        fluidItem, part = VLS.getVehicleFluidItem(vehicle, self.vlsFluidPartId)
-    end
-    if not fluidItem then
-        return ISFluidContainer.new(ISFluidContainer, self:getFluidObject())
-    end
-    return VLSVehicleFluidContainer:new(self:getFluidObject(), playerObj,
-        vehicle, fluidItem, part)
+    if not vehicle or vehicle:getId() ~= container.vlsVehicleId then return nil end
+    return NativeContext.fluid(playerObj, vehicle, container.vlsFluidPartId,
+        container.vlsFluidItemId, container.vlsInstallationEpoch)
 end
 
 function VLS.isVehicleFluidContainerValid(container, character)
-    if not container or not container.vlsVehicleFluidEndpoint then return false end
-    local playerObj = character or container.vlsCharacter or getSpecificPlayer(container.vlsPlayerNum)
-    local vehicle = playerObj and playerObj:getVehicle()
-    if not VLS.isSupportedVehicle(vehicle)
-            or vehicle:getId() ~= container.vlsVehicleId then return false end
-
-    local fluidItem = VLS.getVehicleFluidItem(vehicle, container.vlsFluidPartId)
-    return fluidItem ~= nil
-        and fluidItem:getID() == container.vlsFluidItemId
-        and fluidItem:getFluidContainer() == container:getFluidContainer()
+    local context = resolveVehicleContainer(container, character)
+    return context ~= nil and context.fluidContainer == container:getFluidContainer()
+        and container:getOwner() == context.item
 end
 
--- transmitPartItem() may replace the client-side InventoryItem wrapper while
--- preserving the installed bottle ID. Rebind the scoped endpoint before the
--- vanilla panel validates it so the original transfer UI stays open and keeps
--- displaying the synchronized amounts.
+-- A synchronized replica may change wrappers within the same installation.
+-- Epoch comparison happens before rebinding, including same-item reinstall.
 function VLS.refreshVehicleFluidEndpoint(container, character)
-    if not container or not container.vlsVehicleFluidEndpoint then return false end
-    local playerObj = character or container.vlsCharacter or getSpecificPlayer(container.vlsPlayerNum)
-    local vehicle = playerObj and playerObj:getVehicle()
-    if not VLS.isSupportedVehicle(vehicle)
-            or vehicle:getId() ~= container.vlsVehicleId then return false end
-
-    local fluidItem = VLS.getVehicleFluidItem(vehicle, container.vlsFluidPartId)
-    if not fluidItem or fluidItem:getID() ~= container.vlsFluidItemId
-            or not fluidItem:getFluidContainer() then return false end
-    if container:getFluidContainer() ~= fluidItem:getFluidContainer() then
-        container:initFromObject(fluidItem:getFluidContainer())
+    local context = resolveVehicleContainer(container, character)
+    if not context then return false end
+    if container:getFluidContainer() ~= context.fluidContainer then
+        container:initFromObject(context.fluidContainer)
     end
-    return true
+    return VLS.isVehicleFluidContainerValid(container, character)
 end
 
 if not VLS.vehicleFluidValidationHookApplied then
@@ -93,6 +99,7 @@ local function describeFluidEndpoint(character, endpoint)
             kind = "vehicle",
             part = endpoint.vlsFluidPartId,
             item = endpoint.vlsFluidItemId,
+            epoch = endpoint.vlsInstallationEpoch,
         }, endpoint.vlsVehicleId
     end
 
@@ -115,7 +122,8 @@ function VLS.makeVehicleFluidTransferRequest(character, source, target, amount)
             and sourceVehicle ~= targetVehicle) then return nil end
 
     local transferAmount = math.max(0, tonumber(amount) or 0)
-    if transferAmount <= 0
+    if transferAmount ~= transferAmount or transferAmount == math.huge
+            or transferAmount <= 0
             or not FluidContainer.CanTransfer(source:getFluidContainer(),
                 target:getFluidContainer()) then return nil end
 
@@ -129,23 +137,24 @@ end
 
 -- Never trust a serialized installed InventoryItem/FluidContainer owner. Resolve
 -- primitive IDs independently on each peer and validate the current ownership.
-local function integer(value)
-    return type(value) == "number" and value == value
-        and value ~= math.huge and value ~= -math.huge
-        and value == math.floor(value)
-end
 
-local function resolveEndpoint(character, vehicle, partId, itemId)
+local function resolveEndpoint(character, vehicle, partId, itemId, epoch)
     if type(partId) ~= "string" or not integer(itemId) then return end
     local item, part
     if partId ~= "" then
-        item, part = VLS.getVehicleFluidItem(vehicle, partId)
+        if not integer(epoch) or epoch < 0 then return end
+        local context = NativeContext.fluid(character, vehicle, partId, itemId, epoch)
+        if not context then return end
+        item, part = context.item, context.part
     else
-        item = character:getInventory():getItemWithIDRecursiv(itemId)
+        if epoch ~= -1 then return end
+        local inventory = character:getInventory()
+        item = inventory and inventory:getItemWithIDRecursiv(itemId)
     end
-    if not item or item:getID() ~= itemId or not item:getFluidContainer() then return end
+    if not item or item:getID() ~= itemId or not item:getFluidContainer()
+            or item:getFluidContainer():getOwner() ~= item then return end
     local endpoint = part and VLSVehicleFluidContainer:new(item:getFluidContainer(),
-        character, vehicle, item, part) or ISFluidContainer:new(item:getFluidContainer())
+        character, vehicle, item, part, epoch) or ISFluidContainer:new(item:getFluidContainer())
     return endpoint, item, part
 end
 
@@ -180,9 +189,9 @@ function VLSVehicleFluidTransferAction:resolveEndpoints()
     if not vehicle or vehicle:getId() ~= self.vehicleId
             or not VLS.isSupportedVehicle(vehicle) then return end
     local source, sourceItem, sourcePart = resolveEndpoint(self.character,
-        vehicle, self.sourcePartId, self.sourceItemId)
+        vehicle, self.sourcePartId, self.sourceItemId, self.sourceEpoch)
     local target, targetItem, targetPart = resolveEndpoint(self.character,
-        vehicle, self.targetPartId, self.targetItemId)
+        vehicle, self.targetPartId, self.targetItemId, self.targetEpoch)
     if not source or not target or sourceItem == targetItem then return end
     return source, target, vehicle, sourcePart, targetPart
 end
@@ -205,6 +214,28 @@ function VLSVehicleFluidTransferAction:isValid()
     return ISFluidTransferAction.isValid(self)
 end
 
+function VLSVehicleFluidTransferAction:isValidStart()
+    return self:isValid()
+end
+
+function VLSVehicleFluidTransferAction:start()
+    if not self:isValid() then
+        if self.action then self:forceStop() end
+        return
+    end
+    return ISFluidTransferAction.start(self)
+end
+
+function VLSVehicleFluidTransferAction:stop()
+    self.vlsFinished = true
+    return ISFluidTransferAction.stop(self)
+end
+
+function VLSVehicleFluidTransferAction:forceCancel()
+    self.vlsFinished = true
+    return ISFluidTransferAction.forceCancel(self)
+end
+
 function VLSVehicleFluidTransferAction:update()
     if not self:isValid() then self:forceStop(); return end
     if isClient() then return ISFluidTransferAction.update(self) end
@@ -220,19 +251,34 @@ function VLSVehicleFluidTransferAction:complete()
 end
 
 function VLSVehicleFluidTransferAction:new(character, vehicleId, sourcePartId,
-        sourceItemId, targetPartId, targetItemId, amount)
+        sourceItemId, targetPartId, targetItemId, amount, sourceEpoch, targetEpoch)
+    -- Original seven-argument calls bind the current generation at first local
+    -- construction. Keep legacy reverse/bottle/vehicle branches compatible.
+    -- A server W0 reconstruction must carry the already-captured tank epoch.
+    local vehicle = character and character:getVehicle()
+    local sourceContext = vehicle and NativeContext.identity(vehicle, sourcePartId, sourceItemId)
+    local legacy = sourceEpoch == nil and targetEpoch == nil
+    local missingW0Epoch = isServer() and sourceEpoch == nil and targetPartId == ""
+        and sourceContext and VLS.isWaterTankPart(sourceContext.part)
+    if legacy and not missingW0Epoch then
+        sourceEpoch = sourcePartId == "" and -1 or sourceContext and sourceContext.installationEpoch
+        local targetContext = vehicle and NativeContext.identity(vehicle, targetPartId, targetItemId)
+        targetEpoch = targetPartId == "" and -1 or targetContext and targetContext.installationEpoch
+    end
     -- This small identity shell exists before invoking the original constructor.
     local identity = setmetatable({ character=character, vehicleId=vehicleId,
         sourcePartId=sourcePartId, sourceItemId=sourceItemId,
-        targetPartId=targetPartId, targetItemId=targetItemId, amount=amount }, {__index=self})
+        targetPartId=targetPartId, targetItemId=targetItemId, amount=amount,
+        sourceEpoch=sourceEpoch, targetEpoch=targetEpoch }, {__index=self})
     local source, target = identity:resolveEndpoints()
     if not source then
         identity.maxTime = 1
         return identity -- invalid/stale network packet: isValid rejects it
     end
     -- The native constructor owns timing (including instant-action settings).
-    constructingEndpoints = { [source:getFluidContainer()]=source,
-        [target:getFluidContainer()]=target }
+    constructingEndpoints = {}
+    if source.vlsVehicleFluidEndpoint then constructingEndpoints[source:getFluidContainer()] = source end
+    if target.vlsVehicleFluidEndpoint then constructingEndpoints[target:getFluidContainer()] = target end
     local ok, action = pcall(ISFluidTransferAction.new, self, character,
         source, source:getFluidObject(), target, target:getFluidObject(), amount)
     constructingEndpoints = nil

@@ -1,12 +1,14 @@
 require "Entity/TimedActions/ISHandcraftAction"
 require "TimedActions/ISDeviceBatteryAction"
+local NativeContext = require "VLS_NativeContext"
+local NativeDefinition = require "VLS_NativeDefinition"
 
 -- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: shared
 VLS = VLS or {}
 
 VLS.MOD_ID = "VehicleLivingSlots"
-VLS.VERSION = "3.11.1"
-VLS.BUILD_ID = "release-3.11.1"
+VLS.VERSION = "3.12"
+VLS.BUILD_ID = "3.12"
 VLS.CATEGORY_ID = "VLSLiving"
 VLS.OVERHEAD_CATEGORY_ID = VLS.CATEGORY_ID
 VLS.TOP_FRAME_PART_IDS = {"VLSTopFrame1", "VLSTopFrame2", "VLSTopFrame3"}
@@ -52,6 +54,11 @@ VLS.FREEZER_PART_BY_UNIVERSAL = {
     [VLS.LARGE_VAN_SLOT_3_ID] = VLS.LARGE_VAN_FREEZER_3_ID,
     [VLS.LARGE_VAN_SLOT_4_ID] = VLS.LARGE_VAN_FREEZER_4_ID,
     [VLS.LARGE_VAN_SLOT_5_ID] = VLS.LARGE_VAN_FREEZER_5_ID,
+    -- Top slots carry the same hidden companion (freezer drawer / TV device).
+    VLSPantryCoffee = "VLSTopFreezer1",
+    VLSOverhead1 = "VLSTopFreezer2",
+    VLSOverhead2 = "VLSTopFreezer3",
+    VLSOverhead3 = "VLSTopFreezer4",
 }
 VLS.UNIVERSAL_PART_BY_FREEZER = {}
 for universalId, freezerId in pairs(VLS.FREEZER_PART_BY_UNIVERSAL) do
@@ -238,13 +245,7 @@ VLS.equipmentProfiles = {
     ["Base.Mov_SmallPineCabinet"] = {
         capability = "storage",
         genericCraftSurface = true,
-        capacity = VLS.CABINET_CAPACITY,
         previewSprite = "furniture_storage_01_48",
-        containerType = "sidetable",
-        containerOpenSound = "DrawerWoodOpen",
-        containerCloseSound = "DrawerWoodClose",
-        containerPutSound = "DrawerWoodTransferItem",
-        containerTakeSound = "DrawerWoodTransferItem",
     },
     ["Base.Mov_Microwave"] = {
         capability = "cooking",
@@ -321,29 +322,22 @@ VLS.equipmentProfiles["Base.Mov_BlueComboWasherDryer"] = {
 -- cabinet rows are deliberately excluded because the small van has room only
 -- for lower furniture.
 local lowerCounterFamilies = {
-    { "Modern", 0, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "Wooden", 8, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "Steel", 32, "DoorMetalSmallOpen", "DoorMetalSmallClose", "DoorMetalSmallTransferItem" },
-    { "Birch", 40, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "Oak", 48, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "Dark", 56, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "Green", 64, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
-    { "White", 72, "DoorWoodMediumOpen", "DoorWoodMediumClose", "DoorWoodMediumTransferItem" },
+    { "Modern", 0 },
+    { "Wooden", 8 },
+    { "Steel", 32 },
+    { "Birch", 40 },
+    { "Oak", 48 },
+    { "Dark", 56 },
+    { "Green", 64 },
+    { "White", 72 },
 }
 
 for _, family in ipairs(lowerCounterFamilies) do
     local name, sprite = family[1], family[2]
-    local openSound, closeSound, transferSound = family[3], family[4], family[5]
     VLS.equipmentProfiles["Base.Mov_" .. name .. "Counter"] = {
         capability = "storage",
         genericCraftSurface = true,
-        capacity = VLS.COUNTER_CAPACITY,
         previewSprite = "fixtures_counters_01_" .. (sprite + 5),
-        containerType = "counter",
-        containerOpenSound = openSound,
-        containerCloseSound = closeSound,
-        containerPutSound = transferSound,
-        containerTakeSound = transferSound,
     }
 end
 
@@ -447,14 +441,11 @@ end
 local overheadCatalog = require "VLS_OverheadCatalog"
 for _, id in ipairs(VLS.OVERHEAD_PART_IDS) do VLS.allowedItems[id] = {} end
 for _, entry in ipairs(overheadCatalog) do
-    local sound = entry.metal and "DoorMetalSmall" or "DoorWoodMedium"
     VLS.equipmentProfiles[entry.type] = {
-        capability = "storage", overhead = true, capacity = 50,
+        capability = "storage", overhead = true,
         overheadInstallable = entry.installable,
-        containerType = "overhead", previewSprite = entry.sprites[1],
+        previewSprite = entry.sprites[1],
         moveableName = entry.name,
-        containerOpenSound = sound .. "Open", containerCloseSound = sound .. "Close",
-        containerPutSound = sound .. "TransferItem", containerTakeSound = sound .. "TransferItem",
     }
     for _, sprite in ipairs(entry.sprites) do
         VLS.supportedMoveableSprites[sprite] = entry.type
@@ -463,6 +454,10 @@ for _, entry in ipairs(overheadCatalog) do
         VLS.allowedItems[id][entry.type] = true
     end
 end
+
+-- Living/top space: newly supported vanilla furniture plus each type's space.
+local NativeSpace = require("VLS_NativeSpace").bind(VLS)
+NativeSpace.allow(generalSlotIds, VLS.OVERHEAD_PART_IDS)
 
 function VLS.getOverheadIndex(part)
     if not part then return nil end
@@ -589,14 +584,15 @@ end
 -- supported vehicle's universal living slots.
 function VLS.isGenericCraftSurfaceEquipment(item)
     local profile = VLS.getEquipmentProfile(item)
-    return profile ~= nil and profile.genericCraftSurface == true
+    if not profile or profile.genericCraftSurface ~= true then return false end
+    local definition = NativeDefinition.furniture(item)
+    return definition ~= nil and definition.genericCraftSurface == true
 end
 
 function VLS.getInstalledGenericCraftSurfacePart(vehicle)
-    local vehicleProfile = vehicle and VLS.getVehicleProfile(vehicle) or nil
-    if not vehicleProfile then return nil end
+    if not (vehicle and VLS.getVehicleProfile(vehicle)) then return nil end
 
-    for _, partId in ipairs(vehicleProfile.universalParts or {}) do
+    for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
         local part = VLS.getInstalledPart(vehicle, partId)
         if part and VLS.isGenericCraftSurfaceEquipment(
                 part:getInventoryItem()) then
@@ -612,19 +608,12 @@ function VLS.hasGenericCraftSurface(vehicle)
 end
 
 function VLS.getVehicleGenericCraftSurface(playerObj)
-    local vehicle = playerObj and playerObj:getVehicle() or nil
-    if vehicle and VLS.hasGenericCraftSurface(vehicle) then
-        return vehicle
-    end
-    return nil
+    local context = NativeContext.cabinet(playerObj)
+    return context and context.surface or nil
 end
 
 function VLS.canUseVehicleGenericCraftSurface(playerObj, vehicle)
-    return playerObj ~= nil
-        and vehicle ~= nil
-        and playerObj:getVehicle() == vehicle
-        and VLS.isSupportedVehicle(vehicle)
-        and VLS.hasGenericCraftSurface(vehicle)
+    return NativeContext.cabinet(playerObj, vehicle) ~= nil
 end
 
 function VLS.isBedEquipment(item)
@@ -633,7 +622,17 @@ end
 
 function VLS.isStorageEquipment(item)
     local profile = VLS.getEquipmentProfile(item)
+    if VLS.usesNativeContainer(profile) then
+        local definition, reason = NativeDefinition.singleContainer(item)
+        return definition ~= nil and definition.capacity > 0, reason
+    end
     return profile ~= nil and profile.capacity ~= nil and profile.capacity > 0
+end
+
+-- Furniture whose container is read from its original vanilla definition.
+function VLS.usesNativeContainer(profile)
+    return profile ~= nil and (profile.genericCraftSurface == true
+        or profile.overhead == true or profile.native == true)
 end
 
 function VLS.isManagedPart(part)
@@ -683,6 +682,8 @@ function VLS.isWaterTankShortcutEnabled()
 end
 
 function VLS.isInstallationEnabled(part, itemOrType)
+    -- New installations follow the item's space; installed equipment stays usable.
+    if not VLS.NativeSpace.allows(part, itemOrType) then return false end
     if VLS.isOverheadPart(part) then
         if not VLS.hasTopFrame(part) then return false end
         local profile = type(itemOrType) == "string"
@@ -811,7 +812,19 @@ function VLS.getSeatEquipmentDisplayName(vehicle, seat)
     return item and item:getDisplayName() or VLS.getPartDisplayName(part, nil)
 end
 
-local CONTAINER_PROFILE_VERSION = 2
+local CONTAINER_PROFILE_VERSION = 3
+local nativeDefinitionFailures = setmetatable({}, { __mode = "k" })
+function VLS.getNativeDefinitionFailure(part)
+    return nativeDefinitionFailures[part]
+end
+local function noteNativeDefinitionFailure(part, reason)
+    if nativeDefinitionFailures[part] == reason then return end
+    nativeDefinitionFailures[part] = reason
+    if reason then
+        print("[VLS native cabinet unavailable] part=" .. tostring(part:getId())
+            .. " reason=" .. tostring(reason))
+    end
+end
 
 local function applyContainerProfile(container, profile, fallbackType)
     if not container then return false end
@@ -822,10 +835,14 @@ local function applyContainerProfile(container, profile, fallbackType)
         changed = true
     end
     local containerType = profile and profile.containerType or fallbackType
-    local openSound = profile and profile.containerOpenSound or "VehicleTrunkOpen"
-    local closeSound = profile and profile.containerCloseSound or "VehicleTrunkClose"
-    local putSound = profile and profile.containerPutSound or "VehicleTrunkTransferItem"
-    local takeSound = profile and profile.containerTakeSound or "VehicleTrunkTransferItem"
+    local function sound(key, fallback)
+        if profile and profile.nativeDefinition then return profile[key] end
+        return profile and profile[key] or fallback
+    end
+    local openSound = sound("containerOpenSound", "VehicleTrunkOpen")
+    local closeSound = sound("containerCloseSound", "VehicleTrunkClose")
+    local putSound = sound("containerPutSound", "VehicleTrunkTransferItem")
+    local takeSound = sound("containerTakeSound", "VehicleTrunkTransferItem")
     if container:getType() ~= containerType then
         container:setType(containerType)
         changed = true
@@ -885,9 +902,7 @@ function VLS.walkApplianceContainer(container, visitor, state)
 end
 
 function VLS.getInstalledCapabilityPart(vehicle, capability)
-    local profile = VLS.getVehicleProfile(vehicle)
-    if not profile then return nil end
-    for _, partId in ipairs(profile.universalParts) do
+    for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
         local part = VLS.getInstalledPart(vehicle, partId)
         if part and VLS.getEquipmentCapability(part:getInventoryItem()) == capability then
             return part
@@ -898,9 +913,7 @@ end
 
 function VLS.getInstalledCapabilityParts(vehicle, capability)
     local result = {}
-    local profile = VLS.getVehicleProfile(vehicle)
-    if not profile then return result end
-    for _, partId in ipairs(profile.universalParts) do
+    for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
         local part = VLS.getInstalledPart(vehicle, partId)
         if part and VLS.getEquipmentCapability(part:getInventoryItem()) == capability then
             table.insert(result, part)
@@ -924,6 +937,17 @@ function VLS.ensureUniversalContainerProfile(part)
     local container = part:getItemContainer()
     if not container then return nil end
     local profile = VLS.getEquipmentProfile(part:getInventoryItem())
+    if VLS.usesNativeContainer(profile) then
+        local definition, reason = NativeDefinition.furniture(part:getInventoryItem())
+        if not definition then
+            -- Leave saved inventory/capacity intact if the engine cannot resolve
+            -- the native definition. Do not fabricate success from VLS constants.
+            noteNativeDefinitionFailure(part, reason)
+            return profile, false, reason
+        end
+        noteNativeDefinitionFailure(part, nil)
+        profile = definition
+    end
     if profile and profile.capability == "laundryCombo"
             and VLS.getLaundryMode(part) == "laundryDryer" then
         local dryerProfile = {}
@@ -1011,11 +1035,13 @@ local function syncOneFreezerSlot(vehicle, universalPartId)
     local container = freezer and freezer:getItemContainer()
     if not container then return false end
     local fridge = VLS.getInstalledPart(vehicle, universalPartId)
-    if fridge and VLS.getEquipmentCapability(fridge:getInventoryItem()) ~= "cooling" then
-        fridge = nil
-    end
+    local fridgeProfile = fridge and VLS.getEquipmentProfile(fridge:getInventoryItem())
+    -- The vanilla freezer drawer size; a freezer-only appliance has none.
+    local freezerCapacity = fridgeProfile and fridgeProfile.capability == "cooling"
+        and (fridgeProfile.freezerCapacity or VLS.FREEZER_CAPACITY) or 0
+    if freezerCapacity <= 0 then fridge = nil end
     local containerProfile = fridge and {
-        capacity = VLS.FREEZER_CAPACITY,
+        capacity = freezerCapacity,
         containerType = "freezer",
         containerOpenSound = "OpenFridge",
         containerCloseSound = "CloseFridge",
@@ -1048,8 +1074,7 @@ function VLS.syncFreezerSlot(vehicle, universalPartId)
         return syncOneFreezerSlot(vehicle, universalPartId)
     end
     local changed = false
-    local profile = VLS.getVehicleProfile(vehicle)
-    for _, partId in ipairs(profile.universalParts) do
+    for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
         if syncOneFreezerSlot(vehicle, partId) then changed = true end
     end
     return changed
@@ -1318,6 +1343,7 @@ function VLS.Create.UniversalSlot(vehicle, part)
 end
 
 function VLS.PartComplete.UniversalSlot(vehicle, part)
+    NativeContext.installationChanged(vehicle, part)
     VLS.syncUniversalSlot(part)
     VLS.syncFreezerSlot(vehicle, part and part:getId())
     VLS.syncTelevisionDevice(vehicle, part, true)
@@ -1581,27 +1607,38 @@ function VLS.getComboDryPowerConsumption()
     return VLS.getComboPowerConsumption()
 end
 
+-- One laundry executor: a combo machine switches between both modes, a washer
+-- or dryer keeps its single vanilla mode.
+function VLS.getLaundryModes(part)
+    local profile = part and VLS.getEquipmentProfile(part:getInventoryItem())
+    return profile and profile.laundryModes or { "laundryWasher", "laundryDryer" }
+end
+
 function VLS.getLaundryMode(part)
+    local modes = VLS.getLaundryModes(part)
+    if #modes == 1 then return modes[1] end
     local data = part and part:getModData()
     return data and data.vlsLaundryMode == "laundryDryer"
         and "laundryDryer" or "laundryWasher"
 end
 
+-- One heating executor: microwaves and ovens differ only by the range of the
+-- vanilla window (ISMicrowaveUI / ISOvenUI knobs) the appliance uses.
+VLS.COOKING_WINDOWS = {
+    microwave = { minTemperature = 50, maxTemperature = 130, maxTimer = 3600 },
+    oven = { minTemperature = 0, maxTemperature = 300, maxTimer = 7200 },
+}
+function VLS.getCookingLimits(part)
+    local profile = part and VLS.getEquipmentProfile(part:getInventoryItem())
+    local window = profile and VLS.COOKING_WINDOWS[profile.cookingWindow]
+        and profile.cookingWindow or "microwave"
+    return VLS.COOKING_WINDOWS[window], window
+end
+
 -- Shared vehicle power adapter. All auxiliary-battery consumers use this
 -- boundary; device code supplies a rate and units (minutes, crafts or liters).
 -- Existing public VLS helpers below remain small compatibility delegates.
-VLS.VehiclePower = VLS.VehiclePower or {}
-local VehiclePower = VLS.VehiclePower
-
-local function finitePower(value)
-    return type(value) == "number" and value == value
-        and value >= 0 and value < math.huge
-end
-
-function VehiclePower.rate(displayValue)
-    if not finitePower(displayValue) then return 0 end
-    return displayValue / VLS.APPLIANCE_DRAIN_DISPLAY_SCALE
-end
+local VehiclePower = require("VLS_NativePower").bind(VLS)
 
 function VLS.getSmallApplianceDrainPerUse()
     return VehiclePower.rate(getApplianceBalanceOption("SmallAppliancePowerConsumption",
@@ -1626,91 +1663,6 @@ end
 
 function VLS.getTelevisionDrainPerMinute()
     return VehiclePower.rate(VLS.getTelevisionPowerConsumption())
-end
-
-function VLS.getAuxBatteryPart(vehicle)
-    return VLS.getInstalledPart(vehicle, VLS.AUX_BATTERY_PART_ID)
-end
-
-function VehiclePower.snapshot(vehicle)
-    local part = VLS.getAuxBatteryPart(vehicle)
-    local item = part and part:getInventoryItem()
-    if not item then return nil end
-    return { vehicle = vehicle, part = part, item = item,
-        charge = item:getCurrentUsesFloat() }
-end
-
-local function writePower(snapshot, charge, deferSync)
-    if isClient and isClient() then return false end
-    if not snapshot or not finitePower(charge)
-            or VLS.getAuxBatteryPart(snapshot.vehicle) ~= snapshot.part
-            or snapshot.part:getInventoryItem() ~= snapshot.item then return false end
-    charge = math.min(1, charge)
-    if snapshot.item:getCurrentUsesFloat() ~= charge then
-        snapshot.item:setUsedDelta(charge)
-        if not deferSync then VehiclePower.sync(snapshot.vehicle, snapshot.part) end
-    end
-    return true
-end
-
-function VehiclePower.sync(vehicle, part)
-    if isClient and isClient() then return end
-    part = part or VLS.getAuxBatteryPart(vehicle)
-    if part then vehicle:transmitPartUsedDelta(part) end
-end
-
-function VehiclePower.restore(snapshot, deferSync)
-    return snapshot == nil or writePower(snapshot, snapshot.charge, deferSync)
-end
-
-function VehiclePower.charge(vehicle)
-    local state = VehiclePower.snapshot(vehicle)
-    return state and state.charge or 0
-end
-
-function VehiclePower.has(vehicle, required)
-    required = required == nil and 0.0001 or required
-    local state = VehiclePower.snapshot(vehicle)
-    return finitePower(required) and state ~= nil and state.charge >= required
-end
-
-function VehiclePower.capacity(vehicle, rate)
-    if not finitePower(rate) then return 0 end
-    local state = VehiclePower.snapshot(vehicle)
-    if not state then return 0 end
-    return rate == 0 and math.huge or math.max(0, state.charge) / rate
-end
-
-function VehiclePower.consume(vehicle, amount)
-    if not finitePower(amount) then return false end
-    local state = VehiclePower.snapshot(vehicle)
-    if not state then return false end
-    -- Preserve established continuous-device behavior: an exhausted battery
-    -- reaches zero and the caller stops the device on this false result.
-    local sufficient = state.charge >= amount
-    if not writePower(state, math.max(0, state.charge - amount)) then return false end
-    return sufficient
-end
-
-function VehiclePower.reserve(vehicle, amount)
-    if not finitePower(amount) or (isClient and isClient()) then return nil end
-    if amount == 0 then return { cost = 0 } end
-    local state = VehiclePower.snapshot(vehicle)
-    if not state or state.charge < amount then return nil end
-    if not writePower(state, state.charge - amount, true) then return nil end
-    state.cost = amount
-    return state
-end
-
-function VehiclePower.settle(reservation, used)
-    if not reservation or reservation.settled or not finitePower(used)
-            or used > reservation.cost + 0.000000001 then return false end
-    used = math.min(used, reservation.cost)
-    if reservation.cost == 0 then reservation.settled = true; return true end
-    local charge = reservation.item:getCurrentUsesFloat()
-    if not writePower(reservation, charge + reservation.cost - used, true) then return false end
-    reservation.settled = true
-    return true
 end
 
 function VLS.getAuxBatteryCharge(vehicle)
@@ -2005,11 +1957,13 @@ function VLS.Update.VehicleWaterTank(vehicle, part)
 end
 
 function VLS.PartComplete.VehicleWaterTankInstalled(vehicle, part)
+    NativeContext.installationChanged(vehicle, part)
     part:setContainerContentAmount(0)
     VLS.syncVehicleWaterTank(vehicle, part)
 end
 
 function VLS.PartComplete.VehicleWaterTankUninstalled(vehicle, part, item)
+    NativeContext.installationChanged(vehicle, part)
     if item and item:getFluidContainer() and GameEntityFactory then
         GameEntityFactory.RemoveComponentType(item, ComponentType.FluidContainer)
         if item.syncItemFields then item:syncItemFields() end
@@ -2054,8 +2008,9 @@ local function refreshOneApplianceEnvironment(vehicle, part, force, slotsSynced)
     if capability == "cooking" then
         local data = part:getModData()
         if data.vlsMicrowaveActive and powered then
-            local temperature = math.max(50, math.min(130,
-                data.vlsMicrowaveTemperature or 90))
+            local limits = VLS.getCookingLimits(part)
+            local temperature = math.max(limits.minTemperature,
+                math.min(limits.maxTemperature, data.vlsMicrowaveTemperature or 90))
             if setContainerEnvironment(container,
                     1.0 + temperature / 100, 1.0, true, partForce) then
                 anyChanged = true
@@ -2065,9 +2020,12 @@ local function refreshOneApplianceEnvironment(vehicle, part, force, slotsSynced)
                     false, partForce) then anyChanged = true end
         end
     elseif capability == "cooling" then
+        -- A freezer-only appliance (chest freezer) freezes its main compartment.
+        local coolingProfile = VLS.getEquipmentProfile(part:getInventoryItem())
+        local freezerOnly = coolingProfile and coolingProfile.freezerOnly
         if setContainerEnvironment(container,
-                powered and 0.2 or 1.0,
-                powered and VLS.getFridgeAgeFactor() or 1.0,
+                powered and (freezerOnly and 0.1 or 0.2) or 1.0,
+                powered and (freezerOnly and 0.0 or VLS.getFridgeAgeFactor()) or 1.0,
                 powered, partForce) then anyChanged = true end
         local freezer = VLS.getFreezerPartForUniversal(vehicle, partId)
         local freezerContainer = freezer and freezer:getItemContainer()
@@ -2096,7 +2054,7 @@ function VLS.refreshApplianceEnvironment(vehicle, onlyPart, force, slotsSynced)
     if onlyPart then
         if onlyPart:getVehicle() ~= vehicle then return false end
         -- Validate profile membership without looking up every sibling part.
-        for _, partId in ipairs(profile.universalParts) do
+        for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
             if partId == onlyPart:getId() then
                 if vehicle:getPartById(partId) ~= onlyPart then return false end
                 return refreshOneApplianceEnvironment(
@@ -2106,7 +2064,7 @@ function VLS.refreshApplianceEnvironment(vehicle, onlyPart, force, slotsSynced)
         return false
     end
     local anyChanged = false
-    for _, partId in ipairs(profile.universalParts) do
+    for _, partId in ipairs(VLS.NativeSpace.equipmentPartIds(vehicle)) do
         local part = vehicle:getPartById(partId)
         if part and refreshOneApplianceEnvironment(vehicle, part, force, false) then
             anyChanged = true
@@ -2155,15 +2113,18 @@ end
 VLS.ContainerAccess = VLS.ContainerAccess or {}
 
 function VLS.ContainerAccess.UniversalSlot(vehicle, part, character)
-    if not part or not VLS.isStorageEquipment(part:getInventoryItem()) then return false end
-    if not character or character:getVehicle() ~= vehicle then return false end
-    if not vehicle or part:getVehicle() ~= vehicle
-            or vehicle:getPartById(part:getId()) ~= part
-            or not VLS.isUniversalPart(part) then
+    local context, accessReason = NativeContext.containerAccess(character, vehicle, part)
+    if not context then
+        if accessReason == "native_metadata_unavailable" then
+            local _, reason = NativeDefinition.singleContainer(part:getInventoryItem())
+            noteNativeDefinitionFailure(part, reason)
+        end
         return false
     end
-    VLS.ensureUniversalContainerProfile(part)
-    return true
+    local _, _, reason = VLS.ensureUniversalContainerProfile(context.part)
+    -- Failed native metadata must not masquerade as a configured container.
+    -- Existing saved contents/capacity remain untouched for a later retry.
+    return reason == nil
 end
 
 function VLS.ContainerAccess.WeaponLocker(vehicle, part, character)
@@ -2461,5 +2422,7 @@ function SeatR6.mayOccupy(vehicle, seat)
 end
 -- END VLS_SEAT_R6_SHARED_20260922
 
+
+VLS.NativeContext = NativeContext
 
 return VLS

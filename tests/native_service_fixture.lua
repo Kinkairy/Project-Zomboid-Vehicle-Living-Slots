@@ -12,10 +12,10 @@ local character={getInventory=function()return {}end,hasTrait=function()return f
  isWearingAwkwardGloves=function()return false end,isTimedActionInstant=function()return false end}
 -- INSERT_HANDCRAFT
 -- INSERT_BAD_PROPANE
-local ok,err=pcall(function()return VLSRefillBlowTorchFromVehicleAction:new(character,42,"Tank",1,2)end)
+local ok,err=pcall(function()return VLSRefillBlowTorchFromVehicleAction:new(character,42,"Tank",1,2,0)end)
 assert(not ok and tostring(err):find("KahluaTable"),tostring(err))
 -- INSERT_FIXED_PROPANE
-local fixed=VLSRefillBlowTorchFromVehicleAction:new(character,42,"Tank",1,2)
+local fixed=VLSRefillBlowTorchFromVehicleAction:new(character,42,"Tank",1,2,0)
 assert(fixed.manualInputs==nil and fixed.maxTime==250)
 
 -- The real native animation wrapper must fail on a dedicated-server action.
@@ -41,7 +41,7 @@ local cancelOk,cancelError=pcall(function()fixed:forceStop()end)
 assert(not cancelOk and tostring(cancelError):find('forceStop'))
 -- Then call the shipped repair using a real Java NetTimedAction (not a fake stop).
 for _,invalid in ipairs({'invalid source','recipe rejects inputs'})do
- local rejected=VLSRefillBlowTorchFromVehicleAction:new(character,42,'Tank',1,2)
+ local rejected=VLSRefillBlowTorchFromVehicleAction:new(character,42,'Tank',1,2,0)
  rejected.netAction=NetTimedAction.new()
  rejected.clearItemsProgressBar=function()error('rejected server touched presentation')end
  local restoreLogic=HandcraftLogic.new
@@ -67,6 +67,7 @@ Metabolics={LightWork=1};ZomboidGlobals={EquippedOrWornEncumbranceMultiplier=.3}
 syncItemFields=function()end;sendItemStats=function()end
 local square={};getCell=function()return {getGridSquare=function()return square end}end
 VLSRoofCargo={vehicleScripts={['Base.StepVan']=true}}
+-- INSERT_NATIVE_CONTEXT
 -- INSERT_TAKE_FUEL
 -- INSERT_ROOF_FUEL
 local function near(a,b)assert(math.abs(a-b)<.00001,tostring(a).." != "..tostring(b))end
@@ -78,8 +79,11 @@ local function run(amount,capacity,progress)
  local function item(id,f)return {getID=function()return id end,getFullType=function()return 'Base.JerryCan' end,
   getFluidContainer=function()return f end,syncItemFields=function()end}end
  local roofItem,can=item(1,roof),item(2,portable)
- local part={getInventoryItem=function()return roofItem end,getArea=function()return 'VLSRoofGeneratorService' end}
- local v={getPartById=function(_,id)if id=='VLSRoofPetrol1'then return part end end,
+ local v
+ local part={md={},getId=function()return "VLSRoofPetrol1"end,getVehicle=function()return v end,
+  getModData=function(self)return self.md end,getItemContainer=function()return nil end,
+  getInventoryItem=function()return roofItem end,getArea=function()return "VLSRoofGeneratorService"end}
+ v={getId=function()return 42 end,getPartById=function(_,id)if id=='VLSRoofPetrol1'then return part end end,
   getScript=function()return {getFullName=function()return 'Base.StepVan' end}end,
   getAreaCenter=function()return {getX=function()return 1 end,getY=function()return 2 end}end,
   isStopped=function()return true end,isInArea=function()return true end,getZ=function()return 0 end,transmitPartItem=function()end}
@@ -87,12 +91,12 @@ local function run(amount,capacity,progress)
   DistToProper=function()return 1 end,getInventory=function()return {contains=function()return true end}end,
   hasFullInventory=function()return false end,getFreeInventoryCapacity=function()return 100 end,
   isTimedActionInstant=function()return false end,setMetabolicTarget=function()end}
- local a=VLSRoofFuelAction:new(pl,v,can,1,-1,-1)
+ local a=VLSRoofFuelAction:new(pl,v,can,1,-1,-1,0,-1,-1)
  if progress then a:updateUse(progress);near(roof:getAmount()+portable:getAmount(),amount)end
  a:complete();near(roof:getAmount()+portable:getAmount(),amount)
  near(portable:getAmount(),math.min(amount,capacity))
  for i=1,20 do
-  local b=VLSRoofFuelAction:new(pl,v,can,1,-1,-1);b:complete()
+  local b=VLSRoofFuelAction:new(pl,v,can,1,-1,-1,0,-1,-1);b:complete()
   near(roof:getAmount()+portable:getAmount(),amount)
  end
  FluidContainer.DisposeContainer(roof);FluidContainer.DisposeContainer(portable)

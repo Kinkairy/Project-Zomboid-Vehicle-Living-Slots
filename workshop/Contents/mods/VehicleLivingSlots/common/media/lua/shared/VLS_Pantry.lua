@@ -1,4 +1,5 @@
 local VLS = require "VLS_Config"
+local NativeContext = require "VLS_NativeContext"
 require "VLS_InstallGuard"
 
 VLSPantry = VLSPantry or {}
@@ -47,12 +48,12 @@ function P.canInstall(part, item)
         and VLS.isInstallationEnabled(part, item)
 end
 
-function P.reason(character, vehicle, partId, itemId)
+function P.reason(character, vehicle, partId, itemId, installationEpoch)
     if not character or not vehicle or character:getVehicle() ~= vehicle
             or not VLS.isSupportedVehicle(vehicle) then return "ContextMenu_VLSPantryInside" end
-    local part = vehicle:getPartById(partId)
-    local item = part and part:getInventoryItem()
-    if not P.accepts(part, item) or (itemId ~= nil and item:getID() ~= itemId) then
+    local context = NativeContext.resolve(character, vehicle, partId, itemId, installationEpoch)
+    local part, item = context and context.part, context and context.item
+    if not context or not P.accepts(part, item) then
         return "ContextMenu_VLSPantryMissing"
     end
     if not VLS.hasTopFrame(part) then return "ContextMenu_VLSPantryMissing" end

@@ -1,7 +1,7 @@
 local root = assert(arg[1])
 local native = assert(arg[2])
 local count = 0
-local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
+local function eq(a,b) if a~=b then error(tostring(a).." ~= "..tostring(b)) end end
 local function test(name,fn) fn(); count=count+1; print("PASS "..name) end
 local function noop() end
 local function list(items)
@@ -16,6 +16,7 @@ ArrayList={new=function()return list()end}
 function instanceof(x,t) return x and x.kind==t or false end
 package.loaded["VLS_Config"]=nil
 local V={allowedItems={},mechanicsDisplayProviders={},installationOptionProviders={}}
+V.isManagedPart=function(p)return V.isOverheadPart(p)end
 V.isSupportedVehicle=function(v)return v and v.supported end
 V.isOverheadPart=function(p)return p and (p:getId()=="VLSPantryCoffee" or p:getId():match("^VLSOverhead[1-2]$")~=nil) end
 V.resolveEquipmentType=function()return "old" end
@@ -55,7 +56,9 @@ local coffee=item("Base.Mov_CoffeeMaker",nil,42)
 local toaster=item("Base.Mov_Toaster",nil,43)
 -- Include an old saved-part fixture to verify it is rejected.
 for _,id in ipairs({P.PART_ID,"VLSPantryToaster"})do
- local part={id=id,item=id=="VLSPantryCoffee" and coffee or nil}
+ local part={id=id,item=id=="VLSPantryCoffee" and coffee or nil,data={vlsNativeEpoch=0}}
+ function part:getModData()return self.data end
+ function part:getItemContainer()return nil end
  function part:getId()return self.id end
  function part:getVehicle()return vehicle end
  function part:getInventoryItem()return self.item end
@@ -176,7 +179,7 @@ end}
 dofile(arg[4] or (base.."shared/VLS_PantryCraftAction.lua"))
 local function action(choice)
  vehicle.parts.VLSPantryCoffee.item=choice=="toast" and toaster or coffee
- local a=VLSPantryCraftAction:new(character,17,P.PART_ID,choice=="toast" and 43 or 42,choice,nil,nil,nil)
+ local a=VLSPantryCraftAction:new(character,17,P.PART_ID,choice=="toast" and 43 or 42,choice,nil,nil,nil,vehicle.parts[P.PART_ID]:getModData().vlsNativeEpoch)
  a.netAction={forceComplete=function()a.forced=true end}
  return a
 end
@@ -252,6 +255,7 @@ package.loaded["ISUI/Crafting/ISHandcraftWindow"]=true
 package.loaded["Entity/ISUI/CraftRecipe/ISHandCraftPanel"]=true
 V.registerMechanicsUIProvider=function(id,provider)V.pantryProvider=provider end
 V.getMechanicsPreviewTexture=function()return nil end
+Translator={getMoveableDisplayName=function()return "Native appliance" end}
 getText=function(key)return key end
 getTexture=function(path)return path end
 UIFont={Small=1}
@@ -482,7 +486,7 @@ end)
 test("actual VLS auxiliary battery helpers gate and debit all three native recipes",function()
  local f=assert(io.open(base.."shared/VLS_Config.lua"));local config=f:read("*a");f:close()
  local has,consume,partGetter=V.hasAuxBatteryPower,V.consumeAuxBattery,V.getAuxBatteryPart
- local powerSource=assert(config:match("(VLS.VehiclePower =.-)function VLS.getInstalledWaterBottlePart"))
+ local powerSource=assert(config:match("(local VehiclePower = require.-)function VLS.getInstalledWaterBottlePart"))
  local smallRate=V.getSmallApplianceDrainPerUse
  assert(loadstring(powerSource))()
  V.getSmallApplianceDrainPerUse=smallRate
@@ -667,6 +671,34 @@ for _,choice in ipairs(P.choiceOrder)do
   end)
  end
 end
+test("actual pantry UI binds generation through constructor-field reconstruction",function()
+ local part=vehicle.parts[P.PART_ID];part.item=coffee;part.data.vlsNativeEpoch=0
+ P.openAppliance(character,vehicle,P.PART_ID)
+ local panel=opened().handCraftPanel;panel.logic:setRecipe(P.recipe("coffeeMug"))
+ local old=ISHandcraftAction.FromLogic(panel.logic,0);eq(old.installationEpoch,0)
+ part.data.vlsNativeEpoch=1
+ local stale=roundtrip(VLSPantryCraftAction,base.."shared/VLS_PantryCraftAction.lua",old,VLSPantryCraftAction.new)
+ eq(stale.installationEpoch,0);eq(stale:isValid(),false)
+ local outputs,debits=outputCount,vehicle.debits or 0;stale:complete()
+ eq(outputCount,outputs);eq(vehicle.debits or 0,debits)
+ local late=ISHandcraftAction.FromLogic(panel.logic,0);eq(late.installationEpoch,0);eq(late:isValid(),false)
+ P.openAppliance(character,vehicle,P.PART_ID)
+ panel=opened().handCraftPanel;panel.logic:setRecipe(P.recipe("coffeeMug"))
+ local fresh=ISHandcraftAction.FromLogic(panel.logic,0);eq(fresh.installationEpoch,1)
+ local rebuilt=roundtrip(VLSPantryCraftAction,base.."shared/VLS_PantryCraftAction.lua",fresh,VLSPantryCraftAction.new)
+ rebuilt.netAction={forceComplete=noop};rebuilt:serverStart();rebuilt:complete();rebuilt:complete()
+ eq(outputCount,outputs+1);eq(vehicle.debits,debits+1)
+ part.data.vlsNativeEpoch=0
+end)
+test("missing network generation and cancelled craft cannot produce output",function()
+ local oldServer=server;server=true
+ local missing=VLSPantryCraftAction:new(character,17,P.PART_ID,42,"coffeeMug",nil,nil,nil)
+ eq(missing.installationEpoch,-1);eq(missing:isValid(),false)
+ local a=action("coffeeMug");a:serverStart();local outputs=outputCount;local debits=vehicle.debits or 0
+ a:forceCancel();a:complete();eq(outputCount,outputs);eq(vehicle.debits or 0,debits)
+ server=oldServer
+end)
+
 test("ordinary crafting retains native constructor field names and values",function()
  -- Capture a fresh unwrapped constructor for the server's original class.
  local saved=ISHandcraftAction
@@ -680,7 +712,7 @@ test("ordinary crafting retains native constructor field names and values",funct
  eq(b.containers,containers);eq(b.variableInputRatio,0.5);eq(b.eatPercentage,0.25)
 end)
 test("malformed remote appliance choice rejects without output or exception",function()
- local a=VLSPantryCraftAction:new(character,17,P.PART_ID,42,"invalid-choice",nil,nil,nil)
+ local a=VLSPantryCraftAction:new(character,17,P.PART_ID,42,"invalid-choice",nil,nil,nil,0)
  a.netAction={forceComplete=function()a.rejected=true end}
  local outputs=outputCount;a:serverStart();assert(a.rejected);eq(outputCount,outputs)
 end)
@@ -690,6 +722,7 @@ test("three independent appliance slots retain their own native recipe and MP id
  local devices={item("Base.Mov_CoffeeMaker",nil,101),item("Base.Mov_Toaster",nil,102),item("Base.Mov_CoffeeMaker",nil,103)}
  for n=1,3 do
   local id=VLS.OVERHEAD_PART_IDS[n];local p=vehicle.parts[id] or {getVehicle=function()return vehicle end}
+  p.data=p.data or {vlsNativeEpoch=0};p.getModData=function(self)return self.data end;p.getItemContainer=function()return nil end
   p.getId=function()return id end;p.getInventoryItem=function(self)return self.item end
   p.item=devices[n];p.item.getDisplayName=function()return "Native device "..n end;vehicle.parts[id]=p
  end
@@ -704,7 +737,7 @@ test("three independent appliance slots retain their own native recipe and MP id
   b.netAction={forceComplete=noop};b:serverStart();assert(b:isValid())
   local outputs,debits=outputCount,vehicle.debits or 0;b:complete();eq(outputCount,outputs+1);eq(vehicle.debits,debits+1)
  end
- local a=VLSPantryCraftAction:new(character,17,"VLSOverhead1",102,"toast",nil,nil,nil)
+ local a=VLSPantryCraftAction:new(character,17,"VLSOverhead1",102,"toast",nil,nil,nil,0)
  vehicle.parts.VLSOverhead1.frameReady=false;eq(a:isValid(),false)
  vehicle.parts.VLSPantryCoffee.item=old;vehicle.parts.VLSOverhead1=nil;vehicle.parts.VLSOverhead2=nil
 end)

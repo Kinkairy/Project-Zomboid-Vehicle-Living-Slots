@@ -36,8 +36,12 @@ for _,name in ipairs({"Base.87fordF700bank","Base.87fordB700school","Base.87ford
   local slot=part(id,nil)
   check(V.isUniversalPart(slot),"living part")
   check(V.getPartDisplayName(slot)==p.spacePassengers[i].nameKey,"localized empty name")
-  for _,itemType in ipairs({"Base.Mov_Cot","Base.Mov_Microwave","Base.Mov_FridgeMini","Base.Mov_TrailerFridge","Base.Mov_BlueComboWasherDryer","Base.Mov_SmallPineCabinet","Base.TvWideScreen","Base.WaterDispenserBottle"})do
+  for _,itemType in ipairs({"Base.Mov_Cot","Base.Mov_BlueComboWasherDryer","Base.WaterDispenserBottle"})do
    check(V.isInstallationEnabled(slot,itemType),"install "..itemType)
+  end
+  -- Owner rule 2026-10-17: small appliances/furniture install only in the top space.
+  for _,itemType in ipairs({"Base.Mov_Microwave","Base.Mov_FridgeMini","Base.Mov_TrailerFridge","Base.Mov_SmallPineCabinet","Base.TvWideScreen"})do
+   check(not V.isInstallationEnabled(slot,itemType),"living rejects "..itemType)
   end
   SandboxVars={VehicleLivingSlots={EnableBeds=false}};check(not V.isInstallationEnabled(slot,"Base.Mov_Cot"),"bed sandbox");SandboxVars=nil
   slot.item={kind="Moveable",getWorldSprite=function()return nil end,getFullType=function()return "Base.Mov_Microwave"end,getDisplayName=function()return "native-microwave"end}

@@ -2,6 +2,7 @@
 -- Only installed-input identity, reachability and vehicle replication live here.
 local VLS = require "VLS_Propane"
 require "Entity/TimedActions/ISHandcraftAction"
+local Context = require "VLS_NativeContext"
 
 VLSRefillBlowTorchFromVehicleAction = ISHandcraftAction:derive(
     "VLSRefillBlowTorchFromVehicleAction")
@@ -21,7 +22,9 @@ function VLSRefillBlowTorchFromVehicleAction:resolveInputs(requirePosition)
     if not vehicle or not vehicle:isStopped()
             or self.character:DistToProper(vehicle) >= 4 then return end
     local tank, part = VLS.getInstalledPropaneSource(vehicle, self.partId, self.tankId)
-    if not tank or not part then return end
+    if not tank or not part or not integer(self.installationEpoch) or self.installationEpoch < 0 then return end
+    local identity = Context.partIdentity(vehicle,self.partId,self.tankId,self.installationEpoch)
+    if not identity or identity.item ~= tank or identity.part ~= part then return end
     if requirePosition ~= false and not vehicle:isInArea(part:getArea(), self.character) then return end
     local torch = self.character:getInventory():getItemWithIDRecursiv(self.torchId)
     if not torch or torch:getFullType() ~= "Base.BlowTorch"
@@ -111,7 +114,7 @@ function VLSRefillBlowTorchFromVehicleAction:performRecipe()
     vehicle:transmitPartUsedDelta(part)
 end
 
-function VLSRefillBlowTorchFromVehicleAction:new(character, vehicleId, partId, torchId, tankId)
+function VLSRefillBlowTorchFromVehicleAction:new(character, vehicleId, partId, torchId, tankId, installationEpoch)
     local recipe = ScriptManager.instance:getCraftRecipe("Base.RefillBlowTorch")
     local containers = ArrayList.new()
     containers:add(character:getInventory())
@@ -123,6 +126,11 @@ function VLSRefillBlowTorchFromVehicleAction:new(character, vehicleId, partId, t
     o.manualInputs = nil
     -- Names match constructor parameters: native NetTimedAction serializes these.
     o.vehicleId, o.partId, o.torchId, o.tankId = vehicleId, partId, torchId, tankId
+    o.installationEpoch = installationEpoch
+    if o.installationEpoch == nil then
+        local vehicle = integer(vehicleId) and getVehicleById(vehicleId) or nil
+        o.installationEpoch = Context.creationEpoch(vehicle,partId,tankId,nil,Context.partIdentity)
+    end
     o.stopOnWalk, o.stopOnRun = true, true
     return o
 end

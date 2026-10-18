@@ -1,0 +1,46 @@
+# Types listed in the shipped 3.11.1 living/top slots before the space rule.
+# Snapshot from base 4733158f; the generator keeps their identity.
+# Base.Mov_TrailerFridge: vanilla WorldObjectSprite is roof tile location_trailer_02_26; VLS recognises 02_10.
+[living]
+Base.Mov_Cot
+Base.Mattress
+Base.SleepingBag_RedPlaid
+Base.SleepingBag_BluePlaid
+Base.SleepingBag_Green
+Base.SleepingBag_GreenPlaid
+Base.SleepingBag_Camo
+Base.SleepingBag_Cheap_Green
+Base.SleepingBag_Cheap_Blue
+Base.SleepingBag_Cheap_Green2
+Base.SleepingBag_Spiffo
+Base.SleepingBag_HighQuality_Brown
+Base.SleepingBag_Hide
+Base.Mov_Microwave
+Base.Mov_Microwave2
+Base.Mov_FridgeMini
+Base.Mov_TrailerFridge location_trailer_02_10
+Base.Mov_BlueComboWasherDryer
+Base.Mov_SmallPineCabinet
+Base.Mov_ModernCounter
+Base.Mov_WoodenCounter
+Base.Mov_SteelCounter
+Base.Mov_BirchCounter
+Base.Mov_OakCounter
+Base.Mov_DarkCounter
+Base.Mov_GreenCounter
+Base.Mov_WhiteCounter
+Base.WaterDispenserBottle
+Base.TvAntique
+Base.TvBlack
+Base.TvWideScreen
+[top]
+Moveables.fixtures_counters_01_16
+Moveables.fixtures_counters_01_20
+Moveables.fixtures_counters_01_24
+Moveables.fixtures_counters_01_28
+Moveables.fixtures_counters_01_144
+Moveables.fixtures_counters_01_148
+Moveables.fixtures_counters_01_152
+Moveables.fixtures_counters_01_156
+Base.Mov_CoffeeMaker
+Base.Mov_Toaster

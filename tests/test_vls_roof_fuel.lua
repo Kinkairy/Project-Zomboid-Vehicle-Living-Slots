@@ -53,6 +53,10 @@ local function fixture()
  function v:getScript()return {getFullName=function()return self.name end}end
  function v:getPartById(id)return id=="GasTank" and tank or id=="VLSRoofPetrol1" and part or nil end
  function v:isStopped()return self.stopped end;function v:isInArea()return self.area end
+ function v:getId()return 7 end
+ function part:getVehicle()return v end
+ function part:getModData()self.md=self.md or {};return self.md end
+ function part:getItemContainer()return nil end
  function v:getZ()return 0 end;function v:transmitPartModData()end;function v:transmitPartItem()end
  local pl={distance=2,z=0,carried=portable}
  function pl:faceLocation()end
@@ -69,7 +73,7 @@ local function fixture()
 end
 local function action()
  local pl,v,p,f,c,t,i=fixture()
- return VLSRoofFuelAction:new(pl,v,i,p:getInventoryItem():getID(),-1,-1),pl,v,p,f,c,t,i
+ return VLSRoofFuelAction:new(pl,v,i,p:getInventoryItem():getID(),-1,-1,0,-1,-1),pl,v,p,f,c,t,i
 end
 test("native class owns pump animation sound duration progress and stop",function()
  local a=action()
@@ -132,10 +136,13 @@ test("concurrent target fill cannot overfill portable",function()
 end)
 test("multiple source tanks behave as one finite pump",function()
  local a,pl,v,p,f,c=action();f.amount=1
- local second=fluid(2.25,20);local p2={getInventoryItem=function()return item(30,second)end}
+ local second=fluid(2.25,20);local p2={getId=function()return "VLSRoofPetrol2"end,getInventoryItem=function()return item(30,second)end}
+ function p2:getVehicle()return v end
+ function p2:getModData()return {} end
+ function p2:getItemContainer()return nil end
  local get=v.getPartById
  v.getPartById=function(self,id)if id=="VLSRoofPetrol2"then return p2 end;return get(self,id)end
- a=VLSRoofFuelAction:new(pl,v,a.petrolCan,10,30,-1)
+ a=VLSRoofFuelAction:new(pl,v,a.petrolCan,10,30,-1,0,0,-1)
  eq(a:complete(),true);near(c.amount,3);near(f.amount,0);near(second.amount,.25)
 end)
 test("native server animation events advance petrol",function()
@@ -160,7 +167,7 @@ end)
 test("removed network portable reference cancels without calling Java contains with nil",function()
  local a,pl,v=action()
  pl.getInventory=function()return {contains=function(_,item)assert(item~=nil);return false end}end
- local missing=VLSRoofFuelAction:new(pl,v,nil,10,-1,-1)
+ local missing=VLSRoofFuelAction:new(pl,v,nil,10,-1,-1,0,-1,-1)
  eq(missing:isValid(),false);eq(missing:complete(),false)
 end)
 test("fill-all queued before earlier containers finish refreshes remaining fuel",function()
@@ -168,8 +175,8 @@ test("fill-all queued before earlier containers finish refreshes remaining fuel"
  local c2,c3=fluid(0,3),fluid(0,4)
  local i2,i3=item(21,c2),item(22,c3)
  pl.getInventory=function()return {contains=function()return true end}end
- local second=VLSRoofFuelAction:new(pl,v,i2,10,-1,-1)
- local third=VLSRoofFuelAction:new(pl,v,i3,10,-1,-1)
+ local second=VLSRoofFuelAction:new(pl,v,i2,10,-1,-1,0,-1,-1)
+ local third=VLSRoofFuelAction:new(pl,v,i3,10,-1,-1,0,-1,-1)
  first:refresh();eq(first:complete(),true)
  second:refresh();eq(second:complete(),true)
  third:refresh();eq(third:complete(),true)
@@ -191,7 +198,7 @@ test("native facing uses the same generator service area",function()
 end)
 test("repeated empty-source attempts never refill or create fuel",function()
  local a,pl,v,p,f,c=action();f.amount=.25;a:refresh();eq(a:complete(),true)
- for i=1,20 do local b=VLSRoofFuelAction:new(pl,v,a.petrolCan,10,-1,-1);eq(b:complete(),false) end
+ for i=1,20 do local b=VLSRoofFuelAction:new(pl,v,a.petrolCan,10,-1,-1,0,-1,-1);eq(b:complete(),false) end
  near(f.amount,0);near(c.amount,.25)
 end)
 for _,case in ipairs({{.9995,10},{10,.9995},{.0005,10},{10,1.9995}})do
@@ -200,4 +207,23 @@ for _,case in ipairs({{.9995,10},{10,.9995},{.0005,10},{10,1.9995}})do
   a:updateUse(1);a:complete();near(f.amount+c.amount,case[1]);near(c.amount,math.min(case[1],case[2]))
  end)
 end
+test("actual captured roof endpoint never upgrades a same-ID installation",function()
+ local a,pl,v,p,f,c=action();local captured=F.capture(v)
+ p:getModData().vlsNativeEpoch=1
+ local old=ISTakeFuel:new(pl,captured,a.petrolCan)
+ local remote=roundTrip(VLSRoofFuelAction,base.."shared/VLS_RoofFuel.lua",old)
+ eq(remote.roofEpoch1,0);eq(remote:isValid(),false);remote:updateUse(.5)
+ eq(remote:complete(),false);near(c.amount,0);near(f.amount,8.75)
+ local fresh=ISTakeFuel:new(pl,F.capture(v),a.petrolCan)
+ eq(fresh.roofEpoch1,1);eq(fresh:complete(),true);near(c.amount,3)
+end)
+test("missing server epoch cannot adopt installed roof fuel",function()
+ local a,pl,v,p,f,c=action()
+ local old=VLSRoofFuelAction:new(pl,v,a.petrolCan,10,-1,-1)
+ eq(old.roofEpoch1,-1);eq(old:complete(),false);near(c.amount,0);near(f.amount,8.75)
+end)
+test("same-ID changed epoch during running fuel action blocks progress",function()
+ local a,pl,v,p,f,c=action();a:updateUse(.5);local before,carried=f.amount,c.amount
+ p:getModData().vlsNativeEpoch=1;a:updateUse(1);eq(a:complete(),false);near(f.amount,before);near(c.amount,carried)
+end)
 print("RESULT roof fuel tests="..n.." failures=0")

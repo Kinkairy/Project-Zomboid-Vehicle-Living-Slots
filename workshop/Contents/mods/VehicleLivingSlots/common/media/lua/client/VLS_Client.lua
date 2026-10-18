@@ -1,10 +1,12 @@
 require "VLS_Config"
+local NativeContext = require "VLS_NativeContext"
 require "Entity/ISEntityUI"
 require "ISUI/ISInventoryPaneContextMenu"
 require "ISUI/Crafting/ISHandcraftWindow"
 -- VLS_DIRECT_ORIGINAL_FIX_20260904_V2: client
 require "ISUI/ISWorldObjectContextMenu"
 require "ISUI/Fireplace/ISMicrowaveUI"
+require "ISUI/Fireplace/ISOvenUI"
 require "Fluids/ISFluidTransferUI"
 require "Definitions/ContainerButtonIcons"
 require "ISUI/LootWindow/ISLootWindowContainerControls"
@@ -732,9 +734,10 @@ local function getReachableBedVehicle(playerObj)
     return part and vehicle or nil, part, seat
 end
 
-local function enterBed(playerObj, vehicle, sleepAfterEntry)
-    local _, seat = getReachableBed(vehicle, playerObj)
-    if not seat then return end
+local function enterBed(playerObj, vehicle, sleepAfterEntry, partId, itemId, installationEpoch)
+    local part, seat = getReachableBed(vehicle, playerObj)
+    local identity = NativeContext.identity(vehicle,partId,itemId,installationEpoch)
+    if not seat or not identity or identity.part ~= part then return end
 
     if not vehicle:isStopped() then
         HaloTextHelper.addBadText(playerObj, getText("IGUI_PlayerText_CanNotEnterMovingCar"))
@@ -744,12 +747,14 @@ local function enterBed(playerObj, vehicle, sleepAfterEntry)
     if sleepAfterEntry then
         pendingBedSleep[playerObj:getPlayerNum()] = {
             vehicle = vehicle,
+            partId=partId, itemId=itemId, installationEpoch=installationEpoch, seat=seat,
             ticks = 600,
         }
     else
         pendingBedRest[playerObj:getPlayerNum()] = {
             player = playerObj,
             vehicle = vehicle,
+            partId=partId, itemId=itemId, installationEpoch=installationEpoch, seat=seat,
             ticks = 600,
         }
     end
@@ -780,12 +785,19 @@ local function isBedEntryComplete(playerObj, vehicle)
         and playerObj:GetVariable("bSwitchingSeat") ~= "true"
 end
 
+local function isPendingBedIdentityValid(pending)
+    local identity = NativeContext.identity(pending.vehicle,pending.partId,
+        pending.itemId,pending.installationEpoch)
+    return identity ~= nil and VLS.getBedSeat(pending.vehicle,identity.part) == pending.seat
+end
+
 local function processPendingBedSleep()
     for playerNum, pending in pairs(pendingBedSleep) do
         local playerObj = getSpecificPlayer(playerNum)
-        if not playerObj then
+        if not playerObj or not isPendingBedIdentityValid(pending) then
             pendingBedSleep[playerNum] = nil
-        elseif isBedEntryComplete(playerObj, pending.vehicle) then
+        elseif isBedEntryComplete(playerObj, pending.vehicle)
+                and pending.vehicle:getSeat(playerObj) == pending.seat then
             pendingBedSleep[playerNum] = nil
             stopBedRest(playerObj)
             ISVehicleMenu.onSleep(playerObj, pending.vehicle)
@@ -802,15 +814,18 @@ local function processPendingBedRest()
         local vehicle = playerObj and playerObj:getVehicle() or nil
         local playerData = playerObj and getPlayerData(playerNum) or nil
         local sleepModal = playerData and playerData.vehicleSleepModal
-        if not playerObj or pending.player ~= playerObj or playerObj:isDead()
+        if not playerObj or not isPendingBedIdentityValid(pending)
+                or pending.player ~= playerObj or playerObj:isDead()
                 or (vehicle and pending.vehicle ~= vehicle)
                 or (pending.entered and not vehicle)
                 or playerObj:isAsleep() or pendingBedSleep[playerNum]
                 or sleepModal then
             pendingBedRest[playerNum] = nil
-        elseif vehicle and isBedEntryComplete(playerObj, pending.vehicle) then
+        elseif vehicle and isBedEntryComplete(playerObj, pending.vehicle)
+                and vehicle:getSeat(playerObj) == pending.seat then
             pendingBedRest[playerNum] = nil
-            ISTimedActionQueue.add(ISVLSVehicleRestAction:new(playerObj))
+            ISTimedActionQueue.add(ISVLSVehicleRestAction:new(playerObj,vehicle:getId(),
+                pending.partId,pending.itemId,pending.installationEpoch))
         else
             -- Walking to the door / entering / changing seats are asynchronous.
             -- A player still outside the car is not an immediate cancellation.
@@ -870,6 +885,7 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
         playerObj = playerObj,
         isVLSMicrowaveProxy = true,
         itemId = part:getInventoryItem():getID(),
+        installationEpoch = part:getModData().vlsNativeEpoch or 0,
     }
     proxy.power = {
         isPowered = function()
@@ -894,7 +910,8 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
     end
 
     function proxy:setTimer(timer)
-        self.pendingTimer = math.max(0, math.min(3600, timer or 0))
+        local limits = VLS.getCookingLimits(self.part)
+        self.pendingTimer = math.max(0, math.min(limits.maxTimer, timer or 0))
     end
 
     function proxy:getMaxTemperature()
@@ -902,8 +919,13 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
     end
 
     function proxy:setMaxTemperature(temperature)
-        self.pendingTemperature = math.max(50, math.min(130, temperature or 90))
+        local limits = VLS.getCookingLimits(self.part)
+        self.pendingTemperature = math.max(limits.minTemperature,
+            math.min(limits.maxTemperature, temperature or 90))
     end
+
+    -- ISOvenUI also syncs multi-tile stove sprites; a vehicle part has none.
+    function proxy:syncSpriteGridObjects() end
 
     function proxy:isRunningFor()
         local data = self:getData()
@@ -918,11 +940,13 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
     function proxy:sync()
         local item = self.part:getInventoryItem()
         if not item or item:getID() ~= self.itemId
+                or (self.part:getModData().vlsNativeEpoch or 0) ~= self.installationEpoch
                 or self.playerObj:getVehicle() ~= self.vehicle then return end
         sendApplianceCommand(self.playerObj, "setMicrowaveParams", {
             vehicle = self.vehicle:getId(),
             part = self.part:getId(),
             item = self.itemId,
+            epoch = self.installationEpoch,
             timer = self:getTimer(),
             temperature = self:getMaxTemperature(),
         })
@@ -931,16 +955,22 @@ local function newMicrowaveProxy(vehicle, part, playerObj)
     return proxy
 end
 
--- ISMicrowaveUI.initialise stores its Close BUTTON in ui.close. Do not call
+-- The vanilla window a VLS heating appliance uses (same knobs as in a house).
+local function cookingWindowClass(window)
+    return window == "oven" and ISOvenUI or ISMicrowaveUI
+end
+
+-- The vanilla windows store their Close BUTTON in ui.close. Do not call
 -- ui:close(), which tries to call that button table instead of a method.
 local function closeVLSMicrowaveWindow(ui)
     if not ui then return end
     ui:setVisible(false)
     ui:removeFromUIManager()
+    local class = ui.vlsWindowClass or ISMicrowaveUI
     local playerNum = ui.character and ui.character:getPlayerNum() or ui.playerNum
-    if playerNum ~= nil and ISMicrowaveUI.instance
-            and ISMicrowaveUI.instance[playerNum + 1] == ui then
-        ISMicrowaveUI.instance[playerNum + 1] = nil
+    if playerNum ~= nil and class.instance
+            and class.instance[playerNum + 1] == ui then
+        class.instance[playerNum + 1] = nil
     end
     local pad = playerNum ~= nil and JoypadState.players[playerNum + 1]
     if pad and pad.focus == ui then setJoypadFocus(playerNum, ui.prevFocus) end
@@ -975,17 +1005,19 @@ local function isVLSMicrowaveWindowValid(ui, proxy)
         and playerObj:getVehicle() == vehicle
         and VLS.getInstalledPart(vehicle, part:getId()) == part
         and item and item:getID() == proxy.itemId
+        and (part:getModData().vlsNativeEpoch or 0) == proxy.installationEpoch
         and VLS.getEquipmentCapability(item) == "cooking"
 end
 
-local function installMicrowaveWindowClientHook()
-    if not ISMicrowaveUI or not ISMicrowaveUI.update
-            or ISMicrowaveUI.update == MicrowaveWindowHooks.updateWrapper then
+local function installMicrowaveWindowClientHook(windowClass, key)
+    MicrowaveWindowHooks.updateWrappers = MicrowaveWindowHooks.updateWrappers or {}
+    if not windowClass or not windowClass.update
+            or windowClass.update == MicrowaveWindowHooks.updateWrappers[key] then
         return
     end
 
-    local previousMicrowaveWindowUpdate = ISMicrowaveUI.update
-    MicrowaveWindowHooks.updateWrapper = function(self)
+    local previousMicrowaveWindowUpdate = windowClass.update
+    MicrowaveWindowHooks.updateWrappers[key] = function(self)
         local proxy = self and self.oven or nil
         if not proxy or proxy.isVLSMicrowaveProxy ~= true then
             return previousMicrowaveWindowUpdate(self)
@@ -1014,10 +1046,11 @@ local function installMicrowaveWindowClientHook()
         return unpack(results, 2)
     end
 
-    ISMicrowaveUI.update = MicrowaveWindowHooks.updateWrapper
+    windowClass.update = MicrowaveWindowHooks.updateWrappers[key]
 end
 
-installMicrowaveWindowClientHook()
+installMicrowaveWindowClientHook(ISMicrowaveUI, "microwave")
+installMicrowaveWindowClientHook(ISOvenUI, "oven")
 
 local function onVLSMicrowaveClick(ui, button)
     if button.internal == "CLOSE" then
@@ -1040,6 +1073,7 @@ local function onVLSMicrowaveClick(ui, button)
         vehicle = proxy.vehicle:getId(),
         part = proxy.part:getId(),
         item = proxy.itemId,
+        epoch = proxy.installationEpoch,
         -- A start with a zero timer otherwise looks like a dead On button.
         active = not proxy:Activated(),
         timer = requestedTimer,
@@ -1055,16 +1089,18 @@ local function openMicrowaveSettings(playerObj, vehicle, part)
     end
 
     local playerNum = playerObj:getPlayerNum()
-    local previous = ISMicrowaveUI.instance
-        and ISMicrowaveUI.instance[playerNum + 1]
+    local _, window = VLS.getCookingLimits(part)
+    local class = cookingWindowClass(window)
+    local previous = class.instance and class.instance[playerNum + 1]
     if previous then
         previous:removeFromUIManager()
         previous:setVisible(false)
-        ISMicrowaveUI.instance[playerNum + 1] = nil
+        class.instance[playerNum + 1] = nil
     end
 
-    local ui = ISMicrowaveUI:new(0, 0, 430, 280,
+    local ui = class:new(0, 0, 430, 280,
         newMicrowaveProxy(vehicle, part, playerObj), playerObj)
+    ui.vlsWindowClass = class
     ui:initialise()
     ui.onClick = onVLSMicrowaveClick
     ui.ok.onclick = onVLSMicrowaveClick
@@ -1159,7 +1195,7 @@ function VLSMicrowaveToggleHandler:perform()
         sendApplianceCommand(self.playerObj, "stopMicrowave", {
             vehicle = vehicle:getId(),
             part = part:getId(),
-            item = part:getInventoryItem():getID(),
+            item = part:getInventoryItem():getID(), epoch = part:getModData().vlsNativeEpoch or 0,
         })
         return
     end
@@ -1170,7 +1206,7 @@ function VLSMicrowaveToggleHandler:perform()
     sendApplianceCommand(self.playerObj, "toggleMicrowave", {
         vehicle = vehicle:getId(),
         part = part:getId(),
-        item = part:getInventoryItem():getID(),
+        item = part:getInventoryItem():getID(), epoch = part:getModData().vlsNativeEpoch or 0,
         active = true,
         timer = math.max(60, data.vlsMicrowaveTimer or 0),
         temperature = data.vlsMicrowaveTemperature or 90,
@@ -1265,7 +1301,7 @@ function VLSLaundryToggleHandler:perform()
     end
     sendApplianceCommand(self.playerObj, "toggleLaundry", {
         vehicle = vehicle:getId(), part = part:getId(),
-        item = part:getInventoryItem():getID(), active = activate,
+        item = part:getInventoryItem():getID(), epoch = part:getModData().vlsNativeEpoch or 0, active = activate,
     })
 end
 
@@ -1278,7 +1314,12 @@ end
 ISLootWindowObjectControlHandler_VLSLaundryMode =
     ISLootWindowObjectControlHandler:derive("ISLootWindowObjectControlHandler_VLSLaundryMode")
 local VLSLaundryModeHandler = ISLootWindowObjectControlHandler_VLSLaundryMode
-VLSLaundryModeHandler.shouldBeVisible = VLSLaundryToggleHandler.shouldBeVisible
+-- Only a combo machine switches modes; a washer or dryer has one.
+function VLSLaundryModeHandler:shouldBeVisible()
+    if not VLSLaundryToggleHandler.shouldBeVisible(self) then return false end
+    local _, part = getLootLaundry(self)
+    return #VLS.getLaundryModes(part) > 1
+end
 VLSLaundryModeHandler.new = VLSLaundryToggleHandler.new
 
 function VLSLaundryModeHandler:getControl()
@@ -1294,7 +1335,7 @@ function VLSLaundryModeHandler:perform()
     if not part then return end
     sendApplianceCommand(self.playerObj, "setLaundryMode", {
         vehicle = vehicle:getId(), part = part:getId(),
-        item = part:getInventoryItem():getID(),
+        item = part:getInventoryItem():getID(), epoch = part:getModData().vlsNativeEpoch or 0,
         mode = mode == "laundryWasher" and "dryer" or "washer",
     })
 end
@@ -1319,7 +1360,8 @@ local function onVLSFluidTransferClick(ui, button)
     if not request then return end
     local action = VLSVehicleFluidTransferAction:new(ui.player, request.vehicle,
         request.source.part or "", request.source.item,
-        request.target.part or "", request.target.item, request.amount)
+        request.target.part or "", request.target.item, request.amount,
+        request.source.epoch or -1, request.target.epoch or -1)
     if not action:isValid() then return end
     -- The existing panel already tracks native actions, progress and unlocks
     -- on completion/cancel. No second request/ACK/timeout state machine.
@@ -1339,6 +1381,13 @@ local function refreshVLSFluidPanelEndpoint(ui, panel)
     local newFluid = endpoint:getFluidContainer()
     if oldFluid == newFluid then return end
 
+    -- Native UI closes on owner-wrapper changes. Only an already-validated
+    -- same-generation replica refresh may reset that UI comparison.
+    if panel == ui.panelLeft then
+        ui.fromPreviousOwner = nil
+    elseif panel == ui.panelRight then
+        ui.toPreviousOwner = nil
+    end
     panel.fluidBar:setContainer(newFluid)
     if panel.containerCopy then FluidContainer.DisposeContainer(panel.containerCopy) end
     panel.containerCopy = newFluid:copy()
@@ -1867,10 +1916,13 @@ local function getNearbyWaterSource(vehicle, tankPart)
 end
 
 local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
-        source)
+        source, installationEpoch)
     if not VLS.isWaterTankShortcutEnabled() or not playerObj or playerObj:getVehicle() or not source
             or VLS.getInstalledWaterTank(vehicle,
                 tankPart:getId()) ~= tank then return end
+    if type(installationEpoch) ~= "number"
+            or not NativeContext.identity(vehicle, tankPart:getId(), tank:getID(),
+                installationEpoch) then return end
     if VLS.getWaterTankFillAmount(vehicle, tank, source) <= 0 then return end
     local path = ISPathFindAction:pathToVehicleArea(playerObj,
         vehicle, tankPart:getArea())
@@ -1880,7 +1932,7 @@ local function fillVehicleWaterTank(playerObj, vehicle, tankPart, tank,
     end, playerObj)
     ISTimedActionQueue.add(path)
     ISTimedActionQueue.add(VLSFillVehicleWaterTankAction:new(playerObj,
-        tankPart, source))
+        tankPart, source, installationEpoch))
 end
 
 local function getFillableWaterInteraction(vehicle, playerObj)
@@ -1905,25 +1957,30 @@ local function addOutsideWaterTankSlice(menu, playerObj)
     local tank, part, source = getFillableWaterInteraction(vehicle, playerObj)
     if not tank then return end
     menu:addSlice(getText("ContextMenu_VLSFillWaterTank"), WATER_FILL_ICON,
-        fillVehicleWaterTank, playerObj, vehicle, part, tank, source)
+        fillVehicleWaterTank, playerObj, vehicle, part, tank, source,
+        NativeContext.creationEpoch(vehicle, part:getId(), tank:getID()))
 end
 
 local function addBedSlices(menu, playerObj)
     if not menu or not playerObj or playerObj:getVehicle() then return end
 
-    local vehicle = getReachableBedVehicle(playerObj)
+    local vehicle, part = getReachableBedVehicle(playerObj)
     if not vehicle then return end
+    local identity = NativeContext.identity(vehicle,part:getId())
+    if not identity then return end
 
     menu:addSlice(
         getText("ContextMenu_Rest"), BED_ICON,
-        enterBed, playerObj, vehicle, false
+        enterBed, playerObj, vehicle, false, identity.partId,
+        identity.installedItemId, identity.installationEpoch
     )
 
     local sleepText, canSleep = getSleepSlice(playerObj, vehicle)
     if sleepText then
         menu:addSlice(
             sleepText, SLEEP_ICON,
-            canSleep and enterBed or nil, playerObj, vehicle, true
+            canSleep and enterBed or nil, playerObj, vehicle, true, identity.partId,
+            identity.installedItemId, identity.installationEpoch
         )
     end
 end
@@ -2099,7 +2156,7 @@ if not VLS.microwaveTransferHookApplied then
                     sendApplianceCommand(self.character, "stopMicrowave", {
                         vehicle = part:getVehicle():getId(),
                         part = part:getId(),
-                        item = part:getInventoryItem():getID(),
+                        item = part:getInventoryItem():getID(), epoch = part:getModData().vlsNativeEpoch or 0,
                     })
                 end
                 changed[container] = container:getType()

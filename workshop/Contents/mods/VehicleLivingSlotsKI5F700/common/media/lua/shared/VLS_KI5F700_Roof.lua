@@ -7,13 +7,10 @@ local R = {}; VLS.F700Roof = R
 -- Map the original KI5 parts to the existing service endpoints. Fuel, timed
 -- actions, generator ownership and synchronization remain owned by the core.
 local petrol = {VLSRoofPetrol1="DAMNGasCanOne", VLSRoofPetrol2="DAMNGasCanTwo"}
-local baseFuel,baseGenerator = F.getPart,G.getPart
-function F.getPart(vehicle,id)
+local baseFuel,baseGenerator = F.resolvePart,G.getPart
+function F.resolvePart(vehicle,id)
     if not A.isBus(vehicle) then return baseFuel(vehicle,id) end
-    local part=petrol[id] and vehicle:getPartById(petrol[id])
-    local item=part and part:getInventoryItem()
-    if item and (item:getFullType()=="Base.PetrolCan" or item:getFullType()=="Base.JerryCan")
-            and item:getFluidContainer() then return part,item,item:getFluidContainer() end
+    return petrol[id] and vehicle:getPartById(petrol[id])
 end
 function G.getPart(vehicle)
     if not A.isBus(vehicle) then return baseGenerator(vehicle) end

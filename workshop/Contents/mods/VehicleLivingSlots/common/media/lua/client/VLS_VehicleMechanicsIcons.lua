@@ -235,6 +235,35 @@ local function applyFurnitureIcons(mechanics, part)
     end
 
 end
+-- A living/top slot lists every furniture family of its space. Keep only what
+-- the player can install there, removing options as ISContextMenu does.
+local function keepInstallable(mechanics, part)
+    if part:getInventoryItem() or not VLS.NativeSpace.ofPart(part) then return end
+    local installOption = mechanics.context:getOptionFromName(getText("IGUI_Install"))
+    local menu = installOption and installOption.subOption
+        and mechanics.context:getSubMenu(installOption.subOption)
+    if not menu then return end
+    local kept = {}
+    for _, option in ipairs(menu.options) do
+        if option.notAvailable and not option.subOption then
+            table.insert(menu.optionPool, option)
+        else
+            kept[#kept + 1] = option
+        end
+    end
+    if #kept == #menu.options then return end
+    for i = #menu.options, 1, -1 do menu.options[i] = nil end
+    for i, option in ipairs(kept) do
+        option.id = i
+        menu.options[i] = option
+    end
+    menu.numOptions = #kept + 1
+    if #kept == 0 then
+        menu:addOption(getText("IGUI_VLS_NoInstallableItem"), nil, nil).notAvailable = true
+    end
+    menu:calcHeight()
+end
+
 local function normalizeMenu(mechanics, part, menu)
     if not menu then return end
     for _, option in ipairs(menu.options or {}) do
@@ -367,6 +396,7 @@ if not VLS.mechanicsIconHookApplied then
                 or (VLS.isTopFramePart and VLS.isTopFramePart(part))) then
             applyFurnitureIcons(self,part)
             normalizeMenu(self,part,self.context)
+            keepInstallable(self,part)
         end
         return result
     end

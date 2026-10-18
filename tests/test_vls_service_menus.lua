@@ -112,11 +112,13 @@ local function fixture(name)
  getZ=function()return 0 end,DistToProper=function()return 1 end,getInventory=function()return inventory end,
  getBuilding=function()return nil end,getFreeInventoryCapacity=function()return 100 end,hasFullInventory=function()return false end,isTimedActionInstant=function()return false end,
  isDead=function()return false end,getKnownRecipes=function(self)return {contains=function()return self.known end}end}
- vehicle={parts={},getAreaCenter=function()return {getX=function()return 10 end,getY=function()return 10 end}end,getScript=function()return {getFullName=function()return name or "Base.StepVan"end}end,
+ vehicle={parts={},getId=function()return 42 end,getAreaCenter=function()return {getX=function()return 10 end,getY=function()return 10 end}end,getScript=function()return {getFullName=function()return name or "Base.StepVan"end}end,
  getSquare=function()return square end,isStopped=function()return true end,getZ=function()return 0 end,isInArea=function()return true end,
  getPartById=function(self,id)return self.parts[id]end}
  local function part(id,it)
-  local p={getId=function()return id end,getArea=function()return "VLSRoofGeneratorService"end,getInventoryItem=function()return it end}
+  local p={md={},getId=function()return id end,getArea=function()return "VLSRoofGeneratorService"end,
+   getVehicle=function()return vehicle end,getInventoryItem=function()return it end,
+   getModData=function(self)return self.md end,getItemContainer=function()return nil end}
   vehicle.parts[id]=p;return p
  end
  local gen=item(1,"Generator",0,0,"Base.Generator");part(G.PART,gen)

@@ -17,7 +17,9 @@ hands=native_base[start:end]
 start=native_base.index('function ISBaseTimedAction:forceStop()')
 end=native_base.index('\nend',start)+4
 for marker,body in {'BASE_HANDS':hands+'\n'+native_base[start:end],'HANDCRAFT':(a.game_root/'media/lua/shared/Entity/TimedActions/ISHandcraftAction.lua').read_text(),'BAD_PROPANE':propane.replace('nil, nil, {}, nil, nil, 1, 0)','nil, nil, false, nil, nil, 1, 0)'),'FIXED_PROPANE':propane,'TAKE_FUEL':(a.game_root/'media/lua/shared/TimedActions/ISTakeFuel.lua').read_text(),'ROOF_FUEL':fuel}.items():fixture=fixture.replace('-- INSERT_'+marker,body)
+context=(runtime/'shared/VLS_NativeContext.lua').read_text()
+fixture=fixture.replace('-- INSERT_NATIVE_CONTEXT','local nativeContext=(function()\n'+context+'\nend)()\nrequire=function(name)if name==\"VLS_NativeContext\"then return nativeContext end end\n')
 (a.work_dir/'probe.lua').write_text(fixture)
 stdlib=next(a.game_root.rglob('stdlib.lua'));(a.work_dir/'stdlib.lua').write_bytes(stdlib.read_bytes())
 subprocess.run([a.javac,'-d',str(a.work_dir),str(source/'NativeServiceProbe.java')],check=True)
-subprocess.run([str(a.game_root/'jre64/bin/java'),'-Duser.home='+str(a.work_dir),'-cp',str(a.game_root/'java/projectzomboid.jar')+':'+str(a.work_dir),'NativeServiceProbe',str(a.work_dir/'probe.lua')],cwd=a.work_dir,check=True)
+subprocess.run([str(a.game_root/'jre64/bin/java'),'-Duser.home='+str(a.work_dir),'-cp',str(a.game_root/'java/*')+':'+str(a.work_dir),'NativeServiceProbe',str(a.work_dir/'probe.lua')],cwd=a.work_dir,check=True)

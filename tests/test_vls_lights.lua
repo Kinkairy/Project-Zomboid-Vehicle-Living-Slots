@@ -26,6 +26,8 @@ local function fixture(i,condition,maximum,normalized)
  local v={charge=1,on=true,engine=true,getScript=function()return script end,
  getHeadlightsOn=function(self)return self.on end,getBatteryCharge=function(self)return self.charge end,getSquare=function()return {}end}
  local p={item=it,condition=condition,models={},calls=0}
+ -- Real BaseVehicle lookup; roof lamps now find their siblings through it.
+ function v:getPartById(id)if id==p:getId()then return p end end
  function p:getInventoryItem()return self.item end
  function p:getId()return 'VLSRoofHeadlight'..i end
  function p:getVehicle()return v end
@@ -52,7 +54,7 @@ for i=1,4 do
      local v,p,it=fixture(i,max*ratio,max,normalized)
      L.Init(v,p)
      near(p:getLightDistance(),48*(0.5+0.5*ratio));near(p:getLightIntensity(),0.5+0.5*ratio)
-     near(p.light.x,i/10);near(p.light.z,0.5);eq(p.light.dot,0.75)
+     near(p.light.x,i/10);near(p.light.z,L.ORIGIN_FORWARD);eq(p.light.dot,0.75)
      eq(it.condition,max*ratio);eq(it.maximum,max);eq(p.light.active,true)
      eq(p.models['RoofSpotlightGlow'..i],true)
     end)

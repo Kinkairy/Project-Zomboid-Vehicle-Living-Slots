@@ -1666,6 +1666,14 @@
       "ch": "關閉時隱藏所有太陽能板模型及操作入口，暫停太陽能充電；保留已安裝物品和儲存狀態。重新啟用後恢復原狀態，不補算關閉期間的充電。",
       "reviewed": true,
       "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/Sandbox.json"
+    },
+    {
+      "key": "IGUI_VLS_NoInstallableItem",
+      "reviewed": true,
+      "runtime_group": "workshop/Contents/mods/VehicleLivingSlots/common/media/lua/shared/Translate/{LOCALE}/IG_UI.json",
+      "en": "No installable item for this space",
+      "cn": "没有适合此空间的可安装物品",
+      "ch": "沒有適合此空間的可安裝物品"
     }
   ]
 }

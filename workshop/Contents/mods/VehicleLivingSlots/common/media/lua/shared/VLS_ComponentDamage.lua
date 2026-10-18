@@ -9,7 +9,10 @@ local samples = setmetatable({}, { __mode = "k" })
 local FRONT = { "EngineDoor", "Windshield", "HeadlightLeft", "HeadlightRight" }
 local REAR = { "TruckBed", "TrailerTrunk", "DoorRear", "TrunkDoor", "WindshieldRear" }
 local STATE_KEY = "VLSComponentDamage"
-local DAMAGE_SCALE = { front = 0.0, rear = 0.0, rack = 0.80 }
+-- Owner request 2026-10-17: the welded rack takes half the forwarded collision
+-- loss it used to (0.80 -> 0.40). It loses its own condition only; mounted cargo
+-- is never a target, and a rack at zero stays installed with its contents.
+local DAMAGE_SCALE = { front = 0.0, rear = 0.0, rack = 0.40 }
 local SOURCE_IDS = {}
 for _, id in ipairs(FRONT) do SOURCE_IDS[id] = true end
 for _, id in ipairs(REAR) do SOURCE_IDS[id] = true end

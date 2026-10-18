@@ -1,4 +1,5 @@
 local VLS = require "VLS_Propane"
+local Context = require "VLS_NativeContext"
 require "Definitions/ContainerButtonIcons"
 require "ISUI/ISInventoryPaneContextMenu"
 require "Vehicles/ISUI/ISVehicleMenu"
@@ -63,7 +64,8 @@ local function findNearbyPropaneSource(playerObj)
     return nil
 end
 
-local function queueVehicleRefill(playerObj, vehicle, part, torch)
+local function queueVehicleRefill(playerObj, vehicle, part, torch, tankId, installationEpoch)
+    if not Context.partIdentity(vehicle,part:getId(),tankId,installationEpoch) then return end
     local path = ISPathFindAction:pathToVehicleArea(playerObj, vehicle,
         part:getArea())
     path:setOnFail(function(character)
@@ -73,17 +75,19 @@ local function queueVehicleRefill(playerObj, vehicle, part, torch)
     ISTimedActionQueue.add(path)
     ISTimedActionQueue.add(VLSRefillBlowTorchFromVehicleAction:new(
         playerObj, vehicle:getId(), part:getId(), torch:getID(),
-        part:getInventoryItem():getID()))
+        tankId, installationEpoch))
 end
 
 local function addVehiclePropaneRefillOption(playerNum, context, items)
     local playerObj = getSpecificPlayer(playerNum)
     local torch = findSelectedBlowTorch(items)
     if not torch then return end
-    local vehicle, _, part = findNearbyPropaneSource(playerObj)
+    local vehicle, tank, part = findNearbyPropaneSource(playerObj)
     if not part then return end
+    local identity = Context.partIdentity(vehicle,part:getId(),tank:getID())
+    if not identity then return end
     context:addOption(Translator.getRecipeName("RefillBlowTorch"), playerObj,
-        queueVehicleRefill, vehicle, part, torch)
+        queueVehicleRefill, vehicle, part, torch, tank:getID(), identity.installationEpoch)
 end
 
 if not VLS.vehiclePropaneRefillMenuApplied then

@@ -65,6 +65,8 @@ local function vehicle(name)
   function p:getId() return self.id end
   function p:getVehicle() return self.v end
   function p:getInventoryItem() return self.it end
+  function p:getModData()self.md=self.md or {};return self.md end
+  function p:getItemContainer()return nil end
   function p:getArea() return self.id:find('VLSRoofPropane') and 'VLSRoofPropaneService' or 'TruckBed' end
   self.parts[id]=p;return p
  end
@@ -149,7 +151,7 @@ dofile(native..'/shared/Entity/TimedActions/ISHandcraftAction.lua')
 package.loaded['Entity/TimedActions/ISHandcraftAction']=true
 require 'VLS_PropaneRefillAction'
 local Action=VLSRefillBlowTorchFromVehicleAction
-local function action(f) return Action:new(f.chr,f.args.vehicle,f.args.part,f.args.torch,f.args.tank) end
+local function action(f) return Action:new(f.chr,f.args.vehicle,f.args.part,f.args.torch,f.args.tank,0) end
 local function clientAction(f)
  local a=action(f)
  a.action={setOverrideHandModelsObject=function(_,one,two) a.handA=one;a.handB=two end}
@@ -336,5 +338,22 @@ for _,case in ipairs({{'Base.StepVan','VLSRoofPropane1'},{'Base.VanSeats','VLSRo
   local count=nativePerform;server:complete();eq(nativePerform,count+1);server:complete();eq(nativePerform,count+1)
  end)
 end
+test('actual stale menu and reconstructed propane action retain old epoch',function()
+ local f=fixture('Base.VanSeats','VLSRoofPropane1');nearby,current=f.v,f.chr
+ local option;local context={addOption=function(_,label,target,callback,...)option={target=target,callback=callback,args={...}}end}
+ for _,hook in ipairs(menuHooks)do hook(0,context,{f.torch})end
+ local queued={};ISTimedActionQueue={add=function(a)queued[#queued+1]=a end}
+ option.callback(option.target,unpack(option.args));eq(#queued,2);eq(queued[2].installationEpoch,0)
+ local server=dofile(roundtripPath)(Action,base..'shared/VLS_PropaneRefillAction.lua',queued[2])
+ f.part:getModData().vlsNativeEpoch=1;local before=nativePerform
+ eq(server:isValid(),false);server:complete();eq(nativePerform,before)
+ queued={};option.callback(option.target,unpack(option.args));eq(#queued,0)
+ for _,hook in ipairs(menuHooks)do hook(0,context,{f.torch})end
+ option.callback(option.target,unpack(option.args));eq(queued[2].installationEpoch,1);eq(queued[2]:isValid(),true)
+end)
+test('missing server propane epoch does not acquire current installation',function()
+ local f=fixture();local a=Action:new(f.chr,f.args.vehicle,f.args.part,f.args.torch,f.args.tank)
+ eq(a.installationEpoch,-1);eq(a:isValid(),false);local before=nativePerform;a:complete();eq(nativePerform,before)
+end)
 print('RESULT propane-native tests='..total..' failures='..failures)
 assert(failures==0)
