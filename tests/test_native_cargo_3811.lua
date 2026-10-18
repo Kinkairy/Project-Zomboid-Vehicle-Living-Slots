@@ -4,6 +4,8 @@
 unpack = unpack or table.unpack
 local root = assert(arg and arg[1], "project root required")
 local vanilla = assert(arg[2], "actual vanilla Vehicles.lua required")
+local runtime=root..'/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
+package.path=runtime..'shared/?.lua;'..package.path
 local checks, cases, models, beds = 0, 0, 0, 0
 local function eq(a,b,why)
     checks=checks+1
@@ -16,11 +18,15 @@ dofile(vanilla)
 local original=Vehicles.ContainerAccess.TruckBedOpenInside
 local exterior=Vehicles.ContainerAccess.TruckBed
 local open=Vehicles.ContainerAccess.TruckBedOpen
-local loaded={['Vehicles/Vehicles']=true}
+-- Native timed actions are outside this cargo contract; retain real shared VLS modules.
+local loaded={
+    ['Vehicles/Vehicles']=true,
+    ['Entity/TimedActions/ISHandcraftAction']=true,
+    ['TimedActions/ISDeviceBatteryAction']=true,
+}
 local nativeRequire=require
 require=function(name) assert(name~='Vehicles/Vehicles','shared config must not require the server-only Vehicles file');if loaded[name] then return loaded[name] end return nativeRequire(name) end
 getModInfoByID=function() return {getDir=function() return 'offline-fixture' end} end
-local runtime=root..'/workshop/Contents/mods/VehicleLivingSlots/common/media/lua/'
 local nativeVehicles=Vehicles;Vehicles=nil
 dofile(runtime..'shared/VLS_Config.lua')
 local C=VLS.CargoR6
