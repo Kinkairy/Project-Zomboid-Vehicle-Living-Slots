@@ -60,13 +60,59 @@ function P.openAppliance(character, vehicle, partId)
         HaloTextHelper.addBadText(character, getText(reason))
         return
     end
-    -- Radial is only a shortcut to the same native-window adapter as right-click.
+    -- Open the validated part directly. Re-entering the generic opener loses the
+    -- requested part when another mod replaces ISEntityUI.OpenHandcraftWindow.
+    if P.openSource then return P.openSource(character, vehicle, partId) end
     return ISEntityUI.OpenHandcraftWindow(character, nil, nil, true, nil, nil, partId)
 end
 
 if not P.uiHooksApplied then
     P.uiHooksApplied = true
     local nativeOpen = ISEntityUI.OpenHandcraftWindow
+
+    -- Neat Crafting replaces ISEntityUI.OpenHandcraftWindow with a six-argument
+    -- function, so VLS's seventh requested-part argument is dropped before the
+    -- hook runs. Open the appliance through the opener Neat saved beforehand.
+    local function openWithSource(character, source)
+        local saved = ISEntityUI._NC_old_OpenHandcraftWindow
+        local opener = nativeOpen
+        if saved and saved ~= P.vlsOpenWrapper then opener = saved end
+        -- A UI skin can cache the panel constructor, so bind the virtual bench at
+        -- construction time instead of relying on the call-site arguments.
+        local realPanel = ISHandCraftPanel
+        local proxy = setmetatable({}, { __index = realPanel })
+        function proxy:new(x, y, width, height, player, craftBench, isoObject, recipeQuery)
+            return realPanel.new(realPanel, x, y, width, height, player,
+                source.bench, source.object, source.bench:getRecipeTagQuery())
+        end
+        local tag = source.bench:getRecipeTagQuery()
+        ISHandCraftPanel = proxy
+        local ok, result = pcall(opener, character, source.object, tag, true, nil, nil)
+        ISHandCraftPanel = realPanel
+        local window = ok and ISEntityUI.GetWindowInstance(character:getPlayerNum(), "HandcraftWindow")
+        local panel = window and window.handCraftPanel
+        local bound = panel and panel.isoObject == source.object
+            and panel.craftBench == source.bench and panel.logic:getCraftBench() == source.bench
+        if not bound then
+            if window and window.isoObject == source.object then window:close() end
+            P.uiSources[source.object] = nil
+            HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
+        end
+        print("[VLS Pantry " .. P.VERSION .. "] open part=" .. source.partId
+            .. " benchBound=" .. tostring(not not bound) .. " query=" .. tostring(tag))
+        if not ok then error(result, 0) end
+        return result
+    end
+
+    P.openSource = function(character, vehicle, partId)
+        local source = uiSource(character, vehicle, partId)
+        if not source then
+            HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
+            return
+        end
+        return openWithSource(character, source)
+    end
+
     function ISEntityUI.OpenHandcraftWindow(character, object, query, ignoreSurface,
             recipe, itemString, requestedId)
         local vehicle, partId = installedPart(character, requestedId)
@@ -78,23 +124,9 @@ if not P.uiHooksApplied then
             HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
             return
         end
-        local tag = source.bench:getRecipeTagQuery()
-        local ok, result = pcall(nativeOpen, character, source.object, tag,
-            true, recipe, itemString)
-        local window = ok and ISEntityUI.GetWindowInstance(character:getPlayerNum(), "HandcraftWindow")
-        local panel = window and window.handCraftPanel
-        local bound = panel and panel.isoObject == source.object
-            and panel.craftBench == source.bench and panel.logic:getCraftBench() == source.bench
-        if not bound then
-            if window and window.isoObject == source.object then window:close() end
-            P.uiSources[source.object] = nil
-            HaloTextHelper.addBadText(character, getText("ContextMenu_VLSPantryMenuUnavailable"))
-        end
-        print("[VLS Pantry " .. P.VERSION .. "] open part=" .. partId
-            .. " benchBound=" .. tostring(not not bound) .. " query=" .. tostring(tag))
-        if not ok then error(result, 0) end
-        return result
+        return openWithSource(character, source)
     end
+    P.vlsOpenWrapper = ISEntityUI.OpenHandcraftWindow
 
     local nativePanel = ISHandCraftPanel.new
     function ISHandCraftPanel:new(x, y, width, height, player, craftBench, isoObject, recipeQuery)
