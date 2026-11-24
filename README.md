@@ -47,6 +47,8 @@ For KI5 F700 vehicles, also enable VehicleLivingSlotsKI5F700 and install
 and that DAMN Library. The optional adapter supports the armored bank truck,
 SWAT van, and School, Prison and Military Buses.
 
+Neat Crafting 1.7.8 is supported: an installed coffee machine or toaster keeps
+its own bench window even though Neat replaces the handcraft opener.
 
 ## Vehicle equipment
 

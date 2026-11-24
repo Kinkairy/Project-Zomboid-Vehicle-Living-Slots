@@ -341,6 +341,7 @@ local menu={slices={},addToUIManager=noop}
 function menu:addSlice(...)self.slices[#self.slices+1]={...}end
 getPlayerRadialMenu=function()return menu end
 ISVehicleMenu={showRadialMenu=function()menu:addToUIManager()end}
+local vanillaOpen=ISEntityUI.OpenHandcraftWindow
 dofile(arg[3] or (base.."client/VLS_PantryMenu.lua"))
 package.loaded["VLS_PantryMenu"]=true
 test("same flexible slot opens the installed device native menu",function()
@@ -362,6 +363,33 @@ test("same flexible slot opens the installed device native menu",function()
  end
  vehicle.parts.VLSPantryCoffee.item=coffee
  eq(networkWrites,0)
+end)
+-- Neat Crafting 1.7.8 saves the opener, then replaces it with a six-argument
+-- function, so VLS's seventh requested-part argument is dropped. The appliance
+-- must keep its own bench instead of falling back to the vehicle surface.
+test("neat crafting's six-argument opener keeps the installed appliance bench",function()
+ local wrapper=ISEntityUI.OpenHandcraftWindow
+ local neatCalls=0
+ ISEntityUI._NC_old_OpenHandcraftWindow=vanillaOpen
+ ISEntityUI.OpenHandcraftWindow=function(player,object,query,ignoreSurface,recipe,itemString)
+  neatCalls=neatCalls+1
+  return vanillaOpen(player,object,query,ignoreSurface,recipe,itemString)
+ end
+ P.openAppliance(character,vehicle,P.PART_ID)
+ local window=opened();local source=P.uiSources[window.isoObject]
+ assert(source,"appliance window lost its virtual bench")
+ eq(neatCalls,0)
+ eq(window.handCraftPanel.craftBench,source.bench)
+ eq(window.handCraftPanel.logic:getCraftBench(),source.bench)
+ eq(#failures,0)
+ -- Neat also saves VLS's own wrapper when it loads second. That is not a
+ -- vanilla opener and must not replace the one captured at load.
+ ISEntityUI._NC_old_OpenHandcraftWindow=wrapper
+ P.openAppliance(character,vehicle,P.PART_ID)
+ window=opened()
+ eq(window.handCraftPanel.craftBench,P.uiSources[window.isoObject].bench)
+ ISEntityUI.OpenHandcraftWindow=wrapper
+ ISEntityUI._NC_old_OpenHandcraftWindow=nil
 end)
 test("UI backing objects never enter native timed action serialization",function()
  P.openAppliance(character,vehicle,"VLSPantryCoffee")
